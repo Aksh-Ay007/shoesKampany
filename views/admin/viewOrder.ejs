@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details - Shoes Kampany</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar {
+            width: 250px; background-color: #2c3e50; color: white; padding: 0;
+            display: flex; flex-direction: column; position: fixed;
+            top: 0; left: 0; bottom: 0; overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); z-index: 1000;
+        }
+        #sidebar-header { background-color: #1c2833; padding: 20px; text-align: center; }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a {
+            color: #ecf0f1; text-decoration: none; display: flex; align-items: center;
+            padding: 15px 20px; transition: background-color 0.3s, color 0.3s;
+            font-size: 14px; font-weight: 500;
+        }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+
+        .breadcrumb {
+            display: flex; align-items: center; margin-bottom: 20px; font-size: 14px;
+            color: #2c3e50; position: sticky; top: 0; background-color: #ecf0f1;
+            z-index: 10; padding: 10px 0;
+        }
+        .breadcrumb a { color: #3498db; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .material-icons { font-size: 18px; margin: 0 5px; vertical-align: text-bottom; }
+
+        .card { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .card-title { color: #fff; margin: 0; padding: 15px; font-size: 1.25rem; }
+        .card-body { padding: 20px; background-color: #fff; }
+        .card-text { margin: 0; line-height: 1.6; }
+
+        .shipping-card .card-title { background-color: #3498db; }
+        .payment-card .card-title { background-color: #e74c3c; }
+
+        .payment-status-alert {
+            color: white; background-color: #e74c3c; font-weight: bold; font-size: 1em;
+            padding: 8px 12px; border-radius: 4px; display: inline-flex; align-items: center;
+            margin: 5px 0; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(231, 76, 60, 1); }
+            100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.7); }
+        }
+
+        .order-grid { display: flex; flex-direction: column; }
+        .order-row { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .product-card { flex: 0 0 calc(25% - 15px); max-width: calc(25% - 15px); background-color: #fff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
+        .product-image { width: 100%; height: 200px; object-fit: cover; }
+        .product-details { padding: 15px; }
+        .product-title { font-size: 1rem; font-weight: 500; margin: 0 0 10px; }
+        .product-info { font-size: 0.9rem; margin: 5px 0; }
+        .product-status { font-weight: bold; }
+        .status-delivered { color: #2ecc71; }
+        .status-pending { color: #f39c12; }
+
+        @media (max-width: 1200px) { .product-card { flex: 0 0 calc(33.33% - 15px); max-width: calc(33.33% - 15px); } }
+        @media (max-width: 992px) { .product-card { flex: 0 0 calc(50% - 15px); max-width: calc(50% - 15px); } }
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.active { transform: translateX(0); }
+            #content { margin-left: 0; width: 100%; padding: 20px; }
+            #sidebarToggle { display: block; }
+            .product-card { flex: 0 0 100%; max-width: 100%; }
+            .order-row { flex-direction: column; }
+        }
+
+        #sidebarToggle {
+            position: fixed; top: 15px; left: 15px; z-index: 1001;
+            background-color: #e74c3c; color: white; border: none;
+            padding: 10px; border-radius: 4px; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin</h2>
+        </div>
+      
+        <ul>
+            <li><a href="/admin"><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
+            <li><a href="/admin/viewOrders" class="active"><i class="material-icons">receipt_long</i> Orders</a></li>
+            <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+            <li><a href="/admin/userside"><i class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage"><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a>
+            <i class="material-icons">chevron_right</i>
+            <span>Order Details</span>
+        </div>
+    
+        <h1>Order Details</h1>
+    
+        <!-- Shipping Address and Payment Status Section -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-6">
+                <div class="card shipping-card">
+                    <h4 class="card-title"><i class="material-icons" style="vertical-align: middle; margin-right: 8px;">local_shipping</i> Shipping Address</h4>
+                    <div class="card-body">
+                        <% if (order.shippingAddress) { %>
+                            <p class="card-text">
+                                <strong>Name:</strong> <%= order.shippingAddress.name %><br>
+                                <strong>Address:</strong> <%= order.shippingAddress.address %><br>
+                                <strong>District:</strong> <%= order.shippingAddress.district %><br>
+                                <strong>State:</strong> <%= order.shippingAddress.state %><br>
+                                <strong>ZIP:</strong> <%= order.shippingAddress.pincode %>
+                            </p>
+                        <% } else { %>
+                            <p class="card-text">Address Not Available</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-md-6">
+                <div class="card payment-card">
+                    <h4 class="card-title"><i class="material-icons" style="vertical-align: middle; margin-right: 8px;">payment</i> Payment Status</h4>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>Method:</strong> <span style="color: #3498db;"><%= order.paymentMethod %></span><br>
+                            <strong>Status:</strong> <span class="payment-status-alert"><i class="material-icons" style="margin-right: 5px; font-size: 1em;">warning</i><%= order.paymentStatus %></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Ordered Items Section -->
+        <h2>Ordered Items</h2>
+        <div class="order-grid">
+            <% for (let i = 0; i < order.orderedItems.length; i += 4) { %>
+                <div class="order-row">
+                    <% for (let j = i; j < i + 4 && j < order.orderedItems.length; j++) { %>
+                        <% let item = order.orderedItems[j]; %>
+                        <div class="product-card">
+                            <% if (item.productimages && item.productimages.length > 0) { %>
+                                <img src="/<%= item.productimages[0] %>" class="product-image" alt="Product Image">
+                            <% } else { %>
+                                <img src="placeholder.jpg" class="product-image" alt="Product Image">
+                            <% } %>
+    
+                            <div class="product-details">
+                                <h5 class="product-title"><%= item.productId.productname %></h5>
+                                <p class="product-info"><strong>Price:</strong> ₹<%= item.price %></p>
+                                <p class="product-info"><strong>Qty:</strong> <%= item.quantity %></p>
+                                <p class="product-info"><strong>Total:</strong> ₹<%= item.price * item.quantity %></p>
+                                <p class="product-info">
+                                    <strong>Status:</strong>
+                                    <span class="product-status <%= item.status === 'Delivered' ? 'status-delivered' : 'status-pending' %>">
+                                        <%= item.status %>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    <% } %>
+                    <% for (let k = order.orderedItems.length % 4; k < 4; k++) { %>
+                        <div class="product-card" style="visibility: hidden;"></div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+
+    <button id="sidebarToggle" class="toggle-button">
+        <i class="material-icons">menu</i>
+    </button>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>    
+    <script>
+        $(document).ready(function () {
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+
+            $(document).on('click', function(event) {
+                if ($(window).width() <= 768 && !$(event.target).closest('#sidebar, #sidebarToggle').length) {
+                    $('#sidebar').removeClass('active');
+                }
+            });
+
+            $('#sidebar').on('click', function(event) {
+                event.stopPropagation();
+            });
+
+            function checkSidebarToggle() {
+                if ($(window).width() <= 768) {
+                    $('#sidebarToggle').show();
+                } else {
+                    $('#sidebarToggle').hide();
+                    $('#sidebar').removeClass('active');
+                }
+            }
+
+            checkSidebarToggle();
+            $(window).on('resize', checkSidebarToggle);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Shoes Kampany</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #sidebar-header {
+            background-color: #1c2833;
+            padding: 20px;
+            text-align: center;
+        }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
+        .table-container, .form-container {
+            overflow-x: auto;
+            max-height: 500px;
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #344955;
+            color: white;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        tbody tr:hover { background-color: #f0f0f0; }
+
+        .toggle-button {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .blocked-user, .inactive-coupon { background-color: #FF5722; }
+        .unblocked-user, .active-coupon, .add-button { background-color: #4CAF50; }
+
+        .blocked-user:hover, .inactive-coupon:hover { background-color: #E64A19; }
+        .unblocked-user:hover, .active-coupon:hover, .add-button:hover { background-color: #388E3C; }
+
+        .form-label { font-size: 16px; font-weight: 500; margin-bottom: 8px; display: block; }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .error-text { color: #FF5722; font-size: 14px; margin-top: -10px; margin-bottom: 15px; }
+
+        #sidebarToggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #FF5722;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #344955;
+        }
+        .breadcrumb a { color: #4CAF50; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .material-icons {
+            font-size: 18px;
+            margin: 0 5px;
+            vertical-align: text-bottom;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                z-index: 999;
+                transform: translateX(-100%);
+            }
+            #sidebar.active { transform: translateX(0); }
+            #content { width: 100%; }
+            #sidebarToggle { display: block; }
+            table { font-size: 14px; }
+            th, td { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin</h2>
+        </div>
+      
+        <ul>
+            <li><a href="/admin"><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
+            <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
+            <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+            <li><a href="/admin/userside"><i class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage" class="active"><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <!-- Edit Coupon Section -->
+        <div id="editCouponSection">
+            <div class="breadcrumb">
+                <a href="/admin/couponmanage">Coupons</a>
+                <i class="material-icons">chevron_right</i>
+                <span>Edit Coupon</span>
+            </div>
+
+            <h1>Edit Coupon</h1>
+            <div class="form-container">
+                <form action="/admin/editCoupon/<%= coupon._id %>" method="post" onsubmit="return validateForm()">
+                    <div>
+                        <label for="name" class="form-label">Coupon Name</label>
+                        <input type="text" name="name" id="name" class="form-control" value="<%= coupon.coupon_Name %>" placeholder="Enter Coupon Name">
+                        <span id="nameError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <label for="code" class="form-label">Coupon Code</label>
+                        <input type="text" name="code" id="code" class="form-control" value="<%= coupon.coupon_Code %>" placeholder="Enter Coupon Code">
+                        <span id="codeError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <label for="discount" class="form-label">Discount Amount (%)</label>
+                        <input type="number" name="discount" id="discount" class="form-control" value="<%= coupon.discount_Amount %>" placeholder="Enter Discount Amount (e.g., 20)">
+                        <span id="discountError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <label for="minPurchase" class="form-label">Minimum Purchase Amount (₹)</label>
+                        <input type="number" name="minPurchase" id="minPurchase" class="form-control" value="<%= coupon.minimum_Amount %>" placeholder="Enter Minimum Purchase Amount (e.g., 500)">
+                        <span id="minPurchaseError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <label for="maxPurchase" class="form-label">Maximum Purchase Amount (₹)</label>
+                        <input type="number" name="maxPurchase" id="maxPurchase" class="form-control" value="<%= coupon.maximum_Amount %>" placeholder="Enter Maximum Purchase Amount (e.g., 2000)">
+                        <span id="maxPurchaseError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <label for="expiryDate" class="form-label">Expiry Date</label>
+                        <input type="date" name="expiryDate" id="expiryDate" class="form-control" value="<%= moment(coupon.expiry_Date).format('YYYY-MM-DD') %>">
+                        <span id="expiryError" class="error-text"></span>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="toggle-button add-button">
+                            <i class="material-icons" style="font-size: 16px; vertical-align: text-top; margin-right: 5px;">edit</i>Update Coupon
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>    
+    <script>
+        $(document).ready(function () {
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+
+            $(document).on('click', function(event) {
+                if ($(window).width() <= 768 && !$(event.target).closest('#sidebar, #sidebarToggle').length) {
+                    $('#sidebar').removeClass('active');
+                }
+            });
+
+            $('#sidebar').on('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+
+        function validateForm() {
+            var fields = [
+                { id: 'name', error: 'nameError', message: 'Coupon Name required', regex: /^[a-zA-Z\s]+$/, regexMessage: 'Coupon name should contain only letters' },
+                { id: 'code', error: 'codeError', message: 'Coupon Code required', regex: /^[A-Z0-9]+$/, regexMessage: 'Coupon code should be in uppercase and can contain numbers' },
+                { id: 'discount', error: 'discountError', message: 'Discount Amount required', type: 'number', min: 1, max: 100, errorMessage: 'Discount must be between 1 and 100' },
+                { id: 'minPurchase', error: 'minPurchaseError', message: 'Minimum Amount required', type: 'number', min: 1 },
+                { id: 'maxPurchase', error: 'maxPurchaseError', message: 'Maximum Amount required', type: 'number', min: 1 },
+                { id: 'expiryDate', error: 'expiryError', message: 'Expiry Date required' }
+            ];
+
+            var isValid = true;
+
+            fields.forEach(function(field) {
+                var element = document.getElementById(field.id);
+                var value = element.value.trim();
+                var errorElement = document.getElementById(field.error);
+                errorElement.textContent = "";
+
+                if (value === "") {
+                    errorElement.textContent = field.message;
+                    isValid = false;
+                } else if (field.regex && !value.match(field.regex)) {
+                    errorElement.textContent = field.regexMessage;
+                    isValid = false;
+                } else if (field.type === 'number') {
+                    var num = parseFloat(value);
+                    if (isNaN(num) || (field.min !== undefined && num < field.min) || (field.max !== undefined && num > field.max)) {
+                        errorElement.textContent = field.errorMessage || `Must be a valid number ${field.min !== undefined ? `between ${field.min} and ${field.max || 'above'}` : ''}`;
+                        isValid = false;
+                    }
+                }
+            });
+
+            var minPurchase = parseFloat(document.getElementById('minPurchase').value);
+            var maxPurchase = parseFloat(document.getElementById('maxPurchase').value);
+            if (maxPurchase <= minPurchase) {
+                document.getElementById('maxPurchaseError').textContent = "Maximum amount must be greater than minimum";
+                isValid = false;
+            }
+
+            var expiryDate = new Date(document.getElementById('expiryDate').value);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (expiryDate < today) {
+                document.getElementById('expiryError').textContent = "Expiry date cannot be in the past";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - Shoes Kampany</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #sidebar-header {
+            background-color: #1c2833;
+            padding: 20px;
+            text-align: center;
+        }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
+
+        .table-container {
+    max-height: none;
+    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: visible; /* Change this to visible */
+}
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #344955;
+            color: white;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        tbody tr:hover { background-color: #f0f0f0; }
+
+        .toggle-button {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+        }
+
+        .blocked-user { background-color: #FF5722; }
+        .unblocked-user { background-color: #4CAF50; }
+
+        .blocked-user:hover { background-color: #E64A19; }
+        .unblocked-user:hover { background-color: #388E3C; }
+
+        #sidebarToggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #FF5722;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            background-color: #ecf0f1;
+            z-index: 10;
+            padding: 10px 0;
+        }
+        .breadcrumb a { color: #3498db; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .material-icons {
+            font-size: 18px;
+            margin: 0 5px;
+            vertical-align: text-bottom;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.active { transform: translateX(0); }
+            #content { margin-left: 0; width: 100%; }
+            #sidebarToggle { display: block; }
+            table { font-size: 14px; }
+            th, td { padding: 10px; }
+        }
+        
+    </style>
+    <style>
+        /* Existing styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+        }
+        .pagination button:disabled {
+            background-color: #bbb;
+            cursor: not-allowed;
+        }
+        .pagination button:not(:disabled):hover {
+            background-color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin</h2>
+        </div>
+      
+        <ul>
+            <li><a href="/admin/dashboard" ><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
+            <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
+            <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+            <li><a href="/admin/userside"class="active" ><i  class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage" ><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <div class="breadcrumb">
+            <a href="/admin">Dashboard</a>
+            <i class="material-icons">chevron_right</i>
+            <span>user</span>
+        </div>
+
+        <h1>User Management</h1>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach((user, index) => { %>
+                    <tr>
+                        <td><%= (currentPage - 1) * itemsPerPage + index + 1 %></td>
+                        <td><%= user.firstname %> <%= user.lastname %></td>
+                        <td><%= user.email %></td>
+                        <td>
+                            <form action="/admin/blockUser/<%= user._id %>" method="POST">
+                                <button type="submit" class="toggle-button <%= user.isBlocked ? 'unblocked-user' : 'blocked-user' %>">
+                                    <%= user.isBlocked ? 'Unblock User' : 'Block User' %>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <button onclick="goToPage(<%= currentPage - 1 %>)">Previous</button>
+            <% } %>
+            <span>Page <%= currentPage %> of <%= totalPages %></span>
+            <% if (currentPage < totalPages) { %>
+                <button onclick="goToPage(<%= currentPage + 1 %>)">Next</button>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>    
+    <script>
+        $(document).ready(function () {
+            $('#sidebarToggle').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+
+            $(document).on('click', function(event) {
+                if ($(window).width() <= 768 && !$(event.target).closest('#sidebar, #sidebarToggle').length) {
+                    $('#sidebar').removeClass('active');
+                }
+            });
+
+            $('#sidebar').on('click', function(event) {
+                event.stopPropagation();
+            });
+
+            $('.toggle-button').on('click', function(event) {
+                event.preventDefault();
+                var action = $(this).text().trim().toLowerCase();
+                var form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you really want to ${action} this user?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script>
+        function goToPage(page) {
+            window.location.href = `/admin/userside?page=${page}`;
+        }
+    </script>
+</body>
+</html>

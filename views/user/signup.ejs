@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Modern Login Page |</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #c9d6ff;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .container p {
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.3px;
+            margin: 20px 0;
+        }
+
+        .container span {
+            font-size: 12px;
+        }
+
+        .container a {
+            color: #333;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 15px 0 10px;
+        }
+
+        .container button {
+            background-color: #512da8;
+            color: #fff;
+            font-size: 12px;
+            padding: 10px 45px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .container button.hidden {
+            background-color: transparent;
+            border-color: #fff;
+        }
+
+        .container form {
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            height: 100%;
+        }
+
+        .container input {
+            background-color: #eee;
+            border: none;
+            margin: 8px 0;
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+
+
+        .social-icons {
+            margin: 20px 0;
+        }
+
+        .social-icons a {
+            border: 1px solid #ccc;
+            border-radius: 20%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 3px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .toggle-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+            border-radius: 150px 0 0 100px;
+            z-index: 1000;
+        }
+
+        .container.active .toggle-container {
+            transform: translateX(-100%);
+            border-radius: 0 150px 100px 0;
+        }
+
+        .toggle {
+            background-color: #512da8;
+            height: 100%;
+            background: linear-gradient(to right, #5c6bc0, #512da8);
+            color: #fff;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: all 0.6s ease-in-out;
+        }
+
+        .container.active .toggle {
+            transform: translateX(50%);
+        }
+
+        .toggle-panel {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 30px;
+            text-align: center;
+            top: 0;
+            transform: translateX(0);
+            transition: all 0.6s ease-in-out;
+        }
+
+        .toggle-left {
+            transform: translateX(-200%);
+        }
+
+        .container.active .toggle-left {
+            transform: translateX(0);
+        }
+
+        .toggle-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .container.active .toggle-right {
+            transform: translateX(200%);
+        }
+
+        .password-container {
+  position: relative;
+}
+
+#password {
+  padding-right: 30px; /* Make room for the eye icon */
+}
+
+#togglePassword {
+  position: absolute;
+  right: 10px;
+  top: 70%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+    </style>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-up">
+        
+                    <form action="/usersignup" method="post" onsubmit="return validateForm()">
+                        <h1>Create Account</h1>
+                        <div class="social-icons">
+                            <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                        </div>
+                        <span>or use your email for registration</span>
+
+                        <input type="text" id="firstname" placeholder="First Name" name="firstname">
+                        <span class="text-warning" id="firstNameValidation" style="color: red"></span>
+
+                        <input type="text" id="lastname" placeholder="Last Name" name="lastname">
+                        <span class="text-warning" id="lastNameValidation" style="color: red"></span>
+
+                        <input type="text" id="email" placeholder="Email" name="email">
+                        <span id="emailValidation" style="color: red"></span>
+
+                        <input type="password" id="password" placeholder="Password" name="password">
+                        <i class="fas fa-eye-slash" id="togglePassword"></i>
+                        <span id="passwordValidation" style="color: red"></span>
+
+                        <input type="password" id="confirmpassword" placeholder="Confirm Password"
+                            name="confirmpassword">
+                        <span id="confirmpasswordValidation" style="color: red"></span>
+
+                        <button type="submit">Sign Up</button>
+                        <!-- Error message placeholders -->
+                        <div id="errorMessages">
+                            <!-- Error messages will appear here -->
+                        </div>
+                    </form>
+        </div>
+
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-right">
+                    <h1>Welcome Back!</h1>
+                    <p>Enter your personal details to use all of site features</p>
+                    <a href="/userlogin"><button class="hidden" id="login">Sign In</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            document.getElementById('firstNameValidation').text = "";
+            document.getElementById('lastNameValidation').text = "";
+            document.getElementById('emailValidation').text="";
+            document.getElementById('passwordValidation').text=""
+            document.getElementById('confirmpasswordValidation').text=""
+
+            const firstName = document.getElementById('firstname').value.trim()
+            const lastname = document.getElementById('lastname').value.trim()
+            const email = document.getElementById('email').value.trim()
+            const password=document.getElementById('password').value.trim();
+            const confirmpassword=document.getElementById('confirmpassword').value.trim();
+
+
+//firstname
+            if (firstName === "") {
+                document.getElementById('firstNameValidation').textContent = "First Name cannot be empty."
+                return false
+            }
+
+            if (firstName.length < 4) {
+                document.getElementById('firstNameValidation').textContent = "First name should contain atleast 4 letters"
+                return false
+            }
+
+            if (!/^[a-zA-Z]+$/.test(firstName)) {
+
+                document.getElementById('firstNameValidation').textContent = 'firstname cannot contain symbols or numbers'
+                return false;
+            }
+
+//lastname
+            if (lastname === "") {
+
+                document.getElementById('lastNameValidation').textContent = 'Last Name cannot be empty.'
+                return false;
+            }
+
+            if (!/^[a-zA-Z]+$/.test(lastname)) {
+
+                document.getElementById('lastNameValidation').textContent = 'lastname cannot contain symbols or numbers'
+                return false;
+            }
+
+            if (lastname.length < 4) {
+
+                document.getElementById('lastNameValidation').textContent = 'last name should contain atleast 4 letters !!'
+                return false;
+            }
+
+//email
+            if(email===''){
+            document.getElementById('emailValidation').textContent='Email cannot be empty.. !!!'
+            return false;
+
+            }
+
+            if(!/^\S+@\S+\.\S+$/.test(email)){
+            document.getElementById('emailValidation').textContent='Email should be in a specific format.. !!!'
+            return false;
+
+            }
+
+  //password
+             
+           if(password===''){
+            document.getElementById('passwordValidation').textContent='password cannot be empty.. !!!'
+            return false;
+
+            }
+
+            if(password.length<5){
+            const pass = document.getElementById('passwordValidation').textContent='password should contain atleast 5 characters.. !!!'
+            return false;
+
+            }
+
+            if (!/(?=.*[a-zA-Z])[A-Za-z\d@$!%*?&]+$/.test(password)) {
+    document.getElementById('passwordValidation').textContent = 'Password must be a combination of letters, digits, and symbols';
+    return false;
+}
+
+
+
+   //confirm password
+   if (confirmpassword === "") {
+    document.getElementById('confirmpasswordValidation').textContent = 'Confirm password cannot be empty.. !!!';
+    return false;
+}
+
+if (password !== confirmpassword) {
+    document.getElementById('confirmpasswordValidation').textContent = 'Passwords do not match';
+    return false;
+}
+
+if (confirmpassword.length < 3) {
+    document.getElementById('confirmpasswordValidation').textContent = 'Password should contain at least 3 characters';
+    return false;
+}
+
+
+            return true
+        }
+    </script>
+
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const passwordInput = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // Existing JavaScript...
+  </script>
+
+</body>
+
+</html>

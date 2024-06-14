@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>orderdetail</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5/6en8XCp+HHAAK5GSLf2xlYtvJ8U2Q4U+9cuEnJoa3" crossorigin="anonymous">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+    <!-- Other CSS links -->
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/wallet.js"></script> <!-- Your custom wallet JavaScript file -->
+
+    <!-- Additional CSS links -->
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/icons/favicon.png">
+
+	
+		<style>
+        body {
+            font-family: 'Times New Roman', Times, serif sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .profile h5 {
+            font-weight: bold;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar {
+            background-color: black;
+            padding: 20px;
+            border-right: 2px solid blue;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                min-height: 40vh;
+            }
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .sidebar ul li a:hover {
+            color: #cce0ff;
+        }
+
+		.col-md-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width: 100%;
+    }
+        .content {
+            padding: 20px;
+        }
+
+        .address-card {
+            margin-bottom: 20px;
+        }
+
+        .responsive-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+
+            .responsive-table th,
+            .responsive-table td {
+                display: block;
+                width: 100%;
+            }
+        }
+
+        .custom-image {
+			max-width: 100%;
+           max-height: 300px;
+            width: 300px;
+            height: 150px;
+        }
+
+
+		.payment-status-completed {
+    color: green; /* Change the text color to green for completed payment status */
+    font-weight: bold; /* Make the text bold */
+}
+
+.payment-status-pending {
+    color: orange; /* Change the text color to orange for pending payment status */
+    font-weight: bold; /* Make the text bold */
+}
+
+.completed-return {
+    /* Add your styles for the return button in completed orders */
+    /* For example: */
+    background-color: black; /* Remove background color */
+    border: 2px solid green; /* Add border */
+    color: green; /* Change text color to green */
+    font-weight: bold; /* Make text bold */
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+
+/* Styling for Shipping Address and Payment Status Box */
+.shadow-sm {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Add shadow effect */
+}
+
+.card {
+    background-color: #f8f9fa; /* Light background color */
+}
+
+.card-title {
+    color: #333; /* Title color */
+}
+
+.card-body {
+    padding: 20px; /* Add padding */
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem; /* Add margin to the title */
+}
+
+.mb-3 {
+    margin-bottom: 1rem; /* Add margin between address details */
+}
+
+.text-muted {
+    color: #6c757d; /* Subtle text color */
+}
+
+.payment-status-completed {
+    color: green; /* Change the text color to green for completed payment status */
+}
+
+.payment-status-pending {
+    color: orange; /* Change the text color to orange for pending payment status */
+}
+
+
+    </style>
+
+<style>
+	.payment-status-alert {
+		color: white; /* White text for better contrast */
+		background-color: red; /* Red background for alert */
+		font-weight: bold;
+		font-size: 1.2em; /* Larger font size */
+		padding: 10px; /* More padding for better readability */
+		border-radius: 5px; /* Rounded corners */
+		display: inline-flex; /* To align the icon and text */
+		align-items: center; /* Vertically align icon and text */
+		margin: 5px 0; /* Margin for spacing */
+		animation: pulse 1.5s infinite; /* Pulsing animation */
+	}
+
+	.payment-status-alert i {
+		margin-right: 8px; /* Space between icon and text */
+	}
+
+	@keyframes pulse {
+		0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.7); }
+		50% { box-shadow: 0 0 20px rgba(255, 0, 0, 1); }
+		100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.7); }
+	}
+</style>
+	
+<style>
+	.custom-modal {
+	  width: 500px; /* Adjust the width to match the desired size */
+	}
+	
+	.custom-modal .modal-body {
+	  max-height: 400px; /* Adjust the height to fit content */
+	  overflow-y: auto; /* Ensure content is scrollable if it exceeds the height */
+	}
+	
+	.transaction-item {
+	  border: 1px solid #ddd; /* Add border to transaction items */
+	  padding: 10px; /* Add padding for better spacing */
+	  margin-bottom: 10px; /* Add margin between items */
+	  background-color: #f9f9f9; /* Optional: Add background color for better visibility */
+	}
+	
+	.transaction-item p {
+	  margin: 0; /* Remove default margin */
+	  padding: 2px 0; /* Add padding for better readability */
+	}
+	
+	.transaction-item strong {
+	  color: #333; /* Optional: Adjust text color for labels */
+	}
+	</style>
+	
+	
+	
+	
+	
+	
+</head>
+
+  <body class="animsition" style="margin: 0px;">
+
+	<!-- Header -->
+	<header class="header-v4">
+		<!-- Header desktop -->
+		<div class="container-menu-desktop">
+			<!-- Topbar -->
+			<div class="top-bar">
+				<div class="content-topbar flex-sb-m h-full container">
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m trans-04 p-lr-25">
+							My Account
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="wrap-menu-desktop how-shadow1">
+				<nav class="limiter-menu-desktop container">
+
+					<!-- Logo desktop -->
+					<a href="#" class="logo">
+						<img src="images/icons/logo-01.png" alt="IMG-LOGO">
+					</a>
+
+					<!-- Menu desktop -->
+					<div class="menu-desktop">
+						<ul class="main-menu">
+							<li>
+								<a href="/">Home</a>
+							</li>
+
+							<li>
+								<a href="/shop">Shop</a>
+							</li>
+
+						</ul>
+					</div>
+
+					<!-- Icon header -->
+					<div class="wrap-icon-header flex-w flex-r-m">
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
+							<i class="zmdi zmdi-search"></i>
+						</div>
+
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart"
+							data-notify="">
+							<i class="zmdi zmdi-shopping-cart"></i>
+						</div>
+
+						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
+							data-notify="0">
+							<i class="zmdi zmdi-favorite-outline"></i>
+						</a>
+					</div>
+				</nav>
+			</div>
+		</div>
+
+		<!-- Header Mobile -->
+		<div class="wrap-header-mobile">
+			<!-- Logo moblie -->
+			<div class="logo-mobile">
+				<a href="index.html"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
+			</div>
+
+			<!-- Icon header -->
+			<div class="wrap-icon-header flex-w flex-r-m m-r-15">
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
+					<i class="zmdi zmdi-search"></i>
+				</div>
+
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart"
+					data-notify="2">
+					<i class="zmdi zmdi-shopping-cart"></i>
+				</div>
+
+				<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti"
+					data-notify="0">
+					<i class="zmdi zmdi-favorite-outline"></i>
+				</a>
+			</div>
+
+
+			<!-- Button show menu -->
+			<div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+				<span class="hamburger-box">
+					<span class="hamburger-inner"></span>
+				</span>
+			</div>
+		</div>
+
+
+		<!-- Menu Mobile -->
+		<div class="menu-mobile">
+			<ul class="topbar-mobile">
+				<li>
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+				</li>
+
+				<li>
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m p-lr-10 trans-04">
+							My Account
+
+
+					</div>
+				</li>
+			</ul>
+
+			<ul class="main-menu-m">
+				<li>
+					<a href="index.html">Home</a>
+
+					<span class="arrow-main-menu-m">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+					</span>
+				</li>
+
+				<li>
+					<a href="product.html">Shop</a>
+				</li>
+
+			</ul>
+		</div>
+
+		<!-- Modal Search -->
+		<div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
+			<div class="container-search-header">
+				<button class="flex-c-m btn-hide-modal-search trans-04 js-hide-modal-search">
+					<img src="images/icons/icon-close2.png" alt="CLOSE">
+				</button>
+
+				<form class="wrap-search-header flex-w p-l-15">
+					<button class="flex-c-m trans-04">
+						<i class="zmdi zmdi-search"></i>
+					</button>
+					<input class="plh3" type="text" name="search" placeholder="Search...">
+				</form>
+			</div>
+		</div>
+	</header>
+
+	<!-- Cart -->
+	>
+
+
+	<!-- breadcrumb -->
+	<div class="container">
+		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+				Home
+				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+			</a>
+
+			<span class="stext-109 cl4">
+				Profile
+			</span>
+		</div>
+	</div>
+
+
+
+	<div class="container">
+		<div class="row">
+			<!-- Left Sidebar -->
+			<div class="col-md-3">
+				<div class="osahan-account-page-left shadow-sm bg-white h-100">
+					<div class="border-bottom p-4">
+						<!-- Navigation Bar -->
+						<ul class="nav flex-column">
+							<li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a></li>
+							<li class="nav-item"><a class="nav-link" href="/wallet"><i class="bi bi-bag-heart"></i> Wallet</a></li>
+							<li class="nav-item"><a class="nav-link" href="/vieworder"><i class="bi bi-briefcase-fill"></i> Orders</a></li>
+							<li class="nav-item"><a class="nav-link" href="/manageAddresses"><i class="bi bi-geo-alt-fill"></i> Addresses</a></li>
+							<li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-lock-fill"></i> Change Pass</a></li>
+							<li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+	
+			<!-- Right Content - Wallet -->
+			<div class="col-md-9">
+				<div class="card border-0 rounded shadow-sm">
+				  <div class="card-body">
+					<h4 class="card-title mb-4">Wallet</h4>
+					<p class="card-text mb-3"><strong>Balance:</strong> ₹<span id="walletBalance"><%= balance.toFixed(2) %></span></p>
+					<h5 class="mb-3">Add Balance</h5>
+					<form id="addBalanceForm">
+					  <div class="mb-3">
+						<label for="amount" class="form-label">Amount (₹)</label>
+						<input type="number" class="form-control" id="amount" placeholder="Enter amount">
+					  </div>
+					  <button type="submit" class="btn btn-primary mb-3">Add Balance</button>
+					</form>
+					<button id="historyBtn" class="btn btn-secondary">History</button>
+				  </div>
+				</div>
+			  </div>
+			  
+			  <!-- Transaction History Modal -->
+			  <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered custom-modal">
+				  <div class="modal-content">
+					<div class="modal-header">
+					  <h5 class="modal-title" id="transactionModalLabel">Transaction History</h5>
+					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+					  <div id="transactionList"></div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			  
+			  
+			  
+			  
+			  
+			  
+			 <!-- Add this to your wallet.ejs or the page where wallet balance is shown -->
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+	  const walletBalanceElement = document.getElementById('walletBalance');
+  
+	  // Function to update wallet balance
+	  const updateWalletBalance = (newBalance) => {
+		walletBalanceElement.textContent = newBalance.toFixed(2);
+	  };
+  
+	  // Event delegation for cancel and return buttons
+	  document.body.addEventListener('click', async (event) => {
+		const target = event.target;
+  
+		if (target.classList.contains('cancel-order-btn')) {
+		  event.preventDefault();
+		  const orderId = target.dataset.orderId;
+		  const reason = prompt('Reason for cancellation:', 'Changed my mind');
+  
+		  try {
+			const response = await fetch(`/order/cancel/${orderId}?reason=${encodeURIComponent(reason)}`, { method: 'GET' });
+			const data = await response.json();
+  
+			if (data.success) {
+			  alert(`Order cancelled. Refunded: ₹${data.refundAmount.toFixed(2)}`);
+			  updateWalletBalance(data.newBalance);
+			  // Optionally, you can also update the order status in the UI
+			} else {
+			  alert(data.message);
+			}
+		  } catch (error) {
+			console.error('Error cancelling order:', error);
+			alert('Error cancelling order');
+		  }
+		}
+  
+		if (target.classList.contains('return-order-btn')) {
+		  event.preventDefault();
+		  const orderId = target.dataset.orderId;
+  
+		  try {
+			const response = await fetch(`/order/return/${orderId}`, { method: 'POST' });
+			const data = await response.json();
+  
+			if (data.success) {
+			  alert(`Order returned. Refunded: ₹${data.refundAmount.toFixed(2)}`);
+			  updateWalletBalance(data.newBalance);
+			  // Optionally, you can also update the order status in the UI
+			} else {
+			  alert(data.message);
+			}
+		  } catch (error) {
+			console.error('Error returning order:', error);
+			alert('Error returning order');
+		  }
+		}
+	  });
+  
+	  // Transaction History Modal
+	  const historyBtn = document.getElementById('historyBtn');
+	  const transactionModal = new bootstrap.Modal(document.getElementById('transactionModal'));
+	  const transactionList = document.getElementById('transactionList');
+  
+	  historyBtn.addEventListener('click', async () => {
+		try {
+		  const response = await fetch('/wallet/transactions');
+		  const data = await response.json();
+  
+		  if (data.success) {
+			transactionList.innerHTML = '';
+  
+			data.transactions.forEach(transaction => {
+			  const transactionDiv = document.createElement('div');
+			  transactionDiv.className = 'border p-3 mb-3';
+			  transactionDiv.innerHTML = `
+				<p><strong>Date:</strong> ${new Date(transaction.timestamp).toLocaleDateString()}</p>
+				<p><strong>Type:</strong> ${transaction.type}</p>
+				<p><strong>Amount:</strong> ₹${transaction.amount.toFixed(2)}</p>
+				<p><strong>Description:</strong> ${transaction.description || 'N/A'}</p>
+			  `;
+			  transactionList.appendChild(transactionDiv);
+			});
+  
+			transactionModal.show();
+		  } else {
+			alert(data.message);
+		  }
+		} catch (error) {
+		  console.error('Error fetching transactions:', error);
+		  alert('Error fetching transactions');
+		}
+	  });
+	});
+  </script>
+		</div>
+	</div>
+
+
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		
+
+
+
+
+
+	</div>
+
+
+
+
+
+	</div>
+
+
+
+
+
+
+
+
+	
+
+
+
+	<!-- Footer -->
+	<footer class="bg3 p-t-75 p-b-32">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Categories
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Women
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Men
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Kids
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Help
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Track Order
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Returns
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Shipping
+							</a>
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						GET IN TOUCH
+					</h4>
+
+					<p class="stext-107 cl7 size-201">
+						Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us
+						on (+1) 96 716 6879
+					</p>
+
+					<div class="p-t-27">
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-facebook"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-instagram"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-pinterest-p"></i>
+						</a>
+					</div>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+				</div>
+			</div>
+
+			<div class="p-t-40">
+				<div class="flex-c-m flex-w p-b-18">
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+					</a>
+				</div>
+
+			</div>
+		</div>
+	</footer>
+
+
+	<!-- Back to top -->
+	<div class="btn-back-to-top" id="myBtn">
+		<span class="symbol-btn-back-to-top">
+			<i class="zmdi zmdi-chevron-up"></i>
+		</span>
+	</div>
+
+
+	<!--===============================================================================================-->
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+	<script>
+		$(".js-select2").each(function () {
+			$(this).select2({
+				minimumResultsForSearch: 20,
+				dropdownParent: $(this).next('.dropDownSelect2')
+			});
+		})
+	</script>
+
+
+
+
+
+
+
+
+
+
+
+	<!--===============================================================================================-->
+	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script>
+		$('.js-pscroll').each(function () {
+			$(this).css('position', 'relative');
+			$(this).css('overflow', 'hidden');
+			var ps = new PerfectScrollbar(this, {
+				wheelSpeed: 1,
+				scrollingThreshold: 1000,
+				wheelPropagation: false,
+			});
+
+			$(window).on('resize', function () {
+				ps.update();
+			})
+		});
+	</script>
+	<!-- SweetAlert JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+
+   </body>
+
+ </html>

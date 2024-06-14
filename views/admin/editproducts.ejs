@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - Shoes Kampany</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar { width: 250px; background-color: #2c3e50; color: white; padding: 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); }
+        #sidebar-header { background-color: #1c2833; padding: 20px; text-align: center; }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a { color: #ecf0f1; text-decoration: none; display: flex; align-items: center; padding: 15px 20px; transition: background-color 0.3s, color 0.3s; font-size: 14px; font-weight: 500; }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
+        .breadcrumb { display: flex; align-items: center; margin-bottom: 20px; font-size: 14px; color: #2c3e50; position: sticky; top: 0; background-color: #ecf0f1; z-index: 10; padding: 10px 0; }
+        .breadcrumb a { color: #3498db; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .material-icons { font-size: 18px; margin: 0 5px; vertical-align: text-bottom; }
+        .table-container { overflow-x: auto; max-height: 500px; margin-bottom: 30px; background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+        th { background-color: #344955; color: white; font-weight: 500; position: sticky; top: 0; z-index: 1; }
+        tbody tr:hover { background-color: #f0f0f0; }
+        #imagePreview { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        #imagePreview img { max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 5px; }
+        #sidebarToggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 1000; background-color: #FF5722; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        @media (max-width: 768px) { #sidebar { transform: translateX(-100%); } #sidebar.active { transform: translateX(0); } #content { margin-left: 0; width: 100%; } #sidebarToggle { display: block; } table { font-size: 14px; } th, td { padding: 10px; } }
+        #cropper-modal .modal-dialog { max-width: 800px; margin: 1.75rem auto; }
+        #cropper-container { max-height: 500px; overflow: hidden; }
+        .cropper-view-box { outline-color: rgba(0, 0, 0, 0.75); }
+        .cropper-face { background-color: rgba(255, 255, 255, 0.5); }
+        .image-container { position: relative; display: inline-block; }
+        .product-image { width: 100px; margin: 10px; cursor: pointer; }
+        .delete-image { position: absolute; top: 5px; right: 5px; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin</h2>
+        </div>
+        <ul>
+            <li><a href="/admin"><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/products" class="active"><i
+              class="material-icons">inventory_2</i> Products</a></li>
+              <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
+              <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+              <li><a href="/allusers"><i class="material-icons">group</i> Users</a></li>
+              <li><a href="/admin/couponmanage"><i class="material-icons">local_offer</i> Coupons</a></li>
+              <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+              <li><a href="/logout"><i class="material-icons">logout</i> Logout</a></li>
+          </ul>
+      </nav>
+  
+  
+      <div id="content">
+          <div class="breadcrumb">
+              <!-- Your breadcrumb and other content structure remains unchanged -->
+              <a href="/admin">Dashboard</a>
+          <i class="material-icons">chevron_right</i>
+          <a href="/products">Products</a>
+          <i class="material-icons">chevron_right</i>
+          <span>Edit Product</span>
+          </div>
+          
+          <h1>Edit Product</h1>
+          
+          <div class="table-container">
+              <form action="/admin/productedit/<%= get._id %>" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                  <input type="hidden" id="product_id" name="id" value="<%= get._id %>">
+                  <table>
+                      <thead>
+                          <tr>
+                              <th>Field</th>
+                              <th>Value</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <td>Product Name</td>
+                              <td><input type="text" class="form-control" id="p_name" name="pro_name" value="<%= get.product_name %>" required></td>
+                          </tr>
+                      
+                            <tr>
+                                <td>Category</td>
+                                <td>
+                                    <select class="form-control" id="category" name="categoryName" required>
+                                        <option value="">Select Category</option>
+                                        <% category.forEach(category => { %>
+                                        <option value="<%= category._id %>" <%= (category._id.toString() === get.category.toString()) ? 'selected' : '' %>><%= category.categoryName %></option>
+                                        <% }); %>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Brand</td>
+                                <td><input type="text" class="form-control" id="brand" name="brand" value="<%= get.brand %>" required></td>
+                            </tr>
+                            <tr>
+                                <td>Color</td>
+                                <td><input type="text" class="form-control" id="color" name="color" value="<%= get.color %>" required></td>
+                            </tr>
+                            <tr>
+                                <td>Price</td>
+                                <td>
+                                    <input type="number" class="form-control" id="price" name="price" min="0" value="<%= get.price %>" oninput="validateInput(this, 'Price must be zero or greater.')" >
+                                    <div id="price-error" class="text-danger mt-1"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Stock</td>
+                                <td>
+                                    <input type="number" class="form-control" id="stock" name="stock" min="0" value="<%= get.stock %>" oninput="validateInput(this, 'Stock must be zero or greater.')">
+                                    <div id="stock-error" class="text-danger mt-1"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                              <td>Images</td>
+                              <td>
+                                <div id="image-preview" style="display: flex; flex-wrap: wrap;">
+                                    <% if (get.images && get.images.length > 0) { %>
+                                    <% get.images.forEach(function(image, index) { %>
+                                    <div class="image-container">
+                                        <img src="/<%= image %>" alt="Product Image" class="product-image" data-index="<%= index %>" onclick="initCropper(this)">
+                                        <button type="button" class="btn btn-danger btn-sm delete-image" onclick="deleteImage('<%= get._id %>', '<%= index %>')">
+                                            <i class="material-icons">delete</i>
+                                        </button>
+                                        <input type="hidden" name="existingImages[<%= index %>]" value="<%= image %>">
+                                    </div>
+                                    <% }); %>
+                                    <% } else { %>
+                                    <p>No images uploaded yet.</p>
+                                    <% } %>
+                                </div>
+                                <input type="file" class="form-control border" id="images" name="images" onchange="previewImages(event)" accept="image/*" multiple>
+                            </td>
+                        </tr>
+                    </table>
+                    <button type="submit" id="update_product" class="btn btn-primary">Update Product</button>
+                </form>
+            </div>
+    
+            <!-- Cropper Modal -->
+            <div class="modal fade" id="cropper-modal" tabindex="-1" role="dialog" aria-labelledby="cropperModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cropperModalLabel">Crop Image</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="cropper-container"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="crop-image">Crop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+            <script>
+                function previewImages(event) {
+                    var previewContainer = document.getElementById('image-preview');
+                    var files = event.target.files;
+    
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        var reader = new FileReader();
+    
+                        reader.onload = function (e) {
+                            var previewImage = document.createElement('div');
+                            previewImage.classList.add('image-container');
+                            previewImage.style.position = 'relative';
+                            previewImage.style.display = 'inline-block';
+    
+                            var imgElement = document.createElement('img');
+                            imgElement.classList.add('product-image');
+                            imgElement.style.width = '100px';
+                            imgElement.style.margin = '10px';
+                            imgElement.src = e.target.result;
+    
+                            imgElement.onclick = function() {
+                                initCropper(this);
+                            };
+    
+                            var deleteButton = document.createElement('button');
+                            deleteButton.type = 'button';
+                            deleteButton.classList.add('btn', 'btn-danger', 'btn-sm', 'delete-image');
+                            deleteButton.style.position = 'absolute';
+                            deleteButton.style.top = '5px';
+                            deleteButton.style.right = '5px';
+                            deleteButton.innerHTML = '<i class="material-icons">delete</i>';
+                            deleteButton.onclick = function() {
+                                previewContainer.removeChild(previewImage);
+                            };
+    
+                            previewImage.appendChild(imgElement);
+                            previewImage.appendChild(deleteButton);
+                            previewContainer.appendChild(previewImage);
+                        };
+    
+                        reader.readAsDataURL(file);
+                    }
+                }
+    
+                function deleteImage(productId, index) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'Do you really want to delete this image?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'No, cancel!',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/admin/deleteSingleImage/${index}/${productId}`;
+                        }
+                    });
+                }
+    
+                let cropper;
+                let currentImage;
+                let cropModalInstance;
+                let currentImageIndex;
+    
+                function initCropper(img) {
+                    currentImageIndex = Array.prototype.indexOf.call(img.parentNode.parentNode.children, img.parentNode);
+                    const modal = new bootstrap.Modal(document.getElementById('cropper-modal'));
+                    modal.show();
+                    cropModalInstance = modal;
+    
+                    const cropperContainer = document.getElementById('cropper-container');
+                    cropperContainer.innerHTML = '';
+                    const clonedImg = img.cloneNode(true);
+                    cropperContainer.appendChild(clonedImg);
+    
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+    
+                    cropper = new Cropper(clonedImg, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        minContainerWidth: 400,
+                        minContainerHeight: 400,
+                    });
+    
+                    currentImage = img;
+                }
+    
+                document.getElementById('cropper-modal').addEventListener('hidden.bs.modal', function () {
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                });
+    
+                document.getElementById('crop-image').onclick = function () {
+                    const croppedCanvas = cropper.getCroppedCanvas();
+                    croppedCanvas.toBlob((blob) => {
+                        const file = new File([blob], 'cropped_image.jpg', { type: 'image/jpeg' });
+                        const fileInput = document.getElementById('images');
+                        const files = fileInput.files;
+    
+                        const dataTransfer = new DataTransfer();
+                        for (let i = 0; i < files.length; i++) {
+                            if (i === currentImageIndex) {
+                                dataTransfer.items.add(file);
+                            } else {
+                                dataTransfer.items.add(files[i]);
+                            }
+                        }
+                        fileInput.files = dataTransfer.files;
+    
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            currentImage.src = e.target.result;
+                            currentImage.setAttribute('data-cropped', 'true');
+                            cropModalInstance.hide();
+                        };
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg');
+                };
+    
+                function validateForm() {
+                    // Add any additional form validation logic here
+                    return true;
+                }
+            </script>
+    
+
+    <script>
+
+function validateInput(input, errorMessage) {
+    const value = input.value;
+    const isValid = value >= 0;
+    const errorElement = document.getElementById(`${input.id}-error`);
+
+    if (isValid) {
+        errorElement.textContent = '';
+        input.style.borderColor = '';
+    } else {
+        errorElement.textContent = errorMessage;
+        input.style.borderColor = 'red';
+    }
+
+    return isValid;
+}
+    </script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.min.js"></script>
+</body>
+</html>
+  

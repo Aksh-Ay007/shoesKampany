@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Home</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="images/icons/favicon.png" />
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/slick/slick.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/MagnificPopup/magnific-popup.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.6.16/css/uikit.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  
+	<!--===============================================================================================-->
+
+		<style>
+        .imageZoom {
+            width: 100%;
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+        .imageZoom img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: 0 0;
+        }
+        .imageZoom::after {
+            display: var(--display);
+            content: '';
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            background-image: var(--url);
+            background-size: 200%;
+            background-position: var(--zoom-x) var(--zoom-y);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+		
+
+    </style>
+
+<style>
+
+	/* Adjust icon size for both add to cart and wishlist buttons */
+.js-addcart-home .zmdi-shopping-cart,
+.js-addwish-b2 .zmdi-favorite {
+    font-size: 24px; /* Adjust this value to increase or decrease the size */
+}
+
+
+
+</style>
+
+
+<style>
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-gap: 20px;
+}
+
+.product-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-details {
+    padding: 10px;
+}
+
+.product-name {
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+.product-price {
+    margin: 5px 0;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-right: 5px;
+}
+
+.discount-percentage {
+    color: red;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.offer-price,
+.regular-price {
+    color: green;
+    font-weight: bold;
+}
+
+.stock-low {
+    color: red;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.stock-available {
+    color: green;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.stock-unavailable {
+    color: red;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.btn-addwish,
+.btn-addcart {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-addwish:hover,
+.btn-addcart:hover {
+    background-color: #f5f5f5;
+}
+</style>
+  
+
+	
+</head>
+
+<body class="animsition">
+
+	<!-- Header -->
+	<header>
+		<!-- Header desktop -->
+		<div class="container-menu-desktop">
+			<!-- Topbar -->
+			<div class="top-bar">
+				<div class="content-topbar flex-sb-m h-full container">
+					<div class="left-top-bar">
+						Free shipping for standard order over Rs:2000
+					</div>
+
+					<div class="right-top-bar flex-w h-full">
+
+
+
+						
+						<% if(!isUser){ %>
+
+
+							<a href="/userlogin" class="flex-c-m trans-04 p-lr-25">
+								LogIn
+							</a>
+							<% } %>
+
+								<% if(isUser){%>
+
+						
+									<div class="wrap-icon-header flex-w flex-r-m">
+										<a href="/wishlist" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" style="line-height: 3.8;" data-notify="0">
+											<i class="zmdi zmdi-favorite-outline wishlist-icon zmdi-hc-2x"></i>
+										</a>
+									
+										<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="<%= cart && cart.items && cart.items.length > 0 ? cart.items.length : 0 %>">
+											<i class="zmdi zmdi-shopping-cart cart-icon-white"></i>
+										</div>
+									</div>
+									
+									
+								   </div>
+
+								
+
+
+
+									<% } %>
+
+										<% if(!isUser){ %>
+											<a href="/usersignup" class="flex-c-m trans-04 p-lr-25">
+												SignUp
+											</a>
+											<% } %>
+
+
+					</div>
+				</div>
+			</div>
+
+			<div class="wrap-menu-desktop">
+				<nav class="limiter-menu-desktop container">
+
+					<!-- Logo desktop -->
+					<a href="#" class="logo">
+						<img src="images/icons/logo-01.png" alt="IMG-LOGO">
+					</a>
+
+					<!-- Menu desktop -->
+					<div class="menu-desktop">
+						<ul class="main-menu">
+							<% if(isUser){%>
+								<li>
+									<a href="/shop">Shop</a>
+									
+								</li>
+
+
+
+								
+								<% } %>
+
+						</ul>
+					</div>
+				
+								
+					<% if(isUser){%>
+						<div class="sec-center" style="margin-left: 64%;">     
+							<li class="nav-item">
+								<a class="nav-link" href="#" id="dropdownIcon">
+									<i class="bi bi-person-circle dropdown-icon"></i>
+									<span class="name-section"><%= isUser.firstname %></span>
+								</a>
+							</li>
+							
+
+							<div class="section-dropdown" id="dropdownMenu"> 
+								<a href="/profile">Profile <i class="uil uil-arrow-right"></i></a>
+								<a href="/logout">Logout <i class="uil uil-arrow-right"></i></a>
+							</div>
+							
+							
+						  </div>
+
+
+						  <% } %>
+
+						  
+							
+
+
+							<!-- <a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
+					<i class="zmdi zmdi-favorite-outline"></i>
+				</a> -->
+						</div>
+				
+
+			</div>
+
+	</header>
+
+	<!-- Cart -->
+	<div class="wrap-header-cart js-panel-cart">
+		<div class="s-full js-hide-cart"></div>
+	  
+		<div class="header-cart flex-col-l p-l-65 p-r-25">
+		  <div class="header-cart-title flex-w flex-sb-m p-b-8">
+			<span class="mtext-103 cl2">
+			  Your Cart
+			</span>
+	  
+			<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
+			  <i class="zmdi zmdi-close"></i>
+			</div>
+		  </div>
+	  
+		  <div class="header-cart-content flex-w js-pscroll">
+			<ul class="header-cart-wrapitem w-full">
+			  <% if (cart && cart.items && cart.items.length > 0) { %>
+				<% cart.items.forEach((item) => { %>
+				  <li class="header-cart-item flex-w flex-t m-b-12">
+					<div class="header-cart-item-img">
+					  <img src="<%= item.productId && item.productId.images && item.productId.images[0] ? item.productId.images[0] : 'default_image_path' %>" alt="Product Image">
+					</div>
+					<div class="header-cart-item-txt p-t-8">
+					  <span class="header-cart-item-info" style="color: black;">Product Name: <%= item.productId && item.productId.product_name ? item.productId.product_name : 'No product name available' %></span><br>
+					  <span class="header-cart-item-info" style="color: black;">Qty: <%= item.quantity %></span><br>
+					  <span class="header-cart-item-info" style="color: red;">Price: &#x20b9;<%= item.productId && item.productId.price ? item.productId.price : 0 %></span><br>
+					</div>
+				  </li>
+				<% }); %>
+			  <% } else { %>
+				<li class="header-cart-item flex-w flex-t m-b-12">
+				  Cart is empty.....
+				</li>
+			  <% } %>
+			</ul>
+	  
+			<div class="header-cart-buttons flex-w w-full">
+			  <a href="/shoping-cart" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
+				View Cart
+			  </a>
+	  
+			  <a href="/checkout" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
+				Check Out
+			  </a>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	  
+	</div>
+
+
+	<!-- Slider -->
+	<section class="section-slide">
+		<div class="wrap-slick1">
+			<div class="slick1">
+				<div class="item-slick1" style="background-image: url(images/slide-01.jpg);">
+					<div class="container h-full">
+						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+							<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
+								<span class="ltext-101 cl2 respon2">
+									Women Collection 2018
+								</span>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="fadeInUp" data-delay="800">
+								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+									NEW SEASON
+								</h2>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="zoomIn" data-delay="1600">
+								<a href="/shop"
+									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+									Shop Now
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="item-slick1" style="background-image: url(images/slide-02.jpg);">
+					<div class="container h-full">
+						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+							<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
+								<span class="ltext-101 cl2 respon2">
+									Men New-Season
+								</span>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn"
+								data-delay="800">
+								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+									Jackets & Coats
+								</h2>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="slideInUp" data-delay="1600">
+								<a href="/shop"
+									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+									Shop Now
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="item-slick1" style="background-image: url(images/slide-03.jpg);">
+					<div class="container h-full">
+						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+							<div class="layer-slick1 animated visible-false" data-appear="rotateInDownLeft"
+								data-delay="0">
+								<span class="ltext-101 cl2 respon2">
+									Men Collection 2018
+								</span>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="rotateInUpRight"
+								data-delay="800">
+								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+									New arrivals
+								</h2>
+							</div>
+
+							<div class="layer-slick1 animated visible-false" data-appear="rotateIn" data-delay="1600">
+								<a href="/shop"
+									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+									Shop Now
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+	<!-- Banner -->
+	<div class="sec-banner bg0 p-t-80 p-b-50">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+					<!-- Block1 -->
+					<div class="block1 wrap-pic-w">
+						<img src="images/banner-01.jpg" alt="IMG-BANNER">
+
+						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+							<div class="block1-txt-child1 flex-col-l">
+								<span class="block1-name ltext-102 trans-04 p-b-8">
+									Women
+								</span>
+
+								<span class="block1-info stext-102 trans-04">
+									Spring 2018
+								</span>
+							</div>
+
+							<div class="block1-txt-child2 p-b-4 trans-05">
+								<div class="block1-link stext-101 cl0 trans-09">
+									Shop Now
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+
+				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+					<!-- Block1 -->
+					<div class="block1 wrap-pic-w">
+						<img src="images/banner-02.jpg" alt="IMG-BANNER">
+
+						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+							<div class="block1-txt-child1 flex-col-l">
+								<span class="block1-name ltext-102 trans-04 p-b-8">
+									Men
+								</span>
+
+								<span class="block1-info stext-102 trans-04">
+									Spring 2018
+								</span>
+							</div>
+
+							<div class="block1-txt-child2 p-b-4 trans-05">
+								<div class="block1-link stext-101 cl0 trans-09">
+									Shop Now
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+
+				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+					<!-- Block1 -->
+					<div class="block1 wrap-pic-w">
+						<img src="images/banner-03.jpg" alt="IMG-BANNER">
+
+						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+							<div class="block1-txt-child1 flex-col-l">
+								<span class="block1-name ltext-102 trans-04 p-b-8">
+									Kids
+								</span>
+
+								<span class="block1-info stext-102 trans-04">
+									New Trend
+								</span>
+							</div>
+
+							<div class="block1-txt-child2 p-b-4 trans-05">
+								<div class="block1-link stext-101 cl0 trans-09">
+									Shop Now
+								</div>
+							</div>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+<!-- Product -->
+<section class="bg0 p-t-23 p-b-140">
+    <div class="container">
+        <div class="p-b-10">
+            <h3 class="ltext-103 cl5">Our Products</h3>
+        </div>
+		<div class="product-grid">
+			<% allProduct.forEach(product => { %>
+			<div class="product-item">
+				<div class="product-image">
+					<img src="<%= product.images[0] %>" alt="IMG-PRODUCT">
+				</div>
+				<div class="product-details">
+					<a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name %></a>
+					<div class="product-price">
+						<% if (product.discountPercentage) { %>
+							<span class="original-price">&#x20a8; <%= product.originalPrice %></span>
+							<span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
+							<span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
+						<% } else { %>
+							<span class="regular-price">&#x20a8; <%= product.price %></span>
+						<% } %>
+					</div>
+					<% if (product.stock > 0) { %>
+						<span class="stock-<%= product.stock < 10 ? 'low' : 'available' %>">
+							<%= product.stock < 10 ? 'Only few left' : 'In Stock (' + product.stock + ' left)' %>
+						</span>
+					<% } else { %>
+						<span class="stock-unavailable">Out of Stock</span>
+					<% } %>
+					<div class="product-actions">
+					
+							<button class="btn-addwish" data-tooltip="Add to wishlist" data-pdt-id="<%= product._id %>">
+								<i class="zmdi zmdi-favorite"></i>
+							</button>
+							<% if (product.stock > 0) { %>
+							<button class="btn-addcart" data-tooltip="Add to Cart" data-pdt-id="<%= product._id %>">
+								<i class="zmdi zmdi-shopping-cart"></i>
+							</button>
+						<% } else { %>
+							<!-- Disable cart button for out of stock products -->
+							<button class="btn-addcart" data-tooltip="Out of Stock" disabled>
+								<i class="zmdi zmdi-shopping-cart"></i>
+							</button>
+						<% } %>
+					</div>
+				</div>
+			</div>
+			<% }) %>
+		</div>
+		
+		
+
+        <div class="flex-c-m flex-w w-full p-t-45">
+            <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">Load More</a>
+        </div>
+    </div>
+</section>
+  
+  
+  
+
+	<!-- Footer -->
+	<footer class="bg3 p-t-75 p-b-32">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Categories
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Women
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Men
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Shoes
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Watches
+							</a>
+						</li>
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Help
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Track Order
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Returns
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Shipping
+							</a>
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						GET IN TOUCH
+					</h4>
+
+					<p class="stext-107 cl7 size-201">
+						Any questions? Let us know at ShoeKampany on the 3rd floor, 42 Brigade Road, Kochi, Kerala
+						560001 or call us on (+91) 96 716 6879.
+					</p>
+
+					<div class="p-t-27">
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-facebook"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-instagram"></i>
+						</a>
+
+					</div>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Newsletter
+					</h4>
+
+					<form>
+						<div class="wrap-input1 w-full p-b-4">
+							<input class="input1 bg-none plh1 stext-107 cl7" type="text" name="email"
+								placeholder="email@example.com">
+							<div class="focus-input1 trans-04"></div>
+						</div>
+
+						<div class="p-t-18">
+							<button class="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
+								Subscribe
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<div class="p-t-40">
+				<div class="flex-c-m flex-w p-b-18">
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+					</a>
+				</div>
+
+
+			</div>
+		</div>
+	</footer>
+
+
+	<!-- Back to top -->
+	<div class="btn-back-to-top" id="myBtn">
+		<span class="symbol-btn-back-to-top">
+			<i class="zmdi zmdi-chevron-up"></i>
+		</span>
+	</div>
+
+	
+							<div class="flex-w flex-m p-l-100 p-t-40 respon7">
+								<div class="flex-m bor9 p-r-10 m-r-11">
+									<a href="#"
+										class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100"
+										data-tooltip="Add to Wishlist">
+										<i class="zmdi zmdi-favorite"></i>
+									</a>
+								</div>
+
+								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+									data-tooltip="Facebook">
+									<i class="fa fa-facebook"></i>
+								</a>
+
+								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+									data-tooltip="Twitter">
+									<i class="fa fa-twitter"></i>
+								</a>
+
+								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100"
+									data-tooltip="Google Plus">
+									<i class="fa fa-google-plus"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div> 
+
+	<!--===============================================================================================-->
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const addToCartButtons = document.querySelectorAll('.btn-addcart');
+			const addToWishlistButtons = document.querySelectorAll('.btn-addwish');
+	
+			// Handle adding to cart
+			addToCartButtons.forEach(button => {
+				button.addEventListener('click', async () => {
+					const productId = button.dataset.pdtId;
+	
+					try {
+						const response = await fetch(`/shoping-cart/${productId}`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						});
+	
+						if (response.ok) {
+							Swal.fire({
+								icon: 'success',
+								title: 'Added to cart',
+								showConfirmButton: false,
+								timer: 1500
+							}).then(() => {
+								location.reload();
+							});
+						} else {
+							const data = await response.json();
+							Swal.fire({
+								icon: 'error',
+								title: 'Oops...',
+								text: data.message
+							});
+						}
+					} catch (error) {
+						Swal.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Something went wrong!'
+						});
+					}
+				});
+			});
+	
+			// Handle adding to wishlist
+			addToWishlistButtons.forEach(button => {
+				button.addEventListener('click', async () => {
+					const productId = button.dataset.pdtId;
+	
+					try {
+						const response = await fetch(`/wishlist/${productId}`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							}
+						});
+	
+						if (response.ok) {
+							Swal.fire({
+								icon: 'success',
+								title: 'Added to wishlist',
+								showConfirmButton: false,
+								timer: 1500
+							}).then(() => {
+								location.reload();
+							});
+						} else {
+							const data = await response.json();
+							Swal.fire({
+								icon: 'error',
+								title: 'Oops...',
+								text: data.message
+							});
+						}
+					} catch (error) {
+						Swal.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Something went wrong!'
+						});
+					}
+				});
+			});
+		});
+	</script>
+
+
+
+	<script>
+		document.getElementById('dropdownIcon').addEventListener('click', function(event) {
+		  event.preventDefault();
+		  document.getElementById('dropdownMenu').classList.toggle('show');
+		});
+	  
+		window.onclick = function(event) {
+		  if (!event.target.matches('#dropdownIcon') && !event.target.matches('.bi-person-circle')) {
+			var dropdowns = document.getElementsByClassName("section-dropdown");
+			for (var i = 0; i < dropdowns.length; i++) {
+			  var openDropdown = dropdowns[i];
+			  if (openDropdown.classList.contains('show')) {
+				openDropdown.classList.remove('show');
+			  }
+			}
+		  }
+		}
+	  </script>
+
+
+	<script>
+		$(".js-select2").each(function () {
+			$(this).select2({
+				minimumResultsForSearch: 20,
+				dropdownParent: $(this).next('.dropDownSelect2')
+			});
+		})
+	</script>
+	<!--===============================================================================================-->
+	<script src="vendor/daterangepicker/moment.min.js"></script>
+	<script src="vendor/daterangepicker/daterangepicker.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/slick/slick.min.js"></script>
+	<script src="js/slick-custom.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/parallax100/parallax100.js"></script>
+	<script>
+		$('.parallax100').parallax100();
+	</script>
+	<!--===============================================================================================-->
+	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<script>
+		$('.gallery-lb').each(function () { // the containers for all your galleries
+			$(this).magnificPopup({
+				delegate: 'a', // the selector for gallery item
+				type: 'image',
+				gallery: {
+					enabled: true
+				},
+				mainClass: 'mfp-fade'
+			});
+		});
+	</script>
+	<!--===============================================================================================-->
+	<script src="vendor/isotope/isotope.pkgd.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/sweetalert/sweetalert.min.js"></script>
+	
+
+	<script>
+
+	</script>
+	<!--===============================================================================================-->
+	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script>
+		$('.js-pscroll').each(function () {
+			$(this).css('position', 'relative');
+			$(this).css('overflow', 'hidden');
+			var ps = new PerfectScrollbar(this, {
+				wheelSpeed: 1,
+				scrollingThreshold: 1000,
+				wheelPropagation: false,
+			});
+
+			$(window).on('resize', function () {
+				ps.update();
+			})
+		});
+	</script>
+	<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+
+</body>
+
+</html>

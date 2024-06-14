@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Shoes Kampany</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #sidebar-header {
+            background-color: #1c2833;
+            padding: 20px;
+            text-align: center;
+        }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
+
+        .form-container {
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        label { display: block; margin-bottom: 10px; font-weight: 500; }
+        .form-control { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; }
+        .toggle-button {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+            margin-right: 5px;
+            background-color: #4CAF50;
+        }
+
+        .toggle-button:hover { background-color: #388E3C; }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            background-color: #ecf0f1;
+            z-index: 10;
+            padding: 10px 0;
+        }
+        .breadcrumb a { color: #3498db; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .material-icons {
+            font-size: 18px;
+            margin: 0 5px;
+            vertical-align: text-bottom;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.active { transform: translateX(0); }
+            #content { margin-left: 0; width: 100%; }
+            #sidebarToggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin</h2>
+        </div>
+      
+        <ul>
+            <li><a href="/admin"><i class="material-icons">dashboard</i> Dashboard</a></li>
+            <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
+            <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
+            <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+            <li><a href="/admin/userside"><i class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage"><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage" class="active"><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <div class="breadcrumb">
+            <a href="/admin/offermanage">Offers</a>
+            <i class="material-icons">chevron_right</i>
+            <span>Edit Offer</span>
+        </div>
+    
+        <h1>Edit Offer</h1>
+        <div class="form-container">
+            <form id="editOfferForm" action="/admin/editoffer/<%= offer._id %>" method="post" onsubmit="return validateForm()">
+                <div>
+                    <label for="productId" class="form-label">Product</label>
+                    <% if (offer.product_name && offer.product_name.product_name !== 'NA') { %>
+                        <select name="productId" id="productId" class="form-control">
+                            <option value="<%= offer.product_name._id %>" selected><%= offer.product_name.product_name %></option>
+                            <% products.forEach(product => { %>
+                                <% if (product.product_name !== 'NA' && product._id.toString() !== offer.product_name._id.toString()) { %>
+                                    <option value="<%= product._id %>"><%= product.product_name %></option>
+                                <% } %>
+                            <% }) %>
+                        </select>
+                    <% } else { %>
+                        <input type="text" class="form-control" value="N/A" disabled>
+                    <% } %>
+                    <span id="productError" class="error-text"></span>
+                </div>
+            
+                <% if (offer.category_name && offer.category_name.categoryName !== 'NA') { %>
+                    <div>
+                        <label for="categoryId" class="form-label">Category</label>
+                        <select name="categoryId" id="categoryId" class="form-control">
+                            <option value="<%= offer.category_name._id %>" selected><%= offer.category_name.categoryName %></option>
+                            <% categories.forEach(category => { %>
+                                <% if (category.categoryName !== 'NA' && category._id.toString() !== offer.category_name._id.toString()) { %>
+                                    <option value="<%= category._id %>"><%= category.categoryName %></option>
+                                <% } %>
+                            <% }) %>
+                        </select>
+                        <span id="categoryError" class="error-text"></span>
+                    </div>
+                <% } %>
+            
+                <div>
+                    <label for="discount" class="form-label">Discount Amount (%)</label>
+                    <input type="number" name="discount" id="discount" class="form-control" value="<%= offer.discount_Amount %>" placeholder="Enter Discount Amount (e.g., 20)">
+                    <span id="discountError" class="error-text"></span>
+                </div>
+            
+                <div>
+                    <label for="expiryDate" class="form-label">Expiry Date</label>
+                    <input type="date" name="expiryDate" id="expiryDate" class="form-control" value="<%= moment(new Date(offer.expiryDate)).format('YYYY-MM-DD') %>">
+                    <span id="expiryDateError" class="error-text"></span>
+                </div>
+            
+                <div>
+                    <button type="submit" class="toggle-button">
+                        <i class="material-icons" style="font-size: 16px; vertical-align: text-top; margin-right: 5px;">edit</i>Update Offer
+                    </button>
+                </div>
+            </form>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<script>
+   function validateForm() {
+    var fields = [
+        { id: 'discount', error: 'discountError', message: 'Discount Amount is required', type: 'number', min: 1, max: 100 },
+        { id: 'expiryDate', error: 'expiryDateError', message: 'Expiry Date is required' }
+    ];
+
+    var isValid = true;
+
+    fields.forEach(function(field) {
+        var element = document.getElementById(field.id);
+        var value = element.value.trim();
+        var errorElement = document.getElementById(field.error);
+        errorElement.textContent = "";
+
+        if (value === "") {
+            errorElement.textContent = field.message;
+            isValid = false;
+        } else if (field.type === 'number') {
+            var num = parseFloat(value);
+            if (isNaN(num) || num < field.min || num > field.max) {
+                errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
+                isValid = false;
+            }
+        }
+    });
+
+    var productId = document.getElementById('productId');
+    var categoryId = document.getElementById('categoryId');
+    var productError = document.getElementById('productError');
+    var categoryError = document.getElementById('categoryError');
+
+    if (productId && categoryId) {
+        if (productId.value === '' && categoryId.value === '') {
+            productError.textContent = 'Please select a product or category';
+            categoryError.textContent = 'Please select a product or category';
+            isValid = false;
+        } else if (productId.value !== '' && categoryId.value !== '') {
+            productError.textContent = 'Cannot select both product and category';
+            categoryError.textContent = 'Cannot select both product and category';
+            isValid = false;
+        } else {
+            productError.textContent = '';
+            categoryError.textContent = '';
+        }
+    }
+
+    var expiryDate = new Date(document.getElementById('expiryDate').value);
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (expiryDate < today) {
+        document.getElementById('expiryDateError').textContent = "Expiry date cannot be in the past";
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#productId').on('change', function() {
+            if ($(this).val() === '') {
+                $('#categoryId').prop('disabled', false);
+            } else {
+                $('#categoryId').prop('disabled', true);
+            }
+        });
+
+        $('#categoryId').on('change', function() {
+            if ($(this).val() === '') {
+                $('#productId').prop('disabled', false);
+            } else {
+                $('#productId').prop('disabled', true);
+            }
+        });
+    });
+</script>
+</body>
+</html>

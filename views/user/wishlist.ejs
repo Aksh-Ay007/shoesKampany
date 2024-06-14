@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Shoping Cart</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="images/icons/favicon.png" />
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<!--===============================================================================================-->
+	<!-- SweetAlert CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<!--===============================================================================================-->
+
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.2/font/bootstrap-icons.min.css">
+
+		<style>
+
+
+.footer-empty {
+  margin-top: 50px; /* adjust this value as needed */
+
+  .cart-items {
+  min-height: 500px; /* adjust this value as needed */
+}
+}
+
+
+
+
+.table-shopping-cart {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+}
+
+.table_head th {
+    font-weight: bold;
+    text-align: center;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.table_row td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.how-itemcart1 {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.wrap-num-product {
+    display: flex;
+    align-items: center;
+}
+
+.num-product {
+    width: 50px;
+    text-align: center;
+}
+
+.btn.btn-danger.delete {
+    background-color: transparent;
+    border: none;
+    color: red;
+    cursor: pointer;
+}
+
+.btn.btn-danger.delete .bi-trash-fill {
+    font-size: 1.2em;
+}
+
+.highlighted-price {
+    font-size: 1em;
+    color: #FF5733;
+}
+
+.container-box-1,
+.container-box-2 {
+    background-color: #fff;
+    padding: 2rem;
+    /* border-radius: 10px; */
+    /* border: 1px solid black; */
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+    margin-bottom: 20px;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body .card-title {
+    font-weight: bold;
+    font-size: 1em;
+    color: black;
+}
+
+.card-body .highlighted-price {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #FF5733;
+}
+
+.card-body .btn {
+    margin: 5px 0;
+}
+
+		</style>
+
+
+<style>
+    .blink {
+        animation: blinker 2s linear infinite;
+    }
+
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-img-top {
+        max-height: 200px;
+        object-fit: cover;
+    }
+</style>
+
+
+		
+
+</head>
+
+<body class="animsition">
+
+	<!-- Header -->
+	<header class="header-v4">
+		<!-- Header desktop -->
+		<div class="container-menu-desktop">
+			<!-- Topbar -->
+			<div class="top-bar">
+				<div class="content-topbar flex-sb-m h-full container">
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m trans-04 p-lr-25">
+							My Account
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="wrap-menu-desktop how-shadow1">
+				<nav class="limiter-menu-desktop container">
+
+					<!-- Logo desktop -->
+					<a href="#" class="logo">
+						<img src="images/icons/logo-01.png" alt="IMG-LOGO">
+					</a>
+
+					<!-- Menu desktop -->
+					<div class="menu-desktop">
+						<ul class="main-menu">
+							<li>
+								<a href="/">Home</a>
+							</li>
+
+							<li>
+								<a href="/shop">Shop</a>
+							</li>
+
+						</ul>
+					</div>
+
+					<!-- Icon header -->
+					<div class="wrap-icon-header flex-w flex-r-m">
+						<a href="/shoping-cart" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart" data-notify="<%= cart && cart.items && cart.items.length > 0 ? cart.items.length : 'Your cart is empty' %>">
+							<i class="zmdi zmdi-shopping-cart"></i>
+						</a>
+					</div>
+					
+				   
+					</div>
+				</nav>
+			</div>
+		</div>
+
+		<!-- Header Mobile -->
+		<div class="wrap-header-mobile">
+			<!-- Logo moblie -->
+			<div class="logo-mobile">
+				<a href="index.html"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
+			</div>
+
+			<!-- Icon header -->
+			<div class="wrap-icon-header flex-w flex-r-m m-r-15">
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
+					<i class="zmdi zmdi-search"></i>
+				</div>
+
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart"
+					data-notify="<%= cart && cart.items && cart.items.length > 0 ? cart.items.length : 'Your cart is empty' %>">
+					<i class="zmdi zmdi-shopping-cart"></i>
+				</div>
+
+				<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti"
+					data-notify="0">
+					<i class="zmdi zmdi-favorite-outline"></i>
+				</a>
+			</div>
+
+
+			<!-- Button show menu -->
+			<div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+				<span class="hamburger-box">
+					<span class="hamburger-inner"></span>
+				</span>
+			</div>
+		</div>
+
+
+		<!-- Menu Mobile -->
+		<div class="menu-mobile">
+			<ul class="topbar-mobile">
+				<li>
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+				</li>
+
+				<li>
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m p-lr-10 trans-04">
+							My Account
+
+
+					</div>
+				</li>
+			</ul>
+
+			<ul class="main-menu-m">
+				<li>
+					<a href="index.html">Home</a>
+
+					<span class="arrow-main-menu-m">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+					</span>
+				</li>
+
+				<li>
+					<a href="product.html">Shop</a>
+				</li>
+
+			</ul>
+		</div>
+
+		<!-- Modal Search -->
+		<div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
+			<div class="container-search-header">
+				<button class="flex-c-m btn-hide-modal-search trans-04 js-hide-modal-search">
+					<img src="images/icons/icon-close2.png" alt="CLOSE">
+				</button>
+
+				<form class="wrap-search-header flex-w p-l-15">
+					<button class="flex-c-m trans-04">
+						<i class="zmdi zmdi-search"></i>
+					</button>
+					<input class="plh3" type="text" name="search" placeholder="Search...">
+				</form>
+			</div>
+		</div>
+	</header>
+
+
+	
+
+	<!-- breadcrumb -->
+	<div class="container">
+		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+				Home
+				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+			</a>
+
+			<span class="stext-109 cl4">
+				Wishlist
+			</span>
+		</div>
+	</div>
+
+	<div class="bg0 p-t-75 p-b-85">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-lg-12 col-xl-12 m-lr-auto m-b-50">
+					<div class="m-l-25 m-r--38 m-lr-0-xl container-box-1">
+						<% if (!wishlist || (wishlist.length < 1)) { %>
+						<div class="text-center" id="empty-wishlist-message">
+							<h2>Your wishlist is empty.</h2>
+							<p>Add some products to your wishlist to see them here.</p>
+						</div>
+						<% } else { %>
+						<!-- Wishlist Items -->
+						<div id="wishlist-items" class="row justify-content-center">
+							<% wishlist.forEach((item, index) => { %>
+							<% if (item.productId) { %>
+							<div class="col-md-3 mb-4 wishlist-item">
+								<div class="card shadow-sm" style="border-radius: 10px;">
+									<% if (item.productId.images && item.productId.images.length > 0) { %>
+									<img src="<%= item.productId.images[0] %>" class="card-img-top" alt="Product Image"
+										style="max-height: 200px; object-fit: cover;">
+									<% } else { %>
+									<!-- Placeholder image or alternative content -->
+									<div class="no-image-placeholder">
+										No Image Available
+									</div>
+									<% } %>
+									<div class="card-body">
+										<h5 class="card-title" style="font-weight: bold; color:black;">
+											<%= item.productId.product_name %>
+										</h5>
+										<% if (item.productId.discountPercentage) { %>
+										<span class="discount-percentage">
+											(<%= item.productId.discountPercentage %>% off)
+										</span>
+										<% } %>
+										<% if (item.productId.offerPrice) { %>
+										<p class="card-text" style="font-weight: bold; color:green;">
+											Offer Price: ₹<%= item.productId.offerPrice %>
+										</p>
+										<p class="card-text" style="font-weight: bold; color:black;">
+											Regular Price:
+											<del>₹<%= item.productId.price %></del>
+										</p>
+										<% } else { %>
+										<p class="card-text" style="font-weight: bold; color:black;">
+											Regular Price: ₹<%= item.productId.price %>
+										</p>
+										<% } %>
+										<p class="card-text stock-status" style="font-weight: bold; color:black;"
+											data-stock="<%= item.productId.stock %>">
+											<% if (item.productId.stock <= 0) { %>
+											Out of Stock
+											<% } %>
+										</p>
+										<div class="d-flex justify-content-between align-items-center">
+											<button class="btn btn-primary btn-sm add-to-cart"
+												data-id="<%= item.productId._id %>"
+												<% if (item.productId.stock <= 0) { %> disabled <% } %>>
+												<i class="fas fa-shopping-cart"></i> Add to Cart
+											</button>
+											<button class="btn btn-danger btn-sm remove-from-wishlist"
+												data-id="<%= item.productId._id %>">
+												<i class="bi bi-trash-fill"></i> Remove
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<% } %>
+							<% }) %>
+						</div>
+						<!-- End of Wishlist Items -->
+						<% } %>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+
+
+
+
+
+	<!-- Footer -->
+	<footer class="bg3 p-t-75 p-b-32 ">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Categories
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Women
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Men
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Kids
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Help
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Track Order
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Returns
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Shipping
+							</a>
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						GET IN TOUCH
+					</h4>
+
+					<p class="stext-107 cl7 size-201">
+						Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us
+						on (+1) 96 716 6879
+					</p>
+
+					<div class="p-t-27">
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-facebook"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-instagram"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-pinterest-p"></i>
+						</a>
+					</div>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+				</div>
+			</div>
+
+			<div class="p-t-40">
+				<div class="flex-c-m flex-w p-b-18">
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+					</a>
+				</div>
+
+			</div>
+		</div>
+	</footer>
+
+
+	<!-- Back to top -->
+	<div class="btn-back-to-top" id="myBtn">
+		<span class="symbol-btn-back-to-top">
+			<i class="zmdi zmdi-chevron-up"></i>
+		</span>
+	</div>
+
+
+	<!--===============================================================================================-->
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+	<script>
+		$(".js-select2").each(function () {
+			$(this).select2({
+				minimumResultsForSearch: 20,
+				dropdownParent: $(this).next('.dropDownSelect2')
+			});
+		})
+	</script>
+
+
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    const removeFromWishlistButtons = document.querySelectorAll('.remove-from-wishlist');
+
+    // Handle adding to cart
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const productId = button.dataset.id;
+
+            try {
+                const response = await fetch(`/shoping-cart/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    await removeFromWishlist(productId); // Remove from wishlist after adding to cart
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to cart',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        if (document.querySelectorAll('.wishlist-item').length === 0) {
+                            location.reload(); // Reload if wishlist becomes empty
+                        } else {
+                            location.href = '/wishlist'; // Redirect to wishlist page
+                        }
+                    });
+                } else {
+                    const data = await response.json();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong!'
+                });
+            }
+        });
+    });
+
+    // Handle removing from wishlist
+    removeFromWishlistButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const productId = button.dataset.id;
+            await removeFromWishlist(productId);
+        });
+    });
+
+    async function removeFromWishlist(productId) {
+        try {
+            const response = await fetch(`/wishlist/remove/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed from wishlist',
+                    showConfirmButton: false,
+                    timer: 1000
+                }).then(() => {
+                    document.querySelector(`button[data-id="${productId}"]`).closest('.wishlist-item').remove();
+                    if (document.querySelectorAll('.wishlist-item').length === 0) {
+                        location.reload(); // Reload if wishlist becomes empty
+                    }
+                });
+            } else {
+                const data = await response.json();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        }
+    }
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!--===============================================================================================-->
+		<!--===============================================================================================-->
+		<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+		<!--===============================================================================================-->
+		<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+		<script>
+			$('.js-pscroll').each(function () {
+				$(this).css('position', 'relative');
+				$(this).css('overflow', 'hidden');
+				var ps = new PerfectScrollbar(this, {
+					wheelSpeed: 1,
+					scrollingThreshold: 1000,
+					wheelPropagation: false,
+				});
+	
+				$(window).on('resize', function () {
+					ps.update();
+				})
+			});
+		</script>
+	<!-- SweetAlert JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+
+</body>
+
+</html>

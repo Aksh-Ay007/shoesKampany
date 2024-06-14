@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Shoes Kampany</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #sidebar-header {
+            background-color: #1c2833;
+            padding: 20px;
+            text-align: center;
+        }
+        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
+        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
+        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
+        #sidebar li { margin: 0; }
+        #sidebar a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        #sidebar a:hover { background-color: #34495e; color: #fff; }
+        #sidebar a.active { background-color: #e74c3c; color: #fff; }
+        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
+        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
+        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
+        .table-container, .form-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td { text-align: left; padding: 15px; }
+        th { background-color: #4c0bbc; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .btn { background-color: #4c0bbc; color: white; padding: 10px 15px; text-decoration: none; border: none; border-radius: 5px; transition: background-color 0.3s; display: inline-block; margin-top: 10px; cursor: pointer; }
+        .btn:hover { background-color: #3b0a94; }
+        .btn-primary { background-color: #4c0bbc; color: white; }
+        .btn-primary:hover { background-color: #3b0a94; }
+        canvas { width: 100% !important; height: auto !important; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <h1>Shoes Kampany</h1>
+            <h2>Admin Dashboard</h2>
+        </div>
+        <ul>
+            <li><a href="/admin/dashboard" class="active"><i class="material-icons">dashboard</i> Dashboard</a></li>
+           
+            <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
+            <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
+            <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
+            <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
+            <li><a href="/admin/userside"><i  class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage" ><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
+        </ul>
+    </div>
+    <div id="content">
+        <h1>Dashboard</h1>
+        <p>Total Revenue: <%= totalRevenue %></p>
+        <p>Total Orders: <%= totalOrders %></p>
+        <p>Total Discount: <%= totalDiscount %></p>
+        <div class="table-container">
+            <h2>Sales Data</h2>
+            <canvas id="salesChart"></canvas>
+        </div>
+        <div class="table-container">
+            <h2>Orders Data</h2>
+            <canvas id="ordersChart"></canvas>
+        </div>
+        <div class="table-container">
+            <h2>Payment Methods</h2>
+            <canvas id="paymentChart"></canvas>
+        </div>
+        <div class="table-container">
+            <h2>Best Selling Products</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity Sold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bestSellingProducts.forEach(product => { %>
+                        <tr>
+                            <td><%= product.productName %></td>
+                            <td><%= product.quantity %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-container">
+            <form action="/admin/dashboard" method="get">
+                <select name="filter">
+                    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All</option>
+                    <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Yearly</option>
+                    <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: <%= JSON.stringify(salesData.labels) %>,
+                    datasets: [{
+                        label: 'Sales',
+                        data: <%= JSON.stringify(salesData.values) %>,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { display: true, title: { display: true, text: 'Year' }},
+                        y: { display: true, title: { display: true, text: 'Amount' }}
+                    }
+                }
+            });
+
+            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+            new Chart(ordersCtx, {
+                type: 'line',
+                data: {
+                    labels: <%= JSON.stringify(ordersData.labels) %>,
+                    datasets: [{
+                        label: 'Orders',
+                        data: <%= JSON.stringify(ordersData.values) %>,
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { display: true, title: { display: true, text: 'Date' }},
+                        y: { display: true, title: { display: true, text: 'Number of Orders' }}
+                    }
+                }
+            });
+
+            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+            new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: <%= JSON.stringify(Object.keys(paymentDetails)) %>,
+                    datasets: [{
+                        data: <%= JSON.stringify(Object.values(paymentDetails)) %>,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        });
+    </script>
+</body>
+</html>

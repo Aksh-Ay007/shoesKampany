@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>orderdetail</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5/6en8XCp+HHAAK5GSLf2xlYtvJ8U2Q4U+9cuEnJoa3" crossorigin="anonymous">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+    <!-- Other CSS links -->
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Additional CSS links -->
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+    <link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/icons/favicon.png">
+
+	
+		<style>
+        body {
+            font-family: 'Times New Roman', Times, serif sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .profile h5 {
+            font-weight: bold;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar {
+            background-color: black;
+            padding: 20px;
+            border-right: 2px solid blue;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        @media (max-width: 767px) {
+            .sidebar {
+                min-height: 40vh;
+            }
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .sidebar ul li a:hover {
+            color: #cce0ff;
+        }
+
+		.col-md-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width: 100%;
+    }
+        .content {
+            padding: 20px;
+        }
+
+        .address-card {
+            margin-bottom: 20px;
+        }
+
+        .responsive-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .responsive-table th,
+        .responsive-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+
+            .responsive-table th,
+            .responsive-table td {
+                display: block;
+                width: 100%;
+            }
+        }
+
+        .custom-image {
+			max-width: 100%;
+           max-height: 300px;
+            width: 300px;
+            height: 150px;
+        }
+
+
+		.payment-status-completed {
+    color: green; /* Change the text color to green for completed payment status */
+    font-weight: bold; /* Make the text bold */
+}
+
+.payment-status-pending {
+    color: orange; /* Change the text color to orange for pending payment status */
+    font-weight: bold; /* Make the text bold */
+}
+
+.completed-return {
+    /* Add your styles for the return button in completed orders */
+    /* For example: */
+    background-color: black; /* Remove background color */
+    border: 2px solid green; /* Add border */
+    color: green; /* Change text color to green */
+    font-weight: bold; /* Make text bold */
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+
+/* Styling for Shipping Address and Payment Status Box */
+.shadow-sm {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Add shadow effect */
+}
+
+.card {
+    background-color: #f8f9fa; /* Light background color */
+}
+
+.card-title {
+    color: #333; /* Title color */
+}
+
+.card-body {
+    padding: 20px; /* Add padding */
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem; /* Add margin to the title */
+}
+
+.mb-3 {
+    margin-bottom: 1rem; /* Add margin between address details */
+}
+
+.text-muted {
+    color: #6c757d; /* Subtle text color */
+}
+
+.payment-status-completed {
+    color: green; /* Change the text color to green for completed payment status */
+}
+
+.payment-status-pending {
+    color: orange; /* Change the text color to orange for pending payment status */
+}
+
+
+    </style>
+
+<style>
+	.payment-status-alert {
+		color: white; /* White text for better contrast */
+		background-color: red; /* Red background for alert */
+		font-weight: bold;
+		font-size: 1.2em; /* Larger font size */
+		padding: 10px; /* More padding for better readability */
+		border-radius: 5px; /* Rounded corners */
+		display: inline-flex; /* To align the icon and text */
+		align-items: center; /* Vertically align icon and text */
+		margin: 5px 0; /* Margin for spacing */
+		animation: pulse 1.5s infinite; /* Pulsing animation */
+	}
+
+	.payment-status-alert i {
+		margin-right: 8px; /* Space between icon and text */
+	}
+
+	@keyframes pulse {
+		0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.7); }
+		50% { box-shadow: 0 0 20px rgba(255, 0, 0, 1); }
+		100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.7); }
+	}
+</style>
+	
+</head>
+
+  <body class="animsition" style="margin: 0px;">
+
+	<!-- Header -->
+	<header class="header-v4">
+		<!-- Header desktop -->
+		<div class="container-menu-desktop">
+			<!-- Topbar -->
+			<div class="top-bar">
+				<div class="content-topbar flex-sb-m h-full container">
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m trans-04 p-lr-25">
+							My Account
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="wrap-menu-desktop how-shadow1">
+				<nav class="limiter-menu-desktop container">
+
+					<!-- Logo desktop -->
+					<a href="#" class="logo">
+						<img src="images/icons/logo-01.png" alt="IMG-LOGO">
+					</a>
+
+					<!-- Menu desktop -->
+					<div class="menu-desktop">
+						<ul class="main-menu">
+							<li>
+								<a href="/">Home</a>
+							</li>
+
+							<li>
+								<a href="/shop">Shop</a>
+							</li>
+
+						</ul>
+					</div>
+
+					<!-- Icon header -->
+					<div class="wrap-icon-header flex-w flex-r-m">
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
+							<i class="zmdi zmdi-search"></i>
+						</div>
+
+						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti js-show-cart"
+							data-notify="">
+							<i class="zmdi zmdi-shopping-cart"></i>
+						</div>
+
+						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
+							data-notify="0">
+							<i class="zmdi zmdi-favorite-outline"></i>
+						</a>
+					</div>
+				</nav>
+			</div>
+		</div>
+
+		<!-- Header Mobile -->
+		<div class="wrap-header-mobile">
+			<!-- Logo moblie -->
+			<div class="logo-mobile">
+				<a href="index.html"><img src="images/icons/logo-01.png" alt="IMG-LOGO"></a>
+			</div>
+
+			<!-- Icon header -->
+			<div class="wrap-icon-header flex-w flex-r-m m-r-15">
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
+					<i class="zmdi zmdi-search"></i>
+				</div>
+
+				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti js-show-cart"
+					data-notify="2">
+					<i class="zmdi zmdi-shopping-cart"></i>
+				</div>
+
+				<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti"
+					data-notify="0">
+					<i class="zmdi zmdi-favorite-outline"></i>
+				</a>
+			</div>
+
+
+			<!-- Button show menu -->
+			<div class="btn-show-menu-mobile hamburger hamburger--squeeze">
+				<span class="hamburger-box">
+					<span class="hamburger-inner"></span>
+				</span>
+			</div>
+		</div>
+
+
+		<!-- Menu Mobile -->
+		<div class="menu-mobile">
+			<ul class="topbar-mobile">
+				<li>
+					<div class="left-top-bar">
+						Free shipping for standard order over $100
+					</div>
+				</li>
+
+				<li>
+					<div class="right-top-bar flex-w h-full">
+
+						<a href="#" class="flex-c-m p-lr-10 trans-04">
+							My Account
+
+
+					</div>
+				</li>
+			</ul>
+
+			<ul class="main-menu-m">
+				<li>
+					<a href="index.html">Home</a>
+
+					<span class="arrow-main-menu-m">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+					</span>
+				</li>
+
+				<li>
+					<a href="product.html">Shop</a>
+				</li>
+
+			</ul>
+		</div>
+
+		<!-- Modal Search -->
+		<div class="modal-search-header flex-c-m trans-04 js-hide-modal-search">
+			<div class="container-search-header">
+				<button class="flex-c-m btn-hide-modal-search trans-04 js-hide-modal-search">
+					<img src="images/icons/icon-close2.png" alt="CLOSE">
+				</button>
+
+				<form class="wrap-search-header flex-w p-l-15">
+					<button class="flex-c-m trans-04">
+						<i class="zmdi zmdi-search"></i>
+					</button>
+					<input class="plh3" type="text" name="search" placeholder="Search...">
+				</form>
+			</div>
+		</div>
+	</header>
+
+	<!-- Cart -->
+	<div class="wrap-header-cart js-panel-cart">
+		<div class="s-full js-hide-cart"></div>
+
+		<div class="header-cart flex-col-l p-l-65 p-r-25">
+			<div class="header-cart-title flex-w flex-sb-m p-b-8">
+				<span class="mtext-103 cl2">
+					Your Cart
+				</span>
+
+				<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
+					<i class="zmdi zmdi-close"></i>
+				</div>
+			</div>
+
+			<div class="header-cart-content flex-w js-pscroll">
+				<ul class="header-cart-wrapitem w-full">
+
+
+					<li class="header-cart-item flex-w flex-t m-b-12">
+						<div class="header-cart-item-img">
+							<img src="" alt="IMG">
+						</div>
+						<div class="header-cart-item-txt p-t-8">
+							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+
+							</a>
+							<span class="header-cart-item-info">&#x20a8; </span>
+						</div>
+					</li>
+
+
+					<li class="header-cart-item flex-w flex-t m-b-12">
+						Cart is empty.....
+					</li>
+
+
+
+				</ul>
+
+				<!-- <div class="w-full">
+					<div class="header-cart-total w-full p-tb-40">
+						Total: $75.00
+					</div> -->
+
+				<div class="header-cart-buttons flex-w w-full">
+					<a href="/shoping-cart"
+						class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
+						View Cart
+					</a>
+
+					<a href="shoping-cart.html"
+						class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
+						Check Out
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+
+
+	<!-- breadcrumb -->
+	<div class="container">
+		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+				Home
+				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+			</a>
+
+			<span class="stext-109 cl4">
+				Profile
+			</span>
+		</div>
+	</div>
+
+
+
+		
+	<div class="container">
+		<div class="row">
+			<!-- Left Sidebar -->
+			<div class="col-md-3">
+				<div class="osahan-account-page-left shadow-sm bg-white h-100">
+					<div class="border-bottom p-4">
+						<!-- Navigation Bar -->
+						<ul class="nav flex-column">
+							<li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a></li>
+							<li class="nav-item"><a class="nav-link" href="/wallet"><i class="bi bi-bag-heart"></i> Wallet</a></li>
+							<li class="nav-item"><a class="nav-link" href="/vieworder"><i class="bi bi-briefcase-fill"></i> Orders</a></li>
+							<li class="nav-item"><a class="nav-link" href="/manageAddresses"><i class="bi bi-geo-alt-fill"></i> Addresses</a></li>
+							<li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-lock-fill"></i> Change Pass</a></li>
+							<li class="nav-item"><a class="nav-link" href="/logout"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+	
+
+<!-- Right Content -->
+<div class="col-md-9">
+    <!-- Shipping Address and Payment Status Box -->
+    <!-- Shipping Address and Payment Status Box -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 rounded shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Shipping Address</h4>
+                <% orders.forEach((order) => { %>
+                    <div class="mb-3">
+                        <% if (order.shippingAddress) { %>
+                            <p class="mb-1">
+                                <strong>Name:</strong> <%= order.shippingAddress.name %>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Address:</strong> <%= order.shippingAddress.address %>,
+                                <%= order.shippingAddress.city %>, <%= order.shippingAddress.district %>,
+                                <%= order.shippingAddress.state %>, <%= order.shippingAddress.pincode %>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Landmark:</strong> <%= order.shippingAddress.landmark %>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Mobile:</strong> <%= order.shippingAddress.mobile %>
+                            </p>
+                        <% } else { %>
+                            <p class="card-text text-muted">Address Not Available</p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 rounded shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4">Payment Status</h4>
+                <% orders.forEach((order) => { %>
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                        <p class="mb-1">
+                            <strong>Payment Status:</strong>
+                            <% if (order.status === 'Delivered') { %>
+                                <span class="payment-status-completed">Completed</span>
+                            <% } else { %>
+                                <span class="payment-status-pending"><%= order.paymentStatus %></span>
+                            <% } %>
+                        </p>
+                        <p class="mb-0"><strong>Order Total:</strong> ₹<%= order.totalAmount %></p>
+						<p class="mb-0"><strong>Order Total:</strong> ₹<%= order.finalAmount %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Ordered Items -->
+    <div class="row">
+        <% orders.forEach((order) => { %>
+            <% order.orderedItems.forEach((item, index) => { %>
+                <div class="col-md-4 col-sm-12">
+                    <div class="card mb-4">
+                        <img src="<%= item.productimages[0] %>" class="card-img-top custom-image" alt="Product Image">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= item.productname %></h5>
+                            <p class="card-text">Price: ₹<%= item.price %></p>
+                            <p class="card-text">Qty: <%= item.quantity %></p>
+                            <p class="card-text">Delivery Status: <%= item.status %></p>
+                            <div class="d-flex flex-column align-items-center">
+                                <% if (order.status !== 'Delivered') { %>
+                                    <button class="btn btn-warning text-white mb-2 cancel" data-order-id="<%= order._id %>">Cancel</button>
+                                <% } else { %>
+                                    <button class="btn btn-secondary text-white mb-2 return completed-return" data-order-id="<%= order._id %>">Return</button>
+                                    <span class="payment-status-completed blink">Order Delivered Successfully</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% }) %>
+    </div>
+</div>
+
+		
+		 <script>
+			document.addEventListener('DOMContentLoaded', () => {
+				// Function to add event listeners to buttons
+				function addEventListenersToButtons() {
+					const viewOrderBtns = document.querySelectorAll('.view-order-btn');
+					const cancelBtns = document.querySelectorAll('.cancel');
+		
+					viewOrderBtns.forEach(btn => {
+						btn.addEventListener('click', function () {
+							const orderId = this.getAttribute('data-order-id');
+							const url = `/vieworder?oid=${orderId}`;
+							window.location.href = url;
+						});
+					});
+		
+					cancelBtns.forEach(btn => {
+						btn.addEventListener('click', function () {
+							const orderId = this.getAttribute('data-order-id');
+							Swal.fire({
+								title: "Are you sure?",
+								text: "Cancel this order?",
+								icon: "warning",
+								showCancelButton: true,
+								confirmButtonColor: "#3085d6",
+								cancelButtonColor: "#d33",
+								confirmButtonText: "Ok",
+							}).then((result) => {
+								if (result.isConfirmed) {
+									fetch(`/user/cancelorder/${orderId}`, {
+										method: "GET",
+									})
+									.then(response => response.json())
+									.then(data => {
+										if (data.success) {
+											Swal.fire({
+												title: "Cancelled!",
+												text: data.message,
+												icon: "success",
+												showClass: {
+													popup: 'animate__animated animate__fadeInDown'
+												},
+												hideClass: {
+													popup: 'animate__animated animate__fadeOutUp'
+												}
+											}).then(() => {
+												window.location.reload();
+											});
+										} else {
+											Swal.fire({
+												title: "Failed!",
+												text: data.message,
+												icon: "error",
+												showClass: {
+													popup: 'animate__animated animate__shakeX'
+												},
+												hideClass: {
+													popup: 'animate__animated animate__fadeOutUp'
+												}
+											});
+										}
+									})
+									.catch(error => {
+										console.error("Error:", error);
+										Swal.fire({
+											title: "Error!",
+											text: "Something went wrong.",
+											icon: "error",
+											showClass: {
+												popup: 'animate__animated animate__shakeX'
+											},
+											hideClass: {
+												popup: 'animate__animated animate__fadeOutUp'
+											}
+										});
+									});
+								}
+							});
+						});
+					});
+				}
+		
+				// Initial call to add event listeners to buttons
+				addEventListenersToButtons();
+			});
+		</script>
+		
+		<!-- Script for handling status dropdown changes -->
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				document.querySelectorAll('.status-dropdown').forEach(select => {
+					select.addEventListener('change', async (event) => {
+						const orderId = event.target.getAttribute('data-order-id');
+						const newStatus = event.target.value;
+		
+						let url;
+						if (newStatus === 'Shipped') {
+							url = `/statusshipped/${orderId}`;
+						} else if (newStatus === 'Delivered') {
+							url = `/statusdelivered/${orderId}`;
+						}
+		
+						if (url) {
+							try {
+								const response = await fetch(url, { method: 'GET' });
+								const result = await response.json();
+		
+								if (result.success) {
+									Swal.fire({
+										title: 'Success!',
+										text: 'Order status updated successfully',
+										icon: 'success',
+										showClass: {
+											popup: 'animate__animated animate__fadeInDown'
+										},
+										hideClass: {
+											popup: 'animate__animated animate__fadeOutUp'
+										}
+									}).then(() => {
+										window.location.reload();
+									});
+								} else {
+									Swal.fire({
+										title: 'Failed!',
+										text: 'Failed to update order status',
+										icon: 'error',
+										showClass: {
+											popup: 'animate__animated animate__shakeX'
+										},
+										hideClass: {
+											popup: 'animate__animated animate__fadeOutUp'
+										}
+									});
+								}
+							} catch (error) {
+								console.error('Error updating order status:', error);
+								Swal.fire({
+									title: 'Error!',
+									text: 'An error occurred while updating the order status',
+									icon: 'error',
+									showClass: {
+										popup: 'animate__animated animate__shakeX'
+									},
+									hideClass: {
+										popup: 'animate__animated animate__fadeOutUp'
+									}
+								});
+							}
+						}
+					});
+				});
+			});
+		</script>
+								
+
+
+
+
+									
+									
+
+
+								</div>
+							</div>
+
+
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		
+
+
+
+
+
+	</div>
+
+
+
+
+
+	</div>
+
+
+
+
+
+
+
+
+	
+
+
+
+	<!-- Footer -->
+	<footer class="bg3 p-t-75 p-b-32">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Categories
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Women
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Men
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Kids
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						Help
+					</h4>
+
+					<ul>
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Track Order
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Returns
+							</a>
+						</li>
+
+						<li class="p-b-10">
+							<a href="#" class="stext-107 cl7 hov-cl1 trans-04">
+								Shipping
+							</a>
+						</li>
+
+					</ul>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+					<h4 class="stext-301 cl0 p-b-30">
+						GET IN TOUCH
+					</h4>
+
+					<p class="stext-107 cl7 size-201">
+						Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us
+						on (+1) 96 716 6879
+					</p>
+
+					<div class="p-t-27">
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-facebook"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-instagram"></i>
+						</a>
+
+						<a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
+							<i class="fa fa-pinterest-p"></i>
+						</a>
+					</div>
+				</div>
+
+				<div class="col-sm-6 col-lg-3 p-b-50">
+				</div>
+			</div>
+
+			<div class="p-t-40">
+				<div class="flex-c-m flex-w p-b-18">
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-01.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-02.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-03.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-04.png" alt="ICON-PAY">
+					</a>
+
+					<a href="#" class="m-all-1">
+						<img src="images/icons/icon-pay-05.png" alt="ICON-PAY">
+					</a>
+				</div>
+
+			</div>
+		</div>
+	</footer>
+
+
+	<!-- Back to top -->
+	<div class="btn-back-to-top" id="myBtn">
+		<span class="symbol-btn-back-to-top">
+			<i class="zmdi zmdi-chevron-up"></i>
+		</span>
+	</div>
+
+
+	<!--===============================================================================================-->
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/animsition/js/animsition.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/select2/select2.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+	<script>
+		$(".js-select2").each(function () {
+			$(this).select2({
+				minimumResultsForSearch: 20,
+				dropdownParent: $(this).next('.dropDownSelect2')
+			});
+		})
+	</script>
+
+
+
+
+
+	<!-- Add SweetAlert JavaScript code -->
+	<!-- Add SweetAlert JavaScript code -->
+	<script>
+		// Wait for the DOM to be fully loaded
+		$(document).ready(function () {
+			// Attach click event listener to delete buttons
+			$('.delete').on('click', function (e) {
+				e.preventDefault(); // Prevent default link behavior
+
+				// Get the data-id attribute of the delete button
+				const productId = $(this).data('id');
+
+				// Show confirmation dialog
+				swal.fire({
+					title: "Are you sure?",
+					text: "Do you really want to delete this record?",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonText: "Yes, delete it!",
+					cancelButtonText: "No, cancel",
+					reverseButtons: true
+				}).then((result) => {
+					// Check if user confirmed deletion
+					if (result.isConfirmed) {
+						// Send AJAX request to delete the item
+						$.ajax({
+							url: `/delete/${productId}`, // Replace with the correct endpoint
+							method: 'DELETE',
+							success: function (response) {
+								// If deletion is successful, remove the corresponding table row
+								$(e.target).closest('tr').remove();
+
+								// Show success message
+								swal.fire({
+									title: "Deleted!",
+									text: "Item has been deleted successfully",
+									icon: "success",
+									confirmButtonText: "OK"
+								});
+							},
+							error: function (xhr, status, error) {
+								console.error(error); // Log any errors to the console
+
+								// Show error message
+								swal.fire({
+									title: 'Error!',
+									text: 'Failed to delete item',
+									icon: 'error',
+									confirmButtonText: 'OK'
+								});
+							}
+						});
+					}
+				});
+			});
+		});
+	</script>
+
+
+
+
+
+
+	<!--===============================================================================================-->
+	<script src="vendor/MagnificPopup/jquery.magnific-popup.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+	<script>
+		$('.js-pscroll').each(function () {
+			$(this).css('position', 'relative');
+			$(this).css('overflow', 'hidden');
+			var ps = new PerfectScrollbar(this, {
+				wheelSpeed: 1,
+				scrollingThreshold: 1000,
+				wheelPropagation: false,
+			});
+
+			$(window).on('resize', function () {
+				ps.update();
+			})
+		});
+	</script>
+	<!-- SweetAlert JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<!--===============================================================================================-->
+	<script src="js/main.js"></script>
+
+   </body>
+
+ </html>
