@@ -42,12 +42,20 @@ const getCart = async (req, res) => {
       await userCart.save();
     }
 
-    res.render('shoping-cart', { user: req.session.user || {}, cart: userCart });
+    // Fetch the user's wallet balance
+
+
+    res.render('shoping-cart', { 
+      user: req.session.user || {}, 
+      cart: userCart,
+  
+    });
   } catch (error) {
     console.error('Error fetching cart:', error);
     res.status(500).render("../error");
   }
 };
+
 
 const addtocart = async (req, res) => {
   try {

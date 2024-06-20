@@ -49,7 +49,6 @@
     #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
     #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
     .table-container {
-      overflow-x: auto;
       max-height: 500px;
       margin-bottom: 30px;
       background-color: white;
@@ -83,9 +82,6 @@
     .breadcrumb-item a:hover { text-decoration: underline; }
     #addBtn {
       font-family: 'Roboto', sans-serif;
-      position: absolute;
-      top: 15px;
-      right: 15px;
       padding: 10px 15px;
       background-color: #E74C3C;
       color: #fff;
@@ -115,7 +111,141 @@
     .btn-delete { color: #dc3545; }
     .btn-visibility { color: #28a745; }
     .btn-unlist { color: #dc3545; }
-  </style>
+
+    /* Pagination styles */
+    .pagination {
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .page-link {
+      color: #333;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      padding: 0.375rem 0.75rem;
+      line-height: 1.5;
+    }
+    .page-link:hover {
+      color: #0056b3;
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+    }
+    .page-item.active .page-link {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    /* Search bar styles */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .sticky-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-container {
+      margin-right: 20px;
+    }
+
+    .search-container input[type="text"] {
+      padding: 8px 12px;
+      font-size: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 8px;
+      width: 150px;
+    }
+
+    .search-container button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-left: 40px;
+    }
+
+    .search-container button:hover {
+      background-color: #0056b3;
+    }
+
+    .sorting-controls {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+
+    .sorting-controls label {
+      margin-right: 10px;
+      font-weight: 500;
+    }
+
+    .sorting-controls select {
+      margin-right: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      align-items: center;
+    }
+
+    .sorting-controls button {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-left: 160px;
+    }
+
+    .sorting-controls button:hover {
+      background-color: #0056b3;
+    }
+
+    #addBtn {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+    }
+
+    #addBtn:hover {
+      background-color: #1e7e34;
+    }
+
+    #addBtn .material-icons {
+      margin-right: 5px;
+    }
+ </style>
 </head>
 <body>
   <nav id="sidebar">
@@ -144,157 +274,148 @@
       </ol>
     </nav>
 
-    <h1>All Products</h1>
-
-    <a href="/admin/addproduct" id="addBtn">
-      <i class="material-icons">add</i> Add Product
-    </a>
-    <div class="table-container">
-      <div class="sorting-controls">
-        <form method="GET" action="/admin/products">
-          <label for="sortField">Sort by:</label>
-          <select name="sortField" id="sortField">
-            <option value="product_name" <%= sortField === 'product_name' ? 'selected' : '' %>>Name</option>
-            <option value="price" <%= sortField === 'price' ? 'selected' : '' %>>Price</option>
-            <option value="stock" min="0" <%= sortField === 'stock' ? 'selected' : '' %>>Stock</option>
-          </select>
-          <label for="sortOrder">Order:</label>
-          <select name="sortOrder" id="sortOrder">
-            <option value="asc" <%= sortOrder === 1 ? 'selected' : '' %>>Ascending</option>
-            <option value="desc" <%= sortOrder === -1 ? 'selected' : '' %>>Descending</option>
-          </select>
-          <button type="submit" class="btn btn-primary">Sort</button>
-        </form>
+    <div class="sticky-header">
+      <h1>All Products</h1>
+      <div class="controls">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search products...">
+          <button id="searchBtn">Search</button>
+        </div>
+        <div class="sorting-controls">
+          <form method="GET" action="/admin/products">
+            <label for="sortField">Sort by:</label>
+            <select name="sortField" id="sortField">
+              <option value="product_name" <%= sortField === 'product_name' ? 'selected' : '' %>>Name</option>
+              <option value="price" <%= sortField === 'price' ? 'selected' : '' %>>Price</option>
+              <option value="stock" min="0" <%= sortField === 'stock' ? 'selected' : '' %>>Stock</option>
+            </select>
+            <label for="sortOrder">Order:</label>
+            <select name="sortOrder" id="sortOrder">
+              <option value="asc" <%= sortOrder === 1 ? 'selected' : '' %>>Ascending</option>
+              <option value="desc" <%= sortOrder === -1 ? 'selected' : '' %>>Descending</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Sort</button>
+          </form>
+        </div>
+        <a href="/admin/addproduct" id="addBtn">
+          <i class="material-icons">add</i> Add Product
+        </a>
       </div>
-      <table class="table" id="usertable">
-        <thead class="thead-dark">
-          <tr class="bg-dark text-light">
-            <th>ID</th>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>List</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% products.forEach((pdt, index) => { %>
-            <tr>
-              <td><%= index + 1 %></td>
-              <td>
-                <% pdt.images.forEach(image => { %>
-                  <img class="object-fit-cover" src="/<%= image %>" alt="" style="width: 60px; height: 60px; object-fit: cover; margin-right: 5px;">
-                <% }) %>
-              </td>
-              <td><%= pdt.product_name %></td>
-              <td> ₹ <%= pdt.price %></td>
-              <td><%= pdt.stock %></td>
-              <td class="<%= pdt.list === 'listed' ? 'status-listed' : 'status-unlisted' %>"><%= pdt.list %></td>
-              <td>
-                <a href="/admin/productedit/<%= pdt._id %>" class="btn btn-primary">
-                  <span class="material-icons">edit</span>
-                </a>
-                <a class="btn border-shadow shadow delete btn-delete" data-id="<%= pdt._id %>">
-                  <span class="material-icons">delete</span>
-                </a>
-                <% if (pdt.list === 'listed') { %>
-                  <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-unlist" data-id="<%= pdt._id %>">
-                    <span class="material-icons">visibility_off</span>
-                  </a>
-                <% } else { %>
-                  <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-visibility" data-id="<%= pdt._id %>">
-                    <span class="material-icons">visibility</span>
-                  </a>
-                <% } %>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
     </div>
-    
-  </div>
 
-  <button id="sidebarToggle"><i class="material-icons">menu</i></button>
+   <div class="table-container">
+     <table class="table" id="usertable">
+       <thead class="thead-dark">
+         <tr class="bg-dark text-light">
+           <th>ID</th>
+           <th>Image</th>
+           <th>Name</th>
+           <th>Price</th>
+           <th>Stock</th>
+           <th>List</th>
+           <th>Action</th>
+         </tr>
+       </thead>
+       <tbody>
+         <% products.forEach((pdt, index) => { %>
+           <tr>
+             <td><%= (currentPage - 1) * itemsPerPage + index + 1 %></td>
+             <td>
+               <% pdt.images.forEach(image => { %>
+                 <img class="object-fit-cover" src="/<%= image %>" alt="" style="width: 60px; height: 60px; object-fit: cover; margin-right: 5px;">
+               <% }) %>
+             </td>
+             <td><%= pdt.product_name %></td>
+             <td> ₹ <%= pdt.price %></td>
+             <td><%= pdt.stock %></td>
+             <td class="<%= pdt.list === 'listed' ? 'status-listed' : 'status-unlisted' %>"><%= pdt.list %></td>
+             <td>
+               <a href="/admin/productedit/<%= pdt._id %>" class="btn btn-primary">
+                 <span class="material-icons">edit</span>
+               </a>
+               <a class="btn border-shadow shadow delete btn-delete" data-id="<%= pdt._id %>">
+                 <span class="material-icons">delete</span>
+               </a>
+               <% if (pdt.list === 'listed') { %>
+                 <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-unlist" data-id="<%= pdt._id %>">
+                   <span class="material-icons">visibility_off</span>
+                 </a>
+               <% } else { %>
+                 <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-visibility" data-id="<%= pdt._id %>">
+                   <span class="material-icons">visibility</span>
+                 </a>
+               <% } %>
+             </td>
+           </tr>
+         <% }) %>
+       </tbody>
+     </table>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    $(document).ready(function() {
-      var table = $('#usertable').DataTable({
-        paging: false,
-        info: false,
-        searching: false,
-        drawCallback: function() {
-          // Prevents table jerk on actions by maintaining table height
-          var tableHeight = $('.table-container').height();
-          $('.table-container').css('min-height', tableHeight + 'px');
-        }
-      });
+     <!-- Pagination -->
+     <nav aria-label="Page navigation">
+       <ul class="pagination">
+         <% if (currentPage > 1) { %>
+           <li class="page-item"><a class="page-link" href="/admin/products?page=<%= currentPage - 1 %>&sortField=<%= sortField %>&sortOrder=<%= sortOrder %>">Previous</a></li>
+         <% } %>
 
-      $('#sidebarToggle').click(function() {
-        $('#sidebar').toggleClass('active');
-      });
+         <% for (let i = 1; i <= totalPages; i++) { %>
+           <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+             <a class="page-link" href="/admin/products?page=<%= i %>&sortField=<%= sortField %>&sortOrder=<%= sortOrder %>"><%= i %></a>
+           </li>
+         <% } %>
 
-      $('.delete').click(function() {
-        var id = $(this).data('id');
-        Swal.fire({
-          title: 'Are you sure?',
-          text: 'Do you really want to delete this record?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, delete it!',
-          cancelButtonText: 'No, cancel!',
-          reverseButtons: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            $.ajax({
-              url: `/admin/productDelete/${id}`,
-              method: 'DELETE'
-            }).done(function(response) {
-              Swal.fire('Deleted!', 'Record deleted successfully.', 'success').then(() => {
-                table.row($(this).parents('tr')).remove().draw();
-                location.reload();
-              });
-            });
-          }
-        });
-      });
+         <% if (currentPage < totalPages) { %>
+           <li class="page-item"><a class="page-link" href="/admin/products?page=<%= currentPage + 1 %>&sortField=<%= sortField %>&sortOrder=<%= sortOrder %>">Next</a></li>
+         <% } %>
+       </ul>
+     </nav>
+   </div>
+ </div>
 
-      // $('.btn-unlist, .btn-visibility').click(function(e) {
-      //   e.preventDefault();
-      //   var id = $(this).data('id'); // Updated to use data-id attribute
-      //   var action = $(this).hasClass('btn-unlist') ? 'unlist' : 'list';
-      //   var confirmText = action === 'unlist' ? 'unlist this product?' : 'list this product?';
-      //   var buttonText = action === 'unlist' ? 'Yes, unlist it!' : 'Yes, list it!';
+ <button id="sidebarToggle"><i class="material-icons">menu</i></button>
 
-      //   Swal.fire({
-      //     title: 'Are you sure?',
-      //     text: 'Do you really want to ' + confirmText,
-      //     icon: 'warning',
-      //     showCancelButton: true,
-      //     confirmButtonText: buttonText,
-      //     cancelButtonText: 'No, cancel!',
-      //     reverseButtons: true
-      //   }).then((result) => {
-      //     if (result.isConfirmed) {
-      //       $.ajax({
-      //         url: `/admin/productlist?id=${id}`,
-      //         method: 'POST'
-      //       }).done(function(response) {
-      //         Swal.fire('Updated!', 'Product status updated successfully.', 'success').then(() => {
-      //           location.reload();
-      //         });
-      //       });
-      //     }
-      //   });
-      // });
-    });
-</script>
+ <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+ <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+ <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script>
+   $(document).ready(function() {
+     $('#sidebarToggle').click(function() {
+       $('#sidebar').toggleClass('active');
+     });
 
+     $('.delete').click(function() {
+       var id = $(this).data('id');
+       Swal.fire({
+         title: 'Are you sure?',
+         text: 'Do you really want to delete this record?',
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonText: 'Yes, delete it!',
+         cancelButtonText: 'No, cancel!',
+         reverseButtons: true
+       }).then((result) => {
+         if (result.isConfirmed) {
+           $.ajax({
+             url: `/admin/productDelete/${id}`,
+             method: 'DELETE'
+           }).done(function(response) {
+             Swal.fire('Deleted!', 'Record deleted successfully.', 'success').then(() => {
+               location.reload();
+             });
+           });
+         }
+       });
+     });
+
+     // Search functionality
+     $('#searchBtn').click(function() {
+       var searchText = $('#searchInput').val().trim().toLowerCase();
+       $('tbody tr').filter(function() {
+         $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
+       });
+     });
+   });
+ </script>
 </body>
 </html>
-    

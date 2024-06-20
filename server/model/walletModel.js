@@ -5,7 +5,7 @@ const walletSchema = new mongoose.Schema({
   balance: { type: Number, default: 0 },
   transactions: [
     {
-      type: { type: String, enum: ['deposit', 'withdrawal', 'refund'], required: true },
+      type: { type: String, enum: ['deposit', 'withdrawal', 'refund', 'Refunded'], required: true },
       amount: { type: Number, required: true },
       timestamp: { type: Date, default: Date.now },
       description: { type: String }

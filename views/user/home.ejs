@@ -41,7 +41,37 @@
 
   
 	<!--===============================================================================================-->
-
+	<style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .scroll-container {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 30px; /* Adjust the height as needed */
+            overflow: hidden;
+            background: transparent;
+            color: blue;
+            font-size: small;
+            text-align: center;
+            z-index: 1000; /* Ensure it stays on top */
+        }
+        .scroll-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scrollX 10s linear infinite;
+        }
+        @keyframes scrollX {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 		<style>
         .imageZoom {
             width: 100%;
@@ -355,235 +385,231 @@
 	  
 	</div>
 
-
-	<!-- Slider -->
-	<section class="section-slide">
-		<div class="wrap-slick1">
-			<div class="slick1">
-				<div class="item-slick1" style="background-image: url(images/slide-01.jpg);">
-					<div class="container h-full">
-						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-							<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
-								<span class="ltext-101 cl2 respon2">
-									Women Collection 2018
-								</span>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="fadeInUp" data-delay="800">
-								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-									NEW SEASON
-								</h2>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="zoomIn" data-delay="1600">
-								<a href="/shop"
-									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-									Shop Now
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="item-slick1" style="background-image: url(images/slide-02.jpg);">
-					<div class="container h-full">
-						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-							<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
-								<span class="ltext-101 cl2 respon2">
-									Men New-Season
-								</span>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn"
-								data-delay="800">
-								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-									Jackets & Coats
-								</h2>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="slideInUp" data-delay="1600">
-								<a href="/shop"
-									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-									Shop Now
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="item-slick1" style="background-image: url(images/slide-03.jpg);">
-					<div class="container h-full">
-						<div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
-							<div class="layer-slick1 animated visible-false" data-appear="rotateInDownLeft"
-								data-delay="0">
-								<span class="ltext-101 cl2 respon2">
-									Men Collection 2018
-								</span>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="rotateInUpRight"
-								data-delay="800">
-								<h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
-									New arrivals
-								</h2>
-							</div>
-
-							<div class="layer-slick1 animated visible-false" data-appear="rotateIn" data-delay="1600">
-								<a href="/shop"
-									class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
-									Shop Now
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-
-
-	<!-- Banner -->
-	<div class="sec-banner bg0 p-t-80 p-b-50">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="images/banner-01.jpg" alt="IMG-BANNER">
-
-						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Women
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									Spring 2018
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="images/banner-02.jpg" alt="IMG-BANNER">
-
-						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Men
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									Spring 2018
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="images/banner-03.jpg" alt="IMG-BANNER">
-
-						<a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Kids
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									New Trend
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-<!-- Product -->
-<section class="bg0 p-t-23 p-b-140">
-    <div class="container">
-        <div class="p-b-10">
-            <h3 class="ltext-103 cl5">Our Products</h3>
-        </div>
-		<div class="product-grid">
-			<% allProduct.forEach(product => { %>
-			<div class="product-item">
-				<div class="product-image">
-					<img src="<%= product.images[0] %>" alt="IMG-PRODUCT">
-				</div>
-				<div class="product-details">
-					<a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name %></a>
-					<div class="product-price">
-						<% if (product.discountPercentage) { %>
-							<span class="original-price">&#x20a8; <%= product.originalPrice %></span>
-							<span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
-							<span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
-						<% } else { %>
-							<span class="regular-price">&#x20a8; <%= product.price %></span>
-						<% } %>
-					</div>
-					<% if (product.stock > 0) { %>
-						<span class="stock-<%= product.stock < 10 ? 'low' : 'available' %>">
-							<%= product.stock < 10 ? 'Only few left' : 'In Stock (' + product.stock + ' left)' %>
-						</span>
-					<% } else { %>
-						<span class="stock-unavailable">Out of Stock</span>
-					<% } %>
-					<div class="product-actions">
-					
-							<button class="btn-addwish" data-tooltip="Add to wishlist" data-pdt-id="<%= product._id %>">
-								<i class="zmdi zmdi-favorite"></i>
-							</button>
-							<% if (product.stock > 0) { %>
-							<button class="btn-addcart" data-tooltip="Add to Cart" data-pdt-id="<%= product._id %>">
-								<i class="zmdi zmdi-shopping-cart"></i>
-							</button>
-						<% } else { %>
-							<!-- Disable cart button for out of stock products -->
-							<button class="btn-addcart" data-tooltip="Out of Stock" disabled>
-								<i class="zmdi zmdi-shopping-cart"></i>
-							</button>
-						<% } %>
-					</div>
-				</div>
-			</div>
-			<% }) %>
-		</div>
+    <!-- Slider -->
+    <section class="section-slide">
 		
-		
-
-        <div class="flex-c-m flex-w w-full p-t-45">
-            <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">Load More</a>
+	<div class="scroll-container" id="scroll-container">
+        <div class="scroll-content">
+            <span>Cash on Delivery Available for Below &#x20b9 1000 Orders</span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span></span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>Delivery Charge Free Below &#x20b9 500 Order</span>
         </div>
     </div>
-</section>
-  
+        <div class="wrap-slick1">
+            <div class="slick1">
+                <div class="item-slick1" style="background-image: url(images/slide-01.jpg);">
+                    <div class="container h-full">
+                        <div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+                            <div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
+                                <span class="ltext-101 cl2 respon2">
+                                    Women Collection 2018
+                                </span>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="fadeInUp" data-delay="800">
+                                <h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+                                    NEW SEASON
+                                </h2>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="zoomIn" data-delay="1600">
+                                <a href="/shop" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+                                    Shop Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-slick1" style="background-image: url(images/slide-02.jpg);">
+                    <div class="container h-full">
+                        <div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+                            <div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
+                                <span class="ltext-101 cl2 respon2">
+                                    Men New-Season
+                                </span>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn" data-delay="800">
+                                <h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+                                    Jackets & Coats
+                                </h2>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="slideInUp" data-delay="1600">
+                                <a href="/shop" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+                                    Shop Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="item-slick1" style="background-image: url(images/slide-03.jpg);">
+                    <div class="container h-full">
+                        <div class="flex-col-l-m h-full p-t-100 p-b-30 respon5">
+                            <div class="layer-slick1 animated visible-false" data-appear="rotateInDownLeft" data-delay="0">
+                                <span class="ltext-101 cl2 respon2">
+                                    Men Collection 2018
+                                </span>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="rotateInUpRight" data-delay="800">
+                                <h2 class="ltext-201 cl2 p-t-19 p-b-43 respon1">
+                                    New arrivals
+                                </h2>
+                            </div>
+
+                            <div class="layer-slick1 animated visible-false" data-appear="rotateIn" data-delay="1600">
+                                <a href="/shop" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04">
+                                    Shop Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner -->
+    <div class="sec-banner bg0 p-t-80 p-b-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+                    <!-- Block1 -->
+                    <div class="block1 wrap-pic-w">
+                        <img src="images/banner-01.jpg" alt="IMG-BANNER">
+
+                        <a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+                            <div class="block1-txt-child1 flex-col-l">
+                                <span class="block1-name ltext-102 trans-04 p-b-8">
+                                    Women
+                                </span>
+
+                                <span class="block1-info stext-102 trans-04">
+                                    Spring 2018
+                                </span>
+                            </div>
+
+                            <div class="block1-txt-child2 p-b-4 trans-05">
+                                <div class="block1-link stext-101 cl0 trans-09">
+                                    Shop Now
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+                    <!-- Block1 -->
+                    <div class="block1 wrap-pic-w">
+                        <img src="images/banner-02.jpg" alt="IMG-BANNER">
+
+                        <a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+                            <div class="block1-txt-child1 flex-col-l">
+                                <span class="block1-name ltext-102 trans-04 p-b-8">
+                                    Men
+                                </span>
+
+                                <span class="block1-info stext-102 trans-04">
+                                    Spring 2018
+                                </span>
+                            </div>
+
+                            <div class="block1-txt-child2 p-b-4 trans-05">
+                                <div class="block1-link stext-101 cl0 trans-09">
+                                    Shop Now
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
+                    <!-- Block1 -->
+                    <div class="block1 wrap-pic-w">
+                        <img src="images/banner-03.jpg" alt="IMG-BANNER">
+
+                        <a href="/shop" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
+                            <div class="block1-txt-child1 flex-col-l">
+                                <span class="block1-name ltext-102 trans-04 p-b-8">
+                                    Kids
+                                </span>
+
+                                <span class="block1-info stext-102 trans-04">
+                                    New Trend
+                                </span>
+                            </div>
+
+                            <div class="block1-txt-child2 p-b-4 trans-05">
+                                <div class="block1-link stext-101 cl0 trans-09">
+                                    Shop Now
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product -->
+    <section class="bg0 p-t-23 p-b-140">
+        <div class="container">
+            <div class="p-b-10">
+                <h3 class="ltext-103 cl5">Our Products</h3>
+            </div>
+            <div class="product-grid">
+                <% allProduct.forEach(product => { %>
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="<%= product.images[0] %>" alt="IMG-PRODUCT">
+                    </div>
+                    <div class="product-details">
+                        <a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name %></a>
+                        <div class="product-price">
+                            <% if (product.discountPercentage) { %>
+                                <span class="original-price">&#x20a8; <%= product.originalPrice %></span>
+                                <span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
+                                <span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
+                            <% } else { %>
+                                <span class="regular-price">&#x20a8; <%= product.price %></span>
+                            <% } %>
+                        </div>
+                        <% if (product.stock > 0) { %>
+                            <span class="stock-<%= product.stock < 10 ? 'low' : 'available' %>">
+                                <%= product.stock < 10 ? 'Only few left' : 'In Stock (' + product.stock + ' left)' %>
+                            </span>
+                        <% } else { %>
+                            <span class="stock-unavailable">Out of Stock</span>
+                        <% } %>
+                        <div class="product-actions">
+                            <button class="btn-addwish" data-tooltip="Add to wishlist" data-pdt-id="<%= product._id %>">
+                                <i class="zmdi zmdi-favorite"></i>
+                            </button>
+                            <% if (product.stock > 0) { %>
+                            <button class="btn-addcart" data-tooltip="Add to Cart" data-pdt-id="<%= product._id %>">
+                                <i class="zmdi zmdi-shopping-cart"></i>
+                            </button>
+                            <% } else { %>
+                            <!-- Disable cart button for out of stock products -->
+                            <button class="btn-addcart" data-tooltip="Out of Stock" disabled>
+                                <i class="zmdi zmdi-shopping-cart"></i>
+                            </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+            <div class="flex-c-m flex-w w-full p-t-45">
+                <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">Load More</a>
+            </div>
+        </div>
+    </section>
   
   
 

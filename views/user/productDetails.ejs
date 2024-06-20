@@ -37,6 +37,9 @@
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<!--===============================================================================================-->
 
+		<!-- Other head elements -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.2/font/bootstrap-icons.min.css">
     <style>
@@ -116,149 +119,176 @@
     </style>
 
 <style>
-	@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-  
-	.product-detail-container {
-	  background-color: #ffffff;
-	  padding: 30px;
-	  border-radius: 12px;
-	  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-	  max-width: 700px;
-	  margin: 30px auto;
-	  text-align: left;
-	}
+	/* General Styles */
+/* General Styles */
+.product-detail-container {
+    background-color: #f9f9f9;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    max-width: 700px;
+    margin: 30px auto;
+    text-align: left;
+}
 
-	.container-box-1 {
-    background-color: #ffffff;
-    padding: 6px;
-    border: 2px solid #000;
-    border-radius: 70px;
+.container-box-1 {
+    background-color: #fff;
+    padding: 10px;
+   
+    border-radius: 15px;
+}
+
+/* Product Name */
+.product-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.product-subtitle {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Ratings */
+.rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.rating-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4caf50;
+    margin-right: 5px;
+}
+
+.rating-count {
+    font-size: 1rem;
+    color: #888;
+}
+
+/* Product Price */
+.product-price {
+    margin: 20px 0;
+}
+
+.original-price {
+    font-size: 1rem;
+    color: #888;
+    text-decoration: line-through;
+}
+
+.offer-price {
+    font-size: 1.5rem;
+    color: #000;
+}
+
+.inclusive-taxes {
+    font-size: 0.9rem;
+    color: #888;
 }
 
 
-  
-	.product-name {
-	  font-size: 1.5rem;
-	  font-weight: 700;
-	  color: #000;
-	  margin-bottom: 15px;
-	  text-transform: uppercase;
-	  text-align: left;
-	  justify-content: center;
-	  margin-left: 80px;
-	}
-  
-	.product-attributes {
-	  margin-bottom: 20px;
-	  display: flex;
-	  justify-content: space-between;
-	}
-  
-	.product-attribute {
-	  font-size: 1rem;
-	  font-weight: bold;
-	  color: #000;
-	  margin-bottom: 10px;
-	  display: flex;
-	  align-items: center;
-	  display: flex; justify-content: space-between;
-	 
-	}
-  
-	.product-attribute i {
-	  margin-right: 8px;
-	  color: #000;
-	  text-align: right;
-	  font-size: 1rem;
-	  text-transform: lowercase;
-	}
-  
-	.left-align {
-	  text-align: left;
-	}
-  
-	.right-align {
 
-	  text-align: right;
-	}
-  
-	.highlight {
-	  color:black;
-	  text-align: right;
-	  margin-top: 3 px;
-	  
 
-	}
-  
-	.product-description {
-		font-size: 1rem;
-	  margin-bottom: 25px;
-	  margin-top: 5px;
-	  text-transform: lowercase;
+/* Add to Cart and Wishlist */
+.add-to-cart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
-	}
-  
-	.product-description-title {
-	  font-size: 1.2rem;
-	  font-weight: bold;
-	  color: #000;
-	  margin-bottom: 10px;
-	  display: flex;
-	
+.btn-primary {
+    background-color: #ff4081;
+    color: #fff;
+	padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex: 1;
+    margin-right: 10px;
+}
 
-	}
-  
-	.product-description-title i {
-	  margin-right: 18px;
-	  color: #000;
-	  display: flex;
-	  align-items: center;
-	  text-align: left;
-	  text-transform: lowercase;
-	}
-  
-	.product-description p {
-	  font-size: 1.2rem;
-	  color: #000;
-	  margin: 0;
-	  margin-left: 100px;
-	
-	}
-  
-	.add-to-cart {
-	  margin-top: 20px;
-	}
-  
-	.btn-primary {
-	  background-color: #310fdb;
-	  color: #fff;
-	  padding: 12px 30px;
-	  border-radius: 8px;
-	  border: none;
-	  font-size: 1rem;
-	  cursor: pointer;
-	  margin-left: 100px;
-	  transition: background-color 0.3s ease;
-	}
-  
-	.btn-primary:hover {
-	  background-color: #d00909;
-	}
-  
-	.btn-primary i {
-	  margin-right: 5px;
-	}
-  
-	@media (max-width: 600px) {
-	  .product-attributes {
-		flex-direction: column;
-		align-items: center;
-	  }
-  
-	  .product-attribute {
-		margin-bottom: 15px;
-	  }
-	}
+.btn-primary:hover {
+    background-color: #e91e63;
+}
+
+.btn-wishlist {
+	background-color: #ff4081;
+	color: #fff;
+    padding: 12px 20px;
+    border: 1px solid #ff4081;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-wishlist:hover {
+    background-color: #ff4081;
+    color: #fff;
+}
+
+/* Out of Stock */
+.out-of-stock {
+    margin-top: 20px;
+}
+
+.red-text {
+    color: #e91e63;
+}
+
+/* Delivery Options */
+.delivery-options {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.delivery-options input {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.delivery-options .btn-check {
+    padding: 10px 20px;
+    background-color: #ff4081;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.delivery-options .delivery-note {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.delivery-options .delivery-features {
+    list-style: none;
+    padding-left: 0;
+}
+
+.delivery-options .delivery-features li {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+
   </style>
 
 <style>
@@ -523,10 +553,10 @@ display: inline-block;
 
 
 	<!-- Product Detail -->
-	<section class="sec-product-detail bg0 p-t-65 p-b-60">
+	<!-- Product Detail -->
+<section class="sec-product-detail bg0 p-t-65 p-b-60">
     <div class="container">
         <div class="row">
-
             <div class="col-md-6 col-lg-7 p-b-30">
                 <div class="p-l-25 p-r-30 p-lr-0-lg">
                     <div class="wrap-slick3 flex-sb flex-w">
@@ -548,58 +578,59 @@ display: inline-block;
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-5 p-b-30">
-                <div class="p-r-50 p-t-5 p-lr-0-lg text-center"> <!-- Add text-center class for center alignment -->
-                    <div class="container-box-1">
-                        <div class="product-detail-container">
-                            <h1 class="product-name"><%= product.product_name %></h1>
-                            <div class="product-attributes">
-                                <div class="product-attribute left-align">
-                                    <i class="fas fa-tag"></i> <strong>Brand:&nbsp</strong> <%= product.brand %>
-                                </div>
-                                <div class="product-attribute right-align">
-                                    <i class="fas fa-ruler"></i> <strong>Size:&nbsp</strong> <%= product.size %>
-                                </div>
-                            </div>
-                            <div class="product-attributes">
-                                <div class="product-attribute">
-                                    <i class="fas fa-palette"></i> <strong>Color:&nbsp</strong> <%= product.color %>
-                                </div>
-                            </div>
-                            <div class="product-description">
-                                <h2 class="product-description-title">
-                                    <i class="fas fa-info-circle"></i> <span>Description:</span>
-                                </h2>
-                                <p><%= product.description %></p>
-                                <p style="color: <%= stockColor %>;"><strong>Stock:&nbsp</strong><%= stockStatus %></p>
-                            </div>
-                            <div class="product-price">
-                                <% if (product.offerPrice && product.offerPrice < product.price) { %>
-                                    <p class="original-price" style="text-decoration: line-through;">Price: ₹<%= product.price %></p>
-                                    <p class="offer-price" style="color: green;">Offer Price: ₹<%= product.offerPrice %></p>
-                                <% } else { %>
-                                    <p>Price: ₹<%= product.price %></p>
-                                <% } %>
-                            </div>
-                            <div class="add-to-cart">
-                                <% if (product.stock > 0) { %>
-                                    <button data-pdt-id="<%= product._id %>" class="btn-primary js-addcart-detail">
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                    </button>
-                                <% } else { %>
-                                    <div class="out-of-stock">
-                                        <span class="red-text uppercase bold-text">back in stock soon</span>
-                                    </div>
-                                <% } %>
-                            </div>
+			<div class="col-md-6 col-lg-5 p-b-30">
+    <div class="p-r-50 p-t-5 p-lr-0-lg text-center">
+        <div class="container-box-1">
+            <div class="product-detail-container">
+                <h1 class="product-name"><%= product.product_name %></h1>
+                <p class="product-subtitle"><%= product.description %></p>
+                <div class="rating">
+                    <span class="rating-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="rating-count">(16 Ratings)</span>
+                </div>
+                <div class="product-price">
+                    <% if (product.offerPrice) { %>
+                        <p class="offer-price">₹<%= product.offerPrice %> <span class="original-price">₹<%= product.price %></span> (<%= product.discountPercentage %>% OFF)</p>
+                    <% } else { %>
+                        <p class="offer-price">₹<%= product.price %></p>
+                    <% } %>
+                    <p class="inclusive-taxes">inclusive of all taxes</p>
+                </div>
+                <div class="add-to-cart">
+                    <% if (product.stock > 0) { %>
+                        <button data-pdt-id="<%= product._id %>" class="btn-primary js-addcart-detail">
+                            <i class="fas fa-shopping-cart"></i> ADD TO CART
+                        </button>
+                    <% } else { %>
+                        <div class="out-of-stock">
+                            <span class="red-text uppercase bold-text">BACK IN STOCK SOON</span>
                         </div>
-                    </div>
+                    <% } %>
+                    <button class="btn-wishlist">
+                        <i class="fas fa-heart"></i> WISHLIST
+                    </button>
+                </div>
+                <div class="delivery-options">
+                    <ul class="delivery-features">
+                        <li>100% Original Products</li>
+                        <li>Pay on delivery might be available</li>
+                        <li>Easy returns and exchanges</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
+        </div>
+    </div>
+</section>
 
 
 

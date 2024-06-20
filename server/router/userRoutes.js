@@ -63,10 +63,15 @@ router.get('/viewsingleorder', checkoutController.singleOrder);
 router.get('/successPage', checkoutController.sucessPage);
 router.get('/cancelOrder/:id', checkoutController.getCancelOrder);
 router.post('/returnOrder/:id', checkoutController.postReturnOrder);
-router.get('/order/:orderId/invoice', checkoutController.downloadInvoice);
+router.get('/download-invoice/:orderId', checkoutController.downloadInvoice);
 router.post('/handleFailedPayment', checkoutController.handleFailedPayment);
 
-router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
+// router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
+
+router.post('/getOrderDetails',checkoutController.handleRetryPayment)
+
+
+router.put('/changeToSucess',checkoutController.changeStatus)
 
 
 
@@ -91,6 +96,8 @@ router.post('/saveaddress/:id', userController.saveAddress);
 router.get('/changename', userController.showEditUsername);
 router.post('/savename', userController.editUsername);
 router.post('/checkoutaddress', userController.checkoutaddress);
+router.post('/addaddresss', checkoutController.addAddressController);
+
 
 // Catch-all route for undefined routes
 router.get('**', (req, res) => {

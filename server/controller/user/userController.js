@@ -21,7 +21,6 @@ const applyOffer = async (product) => {
   }
   return product;
 };
-
 const home = async (req, res) => {
   try {
     const isUser = req.session.user;
@@ -30,7 +29,11 @@ const home = async (req, res) => {
       cart = await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId');
     }
 
-    let allProduct = await productDatabase.find({ list: 'listed' }).populate('category');
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    let skip = (page - 1) * limit;
+
+    let allProduct = await productDatabase.find({ list: 'listed' }).skip(skip).limit(limit).populate('category');
     allProduct = await Promise.all(allProduct.map(applyOffer));
 
     allProduct = allProduct.map(product => {
@@ -43,7 +46,7 @@ const home = async (req, res) => {
       };
     });
 
-    res.render("home", { isUser, allProduct, cart });
+    res.render('home', { isUser, allProduct, cart });
   } catch (error) {
     console.error("Home Page Error:", error);
     res.status(500).send("Internal Server Error");

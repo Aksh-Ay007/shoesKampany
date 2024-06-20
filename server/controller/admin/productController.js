@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const { log } = require("console");
 const fs = require('fs');
+const OfferDatabase=require("../../model/offerModal")
 
 // Multer configuration for file upload
 const upload = multer({
@@ -24,6 +25,8 @@ const upload = multer({
 
 const list = async (req, res) => {
   try {
+
+    const offers = await OfferDatabase.find().populate('product_name');
     const categories = await categoryDatabase.find();
 
     // Get sorting criteria from query params
@@ -41,7 +44,7 @@ const list = async (req, res) => {
     const totalProducts = await productDatabase.countDocuments();
     const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
-    res.render("products", { products, categories, sortField, sortOrder, currentPage, totalPages, itemsPerPage });
+    res.render("products", { products, categories, sortField, sortOrder, currentPage,offers, totalPages, itemsPerPage });
   } catch (error) {
     console.error(error);
     res.render("error"); // Render error page

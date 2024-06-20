@@ -3,6 +3,7 @@ const userDatabase = require("../../model/user");
 const cartDatabase = require("../../model/cartModel");
 const categoryDatabase = require("../../model/categoryModel");
 const offerDatabase = require("../../model/offerModal"); // Ensure this path is correct
+
 const applyOffer = async (product) => {
   if (!product) {
     return null;

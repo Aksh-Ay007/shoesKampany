@@ -7,14 +7,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
+        #topProductsCategoriesSection {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-section {
+    margin-bottom: 30px;
+}
+
+.top-section h3 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.top-products-list,
+.top-categories-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.top-products-list li,
+.top-categories-list li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-products-list li span,
+.top-categories-list li span {
+    font-weight: bold;
+}
+    </style>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ecf0f1;
+        }
         #sidebar {
             width: 250px;
             background-color: #2c3e50;
             color: white;
-            padding: 0;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -29,10 +80,26 @@
             padding: 20px;
             text-align: center;
         }
-        #sidebar h1 { font-size: 1.8rem; margin: 0; font-weight: 500; }
-        #sidebar h2 { font-size: 1.2rem; margin: 10px 0 0; font-weight: 400; opacity: 0.8; }
-        #sidebar ul { list-style: none; padding: 0; flex-grow: 1; margin: 0; }
-        #sidebar li { margin: 0; }
+        #sidebar h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 500;
+        }
+        #sidebar h2 {
+            font-size: 1.2rem;
+            margin: 10px 0 0;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+            margin: 0;
+        }
+        #sidebar li {
+            margin: 0;
+        }
         #sidebar a {
             color: #ecf0f1;
             text-decoration: none;
@@ -43,30 +110,134 @@
             font-size: 14px;
             font-weight: 500;
         }
-        #sidebar a:hover { background-color: #34495e; color: #fff; }
-        #sidebar a.active { background-color: #e74c3c; color: #fff; }
-        #sidebar .material-icons { margin-right: 15px; font-size: 20px; }
-        #content { flex: 1; padding: 30px; background-color: #ecf0f1; margin-left: 250px; }
-        h1 { font-size: 28px; color: #4c0bbc; margin-bottom: 30px; }
-        .table-container, .form-container {
-            overflow-x: auto;
+        #sidebar a:hover {
+            background-color: #34495e;
+            color: #fff;
+        }
+        #sidebar a.active {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        #sidebar .material-icons {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        #content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            font-size: 28px;
+            color: #4c0bbc;
             margin-bottom: 30px;
         }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+
+
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
         }
-        th, td { text-align: left; padding: 15px; }
-        th { background-color: #4c0bbc; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .btn { background-color: #4c0bbc; color: white; padding: 10px 15px; text-decoration: none; border: none; border-radius: 5px; transition: background-color 0.3s; display: inline-block; margin-top: 10px; cursor: pointer; }
-        .btn:hover { background-color: #3b0a94; }
-        .btn-primary { background-color: #4c0bbc; color: white; }
-        .btn-primary:hover { background-color: #3b0a94; }
-        canvas { width: 100% !important; height: auto !important; }
+        .stats-container {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            flex: 1;
+            text-align: center;
+            margin: 0 10px;
+        }
+        .filter-container {
+            text-align: center;
+            grid-column: 1 / 4;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            grid-column: 1 / 3;
+            position: relative;
+            height: 400px;
+        }
+        .payment-details-container {
+            grid-column: 1 / 2;
+            position: relative;
+            height: 400px;
+        }
+        .daily-orders-container {
+            grid-column: 2 / 3;
+            position: relative;
+            height: 400px;
+        }
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        .dashboard-container {
+    position: relative;
+}
+
+#showTopProductsCategories {
+    position: absolute;
+    top: -21px;  /* Adjust the value as needed */
+    right: -15px;  /* Adjust the value as needed */
+    padding: 10px 20px;
+    background-color: #007bff; /* You can change the color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#showTopProductsCategories:hover {
+    background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+#topProductsCategoriesSection {
+    margin-top: 50px;  /* Ensure there's enough space below the button */
+}
+
+ /* Add some basic styling for the modal */
+ .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: -50px;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -76,126 +247,293 @@
             <h2>Admin Dashboard</h2>
         </div>
         <ul>
-            <li><a href="/admin/dashboard" class="active"><i class="material-icons">dashboard</i> Dashboard</a></li>
-           
+            <li><a href="/admin/dashboard"class="active" ><i class="material-icons">dashboard</i> Dashboard</a></li>
             <li><a href="/admin/category"><i class="material-icons">category</i> Category</a></li>
             <li><a href="/admin/products"><i class="material-icons">inventory_2</i> Products</a></li>
             <li><a href="/admin/viewOrders"><i class="material-icons">shopping_cart</i> Orders</a></li>
             <li><a href="/admin/sales-report"><i class="material-icons">bar_chart</i> Sales Report</a></li>
-            <li><a href="/admin/userside"><i  class="material-icons">group</i> Users</a></li>
-            <li><a href="/admin/couponmanage" ><i class="material-icons">local_offer</i> Coupons</a></li>
-            <li><a href="/admin/offermanage" ><i class="material-icons">local_offer</i> Offers</a></li>
+            <li><a href="/admin/userside"><i class="material-icons">group</i> Users</a></li>
+            <li><a href="/admin/couponmanage"><i class="material-icons">local_offer</i> Coupons</a></li>
+            <li><a href="/admin/offermanage "><i class="material-icons">local_offer</i> Offers</a></li>
             <li><a href="/admin/adminLogout"><i class="material-icons">logout</i> Logout</a></li>
         </ul>
     </div>
     <div id="content">
-        <h1>Dashboard</h1>
-        <p>Total Revenue: <%= totalRevenue %></p>
-        <p>Total Orders: <%= totalOrders %></p>
-        <p>Total Discount: <%= totalDiscount %></p>
-        <div class="table-container">
-            <h2>Sales Data</h2>
-            <canvas id="salesChart"></canvas>
+        <h1>Admin Dashboard</h1>
+
+        
+        <div class="dashboard-container">
+            <button id="showTopProductsCategories">Top Products & Categories</button>
+
+            <div id="topProductsCategoriesSection" style="display: none;">
+                <div class="top-section">
+                    <div id="topProductsCategoriesContainer">
+                        <div class="top-products-container">
+                            <h3>Top 10 Best Selling Products</h3>
+                            <ul>
+                                <% topProducts.forEach(product => { %>
+                                    <li><%= product.productName %> - Quantity: <%= product.totalQuantity %></li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="top-section">
+                    <h3>Top 10 Best Selling Categories</h3>
+                    <div class="top-categories-container">
+                        <ul>
+                            <% topCategories.forEach(category => { %>
+                                <li><%= category.categoryDetails.categoryName %> - Quantity: <%= category.totalQuantity %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        
         </div>
-        <div class="table-container">
-            <h2>Orders Data</h2>
-            <canvas id="ordersChart"></canvas>
-        </div>
-        <div class="table-container">
-            <h2>Payment Methods</h2>
-            <canvas id="paymentChart"></canvas>
-        </div>
-        <div class="table-container">
-            <h2>Best Selling Products</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity Sold</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% bestSellingProducts.forEach(product => { %>
-                        <tr>
-                            <td><%= product.productName %></td>
-                            <td><%= product.quantity %></td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        </div>
-        <div class="form-container">
-            <form action="/admin/dashboard" method="get">
-                <select name="filter">
-                    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All</option>
-                    <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>Yearly</option>
-                    <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Apply Filter</button>
-            </form>
+            
+            
+            <!--  -->
+            
+            <div class="filter-container">
+
+            </div>
+       
+            <div class="daily-orders-container">
+                <canvas data="<%= data %>" labelsWithoutYearAndMonth="<%= labelsWithoutYearAndMonth %>" id="dailyOrdersChart"></canvas>
+            </div>
+
+            <div class="daily-orders-container">
+                <canvas mountdata="<%= mountdata %>" monthsOfCurrentYear="<%= monthsOfCurrentYear %>" id="Mounthly"></canvas>
+            </div>
+
+            <div class="daily-orders-container">
+                <canvas orderData="<%= orderData %>" allYears="<%= allYears %>" id="yearly"></canvas>
+            </div>
         </div>
     </div>
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modalBody">
+                    <!-- Modal content will be inserted here -->
+                </div>
+            </div>
+        </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const salesCtx = document.getElementById('salesChart').getContext('2d');
-            new Chart(salesCtx, {
-                type: 'line',
-                data: {
-                    labels: <%= JSON.stringify(salesData.labels) %>,
-                    datasets: [{
-                        label: 'Sales',
-                        data: <%= JSON.stringify(salesData.values) %>,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { display: true, title: { display: true, text: 'Year' }},
-                        y: { display: true, title: { display: true, text: 'Amount' }}
-                    }
-                }
-            });
+        // Get the modal
+        var modal = document.getElementById("myModal");
 
-            const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-            new Chart(ordersCtx, {
-                type: 'line',
-                data: {
-                    labels: <%= JSON.stringify(ordersData.labels) %>,
-                    datasets: [{
-                        label: 'Orders',
-                        data: <%= JSON.stringify(ordersData.values) %>,
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { display: true, title: { display: true, text: 'Date' }},
-                        y: { display: true, title: { display: true, text: 'Number of Orders' }}
-                    }
-                }
-            });
+        // Get the button that opens the modal
+        var btn = document.getElementById("showTopProductsCategories");
 
-            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
-            new Chart(paymentCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: <%= JSON.stringify(Object.keys(paymentDetails)) %>,
-                    datasets: [{
-                        data: <%= JSON.stringify(Object.values(paymentDetails)) %>,
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-                    }]
-                },
-                options: {
-                    responsive: true
-                }
-            });
-        });
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+            document.getElementById("modalBody").innerHTML = document.getElementById("topProductsCategoriesSection").innerHTML;
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
+    <script>
+        const ctx = document.getElementById('dailyOrdersChart');
+        const data=document.getElementById('dailyOrdersChart').getAttribute("data");
+        const label=document.getElementById('dailyOrdersChart').getAttribute("labelsWithoutYearAndMonth");
+      
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: label.split(','),
+            datasets: [{
+              label: 'DAILY',
+              data: data.split(','),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const monthlyCanvas = document.getElementById('Mounthly');
+        const monthsOfCurrentYear=monthlyCanvas.getAttribute("monthsOfCurrentYear");
+        const mountdata=monthlyCanvas.getAttribute("mountdata");
+        const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July',"August","september","october","novemeber","decemeber"];
+        console.log("mountdata",mountdata);
+        const data = {
+            labels: monthsOfCurrentYear.split(','),
+            datasets: [{
+                label: 'MONTHLY',
+                data: mountdata.split(','),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(201, 203, 207, 0.2)'
+                ],
+                borderColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(255, 159, 64)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(54, 162, 235)',
+                    'rgb(153, 102, 255)',
+                    'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            },
+        };
+
+        // Get the canvas element
+       
+
+        // Ensure the canvas element is found
+        if (monthlyCanvas) {
+            const ctx = monthlyCanvas.getContext('2d');
+            new Chart(ctx, config);
+        } else {
+            console.error('Canvas element with id "Mounthly" not found.');
+        }
+    });
+</script>
+
+
+
+<!-- <script>
+document.getElementById('showTopProductsCategories').addEventListener('click', function() {
+    const topProductsCategoriesSection = document.getElementById('topProductsCategoriesSection');
+    topProductsCategoriesSection.style.display = topProductsCategoriesSection.style.display === 'none' ? 'block' : 'none';
+});
+</script> -->
+
+<!-- <script>
+    document.getElementById('showTopProductsCategories').addEventListener('click', fetchTopProductsCategories);
+
+function fetchTopProductsCategories() {
+  // Make an AJAX request to fetch the top products and categories data
+  fetch('/getTopProductsCategories')
+    .then(response => response.json())
+    .then(data => {
+      // Update the frontend with the received data
+      displayTopProductsCategories(data);
+    })
+    .catch(error => {
+      console.error('Error fetching top products and categories:', error);
+    });
+}
+
+function displayTopProductsCategories(data) {
+  // Clear previous content (if any)
+  const topProductsContainer = document.getElementById('topProductsContainer');
+  const topCategoriesContainer = document.getElementById('topCategoriesContainer');
+  topProductsContainer.innerHTML = '';
+  topCategoriesContainer.innerHTML = '';
+
+  // Display top products
+  const topProductsList = document.createElement('ul');
+  data.topProducts.forEach(product => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${product.productName} - Quantity: ${product.totalQuantity}`;
+    topProductsList.appendChild(listItem);
+  });
+  topProductsContainer.appendChild(topProductsList);
+
+  // Display top categories
+  const topCategoriesList = document.createElement('ul');
+  data.topCategories.forEach(category => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${category.categoryDetails.categoryName} - Quantity: ${category.totalQuantity}`;
+    topCategoriesList.appendChild(listItem);
+  });
+  topCategoriesContainer.appendChild(topCategoriesList);
+}
+</script> -->
+
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const yearlyCanvas = document.getElementById('yearly');
+        const allYears=yearlyCanvas.getAttribute("allYears");
+        const orderData=yearlyCanvas.getAttribute("orderData")
+        const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+        console.log(allYears);
+        const data = {
+            labels: allYears.split(','),
+            datasets: [{
+                label: 'YEARELY',
+                data:orderData.split(','),
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+
+        // Get the canvas element
+     
+
+        // Ensure the canvas element is found
+        if (yearlyCanvas) {
+            const ctx = yearlyCanvas.getContext('2d');
+            new Chart(ctx, config);
+        } else {
+            console.error('Canvas element with id "yearly" not found.');
+        }
+    });
+</script>
+
+
 </body>
 </html>

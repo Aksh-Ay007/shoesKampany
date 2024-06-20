@@ -56,7 +56,9 @@ const orderSchema = new Schema({
     },
     paymentStatus: {
         type: String,
-        enum: ['Pending', 'Processing', 'Completed', 'Failed', 'Cancelled', 'Refunded',"failure"],
+       
+        enum: ['Pending', 'Processing', 'Completed', 'failure', 'Cancelled', 'Refunded'],
+
         default: 'Pending',
     },
     shippingAddress: {
@@ -86,6 +88,14 @@ const orderSchema = new Schema({
         required: true
     },
     deliveryCharge: { // Added delivery charge field
+        type: Number,
+        default: 0
+    },
+    couponDiscount: { // Added coupon discount field
+        type: Number,
+        default: 0
+    },
+    offerDiscount: { // Added offer discount field
         type: Number,
         default: 0
     }

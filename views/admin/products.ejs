@@ -9,6 +9,23 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap4.min.css" />
+  
+  <style>
+
+.product-price {
+  margin-bottom: 5px; /* Optional: Adjust spacing between product prices */
+}
+
+.original-price {
+  text-decoration: line-through; /* Optional: Strike-through original price */
+  color: #999; /* Optional: Color for original price */
+}
+
+.offer-details {
+  color: green; /* Color for offer details */
+}
+
+  </style>
   <style>
     body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
     #sidebar {
@@ -304,52 +321,83 @@
     </div>
 
    <div class="table-container">
-     <table class="table" id="usertable">
-       <thead class="thead-dark">
-         <tr class="bg-dark text-light">
-           <th>ID</th>
-           <th>Image</th>
-           <th>Name</th>
-           <th>Price</th>
-           <th>Stock</th>
-           <th>List</th>
-           <th>Action</th>
-         </tr>
-       </thead>
-       <tbody>
-         <% products.forEach((pdt, index) => { %>
-           <tr>
-             <td><%= (currentPage - 1) * itemsPerPage + index + 1 %></td>
-             <td>
-               <% pdt.images.forEach(image => { %>
-                 <img class="object-fit-cover" src="/<%= image %>" alt="" style="width: 60px; height: 60px; object-fit: cover; margin-right: 5px;">
-               <% }) %>
-             </td>
-             <td><%= pdt.product_name %></td>
-             <td> ₹ <%= pdt.price %></td>
-             <td><%= pdt.stock %></td>
-             <td class="<%= pdt.list === 'listed' ? 'status-listed' : 'status-unlisted' %>"><%= pdt.list %></td>
-             <td>
-               <a href="/admin/productedit/<%= pdt._id %>" class="btn btn-primary">
-                 <span class="material-icons">edit</span>
-               </a>
-               <a class="btn border-shadow shadow delete btn-delete" data-id="<%= pdt._id %>">
-                 <span class="material-icons">delete</span>
-               </a>
-               <% if (pdt.list === 'listed') { %>
-                 <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-unlist" data-id="<%= pdt._id %>">
-                   <span class="material-icons">visibility_off</span>
-                 </a>
-               <% } else { %>
-                 <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-visibility" data-id="<%= pdt._id %>">
-                   <span class="material-icons">visibility</span>
-                 </a>
-               <% } %>
-             </td>
-           </tr>
-         <% }) %>
-       </tbody>
-     </table>
+<!-- products.ejs -->
+
+<!-- products.ejs -->
+
+<table class="table" id="usertable">
+  <thead class="thead-dark">
+    <tr class="bg-dark text-light">
+      <th>ID</th>
+      <th>Image</th>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>List</th>
+      <th>Offer Available</th>
+    
+      <th>Final Price</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% products.forEach((pdt, index) => { %>
+      <tr>
+        <td><%= (currentPage - 1) * itemsPerPage + index + 1 %></td>
+        <td>
+          <% pdt.images.forEach(image => { %>
+            <img class="object-fit-cover" src="/<%= image %>" alt="" style="width: 60px; height: 60px; object-fit: cover; margin-right: 5px;">
+          <% }) %>
+        </td>
+        <td><%= pdt.product_name %></td>
+        <td> ₹ <%= pdt.price %></td>
+        <td><%= pdt.stock %></td>
+        <td class="<%= pdt.list === 'listed' ? 'status-listed' : 'status-unlisted' %>"><%= pdt.list %></td>
+        <td>
+          <% // Check if an offer is applied to this product %>
+          <% let offerApplied = false; %>
+          <% let savedAmount = 0; %>
+          <% let finalPrice = pdt.price; %>
+          <% offers.forEach(offer => { %>
+            <% if (offer.product_name && offer.product_name._id.toString() === pdt._id.toString()) { %>
+              <% offerApplied = true; %>
+              <% savedAmount = offer.discount_Amount; %>
+              <% finalPrice = pdt.price - offer.discount_Amount; %>
+              <span class="offer-details">
+                <%= offer.offerName %> - ₹ <%= offer.discount_Amount %>%
+              </span>
+            <% } %>
+          <% }) %>
+          <% if (!offerApplied) { %>
+            No Offer Applied
+          <% } %>
+        </td>
+
+        <td>
+          ₹ <%= finalPrice %> <!-- Display final price after applying offer -->
+        </td>
+        <td>
+          <a href="/admin/productedit/<%= pdt._id %>" class="btn btn-primary">
+            <span class="material-icons">edit</span>
+          </a>
+          <a class="btn border-shadow shadow delete btn-delete" data-id="<%= pdt._id %>">
+            <span class="material-icons">delete</span>
+          </a>
+          <% if (pdt.list === 'listed') { %>
+            <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-unlist" data-id="<%= pdt._id %>">
+              <span class="material-icons">visibility_off</span>
+            </a>
+          <% } else { %>
+            <a href="/admin/productlist?id=<%= pdt._id %>" class="btn border-shadow shadow btn-visibility" data-id="<%= pdt._id %>">
+              <span class="material-icons">visibility</span>
+            </a>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
 
      <!-- Pagination -->
      <nav aria-label="Page navigation">

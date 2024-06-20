@@ -13,45 +13,36 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 
 const applyOffer = async (product, couponDiscount = 0) => {
-    const productOffer = await offerDatabase.findOne({
-        product_name: product._id,
-        unlist: true,
-    });
-    const categoryOffer = await offerDatabase.findOne({
-        category_name: product.category,
-        unlist: true,
-    });
+  const productOffer = await offerDatabase.findOne({
+    product_name: product._id,
+    unlist: true,
+  });
+  const categoryOffer = await offerDatabase.findOne({
+    category_name: product.category,
+    unlist: true,
+  });
 
-    if (productOffer && typeof productOffer.discount_Amount === "number") {
-        product.offerPrice = Math.round(
-            product.price - product.price * (productOffer.discount_Amount / 100)
-        );
-        product.offerDiscount = Math.round(product.price * (productOffer.discount_Amount / 100));
-    } else if (
-        categoryOffer &&
-        typeof categoryOffer.discount_Amount === "number"
-    ) {
-        product.offerPrice = Math.round(
-            product.price - product.price * (categoryOffer.discount_Amount / 100)
-        );
-        product.offerDiscount = Math.round(product.price * (categoryOffer.discount_Amount / 100));
-    } else {
-        product.offerPrice = null;
-        product.offerDiscount = 0;
-    }
+  let discount = 0;
 
-    // Subtract coupon discount from offer price if available
-    if (product.offerPrice !== null && couponDiscount > 0) {
-        product.finalPrice = product.offerPrice - couponDiscount;
-    } else if (couponDiscount > 0) {
-        product.finalPrice = product.price - couponDiscount;
-    } else {
-        product.finalPrice = product.offerPrice || product.price;
-    }
+  if (productOffer && typeof productOffer.discount_Amount === "number") {
+    discount = productOffer.discount_Amount;
+  } else if (categoryOffer && typeof categoryOffer.discount_Amount === "number") {
+    discount = categoryOffer.discount_Amount;
+  }
 
-    product.couponDiscount = couponDiscount;
-    
-    return product;
+  product.offerPrice = Math.round(product.price - product.price * (discount / 100));
+  product.offerDiscount = Math.round(product.price * (discount / 100));
+
+  // Subtract coupon discount from offer price if available
+  if (couponDiscount > 0) {
+    product.finalPrice = Math.max(0, product.offerPrice - couponDiscount);
+  } else {
+    product.finalPrice = product.offerPrice;
+  }
+
+  product.couponDiscount = couponDiscount;
+  
+  return product;
 };
 
 
@@ -59,13 +50,13 @@ const applyOffer = async (product, couponDiscount = 0) => {
 const calculateOfferDiscount = (items) => {
   let totalOfferDiscount = 0;
   items.forEach((item) => {
-    if (item.productId.offerPrice) {
-      totalOfferDiscount +=
-        (item.productId.price - item.productId.offerPrice) * item.quantity;
+    if (item.productId.offerDiscount) {
+      totalOfferDiscount += item.productId.offerDiscount * item.quantity;
     }
   });
   return totalOfferDiscount;
 };
+
 
 const getCheckout = async (req, res) => {
   try {
@@ -76,6 +67,7 @@ const getCheckout = async (req, res) => {
     const userId = req.session.user._id;
     const user = await userDatabase.findById(userId);
     const addresses = await addressDatabase.find({ user: userId });
+    
     let cart = await cartDatabase
       .findOne({ user: userId })
       .populate("items.productId");
@@ -86,8 +78,10 @@ const getCheckout = async (req, res) => {
         addresses,
         user,
         cart: emptyCart,
+        walletBalance: 0,
         errorMessage: "",
         coupon: [],
+        errorMessage: "Your cart is empty. Please add items to your cart before checking out.",
         appliedCoupon: null,
       });
       return;
@@ -98,11 +92,16 @@ const getCheckout = async (req, res) => {
       maximum_Amount: { $gte: cart.totalAmount },
     });
 
+    let couponDiscount = 0;
+    if (req.session.appliedCoupon) {
+      couponDiscount = req.session.appliedCoupon.discountAmount;
+    }
+
     // Apply offer prices to cart items and filter out null productIds
     cart.items = await Promise.all(
       cart.items.map(async (item) => {
         if (item.productId) {
-          item.productId = await applyOffer(item.productId);
+          item.productId = await applyOffer(item.productId, couponDiscount);
           return item;
         }
       })
@@ -114,6 +113,21 @@ const getCheckout = async (req, res) => {
     // Calculate offer discount for the entire cart
     cart.offerDiscount = calculateOfferDiscount(cart.items);
 
+    // Calculate total amount after discounts
+    cart.finalAmount = cart.totalAmount - cart.offerDiscount - couponDiscount;
+
+    // Add delivery charge if applicable
+    let deliveryCharge = 0;
+    if (cart.finalAmount <= 500) {
+      deliveryCharge = 50;
+    }
+    cart.finalAmount += deliveryCharge;
+
+    // Fetch the user's wallet balance
+    const wallet = await Wallet.findOne({ user: userId });
+    const walletBalance = wallet ? wallet.balance : 0;
+    console.log(walletBalance,"111");
+
     // Log the cart object to check if offerDiscount is present
     console.log("Cart object:", cart);
 
@@ -121,13 +135,119 @@ const getCheckout = async (req, res) => {
       addresses,
       user,
       cart,
+      walletBalance,
       errorMessage: "",
       coupon: availableCoupons,
-      appliedCoupon: null,
+      appliedCoupon: req.session.appliedCoupon,
     });
   } catch (e) {
     console.log(e);
     res.status(500).send("Internal Error");
+  }
+};
+
+
+const postOrder = async (req, res) => {
+  try {
+    const { addressId, cartId, paymentMethod, amountTotal, couponDiscount } = req.body;
+    const userId = req.session.user._id;
+    const AddressId = addressId;
+    const payment = paymentMethod;
+
+    const userCartData = await cartDatabase.findOne({ user: userId, _id: cartId }).populate("items.productId");
+
+    if (!userCartData) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const orderedItems = userCartData.items.map((item) => ({
+      productId: item.productId._id,
+      productname: item.productId.product_name,
+      productimages: item.productId.images,
+      price: item.productId.price,
+      quantity: item.quantity,
+      status: "Pending",
+      returned: false,
+    }));
+
+    const totalAmount = userCartData.totalAmount;
+    const offerDiscount = calculateOfferDiscount(userCartData.items);
+
+    const amountTotalString = amountTotal.replace(/[^0-9.]/g, "");
+    const finalAmount = parseFloat(amountTotalString);
+
+    if (isNaN(finalAmount)) {
+      return res.status(400).json({ error: "Invalid final amount" });
+    }
+
+    if (paymentMethod === "COD" && totalAmount > 1000) {
+      return res.status(400).json({ error: "COD payment is not allowed for orders over Rs. 1000" });
+    }
+
+    let deliveryCharge = 0;
+    if (totalAmount <= 500) {
+      deliveryCharge = 50;
+    }
+
+    let paymentStatus = "Pending";
+
+    if (paymentMethod === "Wallet") {
+      let wallet = await Wallet.findOne({ user: userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          user: userId,
+          balance: 0,
+          transactions: []
+        });
+        await wallet.save();
+      }
+      if (wallet.balance < finalAmount + deliveryCharge) {
+        return res.status(400).json({ error: "Insufficient wallet balance" });
+      }
+
+      // Deduct amount from wallet
+      wallet.balance -= finalAmount + deliveryCharge;
+      wallet.transactions.push({
+        type: "withdrawal",
+        amount: finalAmount + deliveryCharge,
+        timestamp: new Date(),
+        description: "Order payment",
+      });
+      await wallet.save();
+
+      paymentStatus = "Completed";
+    }
+
+    const newOrder = new OrderDatabase({
+      user_id: userId,
+      orderedItems: orderedItems,
+      status: "Pending",
+      returned: false,
+      paymentStatus: paymentStatus,
+      shippingAddress: AddressId,
+      paymentMethod: payment,
+      totalAmount: totalAmount,
+      finalAmount: finalAmount + deliveryCharge,
+      deliveryCharge: deliveryCharge,
+      couponDiscount: couponDiscount || 0,
+      offerDiscount: offerDiscount || 0,
+    });
+
+    await newOrder.save();
+    await cartDatabase.findOneAndDelete({ user: userId, _id: cartId });
+
+    await Promise.all(
+      userCartData.items.map(async (product) => {
+        await productDatabase.findByIdAndUpdate(product.productId, {
+          $inc: { stock: -product.quantity },
+        });
+      })
+    );
+
+    res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    res.status(500).json({ error: "Error placing order" });
   }
 };
 
@@ -161,97 +281,7 @@ const sucessPage = (req, res) => {
   }
 };
 
-const postOrder = async (req, res) => {
-  try {
-    const { addressId, cartId, paymentMethod, amountTotal } = req.body;
-    console.log("hwew");
-    const userId = req.session.user._id;
-    const AddressId = addressId;
-    const payment = paymentMethod;
 
-    const userCartData = await cartDatabase
-      .findOne({ user: userId, _id: cartId })
-      .populate("items.productId");
-
-    if (!userCartData) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
-
-    const orderedItems = userCartData.items.map((item) => ({
-      productId: item.productId._id,
-      productname: item.productId.product_name,
-      productimages: item.productId.images,
-      price: item.productId.price,
-      quantity: item.quantity,
-      status: "Pending",
-      returned: false,
-    }));
-
-    const totalAmount = userCartData.totalAmount;
-
-    const amountTotalString = amountTotal.replace(/[^0-9.]/g, "");
-    const finalAmount = parseFloat(amountTotalString);
-   console.log("paymentMethod",paymentMethod,isNaN(finalAmount));
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ error: "Invalid final amount" });
-    }
-
-    if (paymentMethod === "COD" && totalAmount > 1000) {
-      return res.status(400).json({ error: "COD payment is not allowed for orders over Rs. 1000" });
-    }
-
-    let deliveryCharge = 0;
-    if (totalAmount > 500) {
-      deliveryCharge = 50;
-    }
-
-    if (paymentMethod === "Wallet") {
-      const wallet = await Wallet.findOne({ user: userId });
-      if (!wallet || wallet.balance < finalAmount + deliveryCharge) {
-        return res.status(400).json({ error: "Insufficient wallet balance" });
-      }
-
-      // Deduct amount from wallet
-      console.log(" wallet.balance ", wallet.balance );
-      wallet.balance -= finalAmount + deliveryCharge;
-      wallet.transactions.push({
-        type: "withdrawal",
-        amount: finalAmount + deliveryCharge,
-        timestamp: new Date(),
-        description: "Order payment",
-      });
-      await wallet.save();
-    }
-
-    const newOrder = new OrderDatabase({
-      user_id: userId,
-      orderedItems: orderedItems,
-      status: "Pending",
-      returned: false,
-      paymentStatus: paymentMethod === "wallet" ? "Completed" : "Pending",
-      shippingAddress: AddressId,
-      paymentMethod: payment,
-      totalAmount: totalAmount,
-      finalAmount: finalAmount + deliveryCharge,
-      deliveryCharge: deliveryCharge,
-    });
-    await newOrder.save();
-    await cartDatabase.findOneAndDelete({ user: userId, _id: cartId });
-
-    await Promise.all(
-      userCartData.items.map(async (product) => {
-        await productDatabase.findByIdAndUpdate(product.productId, {
-          $inc: { stock: -product.quantity },
-        });
-      })
-    );
-
-    res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id });
-  } catch (error) {
-    console.error("Error placing order:", error);
-    res.status(500).json({ error: "Error placing order" });
-  }
-};
 const viewOrders = async (req, res) => {
   const user = req.session.user;
   try {
@@ -367,6 +397,7 @@ const razorpay = async (req, res) => {
       cartId,
       paymentMethod,
       amountTotal,
+      couponDiscount,
       razorpay_payment_id,
       razorpay_order_id,
       razorpay_signature,
@@ -374,8 +405,6 @@ const razorpay = async (req, res) => {
     const userId = req.session.user._id;
     const AddressId = addressId;
     const payment = paymentMethod;
-
-    console.log(">>>>");
 
     const userCartData = await cartDatabase
       .findOne({ user: userId, _id: cartId })
@@ -396,6 +425,9 @@ const razorpay = async (req, res) => {
     }));
 
     const totalAmount = userCartData.totalAmount;
+
+    // Calculate offer discount for the entire cart
+    const offerDiscount = calculateOfferDiscount(userCartData.items);
 
     const amountTotalString = amountTotal.replace(/[^0-9.]/g, "");
     const finalAmount = parseFloat(amountTotalString);
@@ -435,12 +467,14 @@ const razorpay = async (req, res) => {
       orderedItems: orderedItems,
       status: "Pending",
       returned: false,
-      paymentStatus: paymentMethod === "RazorPay" ? "Completed" : "Pending", // Set paymentStatus to "Completed" for Razorpay
+      paymentStatus: paymentMethod === "RazorPay" ? "Completed" : "Pending",
       shippingAddress: AddressId,
       paymentMethod: payment,
       totalAmount: totalAmount,
-      finalAmount: finalAmount + deliveryCharge,
+      finalAmount: finalAmount, 
       deliveryCharge: deliveryCharge,
+      couponDiscount: couponDiscount || 0,
+      offerDiscount: offerDiscount || 0,
       razorpay_payment_id,
       razorpay_order_id,
       razorpay_signature,
@@ -456,12 +490,13 @@ const razorpay = async (req, res) => {
       })
     );
 
-    res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id });
+    res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id, redirectUrl: `/order/${newOrder._id}/invoice` });
   } catch (error) {
     console.error("Error placing order:", error);
     res.status(500).json({ error: "Error placing order" });
   }
 };
+
 // In the server-side orderController.js
 const handleFailedPayment = async (req, res) => {
   try {
@@ -565,9 +600,25 @@ console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 
 
+
+const changeStatus=async(req,res)=>{
+const {orderId} = req.body
+
+console.log(orderId,"orderId");
+
+const order = await OrderDatabase.findById(orderId);
+if (!order) {
+  return res.status(404).json({ message: "Order not found" });
+}
+
+order.paymentStatus="Completed"
+await order.save();
+res.status(200).json({ message: "Order successfully" });
+}
+
 const getCancelOrder = async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const orderId = req.params.id;
     const order = await OrderDatabase.findById(orderId);
 
     if (!order) {
@@ -578,15 +629,48 @@ const getCancelOrder = async (req, res) => {
       return res.status(400).json({ message: "Order is already cancelled" });
     }
 
+    // If payment was completed, refund the amount to the user's wallet
+    if (order.paymentStatus === "Completed") {
+      const userId = order.user_id;
+      let wallet = await Wallet.findOne({ user: userId });
+    
+      if (!wallet) {
+        wallet = new Wallet({
+          user: userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+    
+      wallet.balance += order.finalAmount;
+      wallet.transactions.push({
+        type: "Refunded",
+        amount: order.finalAmount,
+        timestamp: new Date(),
+        description: "Order cancellation refund",
+      });
+      await wallet.save();
+    }
+    // Update the stock for each ordered item
+    for (const item of order.orderedItems) {
+      await productDatabase.findByIdAndUpdate(item.productId, {
+        $inc: { stock: item.quantity },
+      });
+    }
+
     order.status = "Cancelled";
+    order.paymentStatus = "Refunded"; // Update the payment status
     await order.save();
 
-    res.status(200).json({ message: "Order cancelled successfully" });
+    res.status(200).json({ success: true, message: "Order cancelled successfully" });
   } catch (error) {
     console.error("Error cancelling order:", error);
-    res.status(500).json({ message: "Error cancelling order" });
+    res.status(500).json({ success: false, message: "Error cancelling order" });
   }
 };
+
+
+
 
 const postReturnOrder = async (req, res) => {
   try {
@@ -601,16 +685,48 @@ const postReturnOrder = async (req, res) => {
       return res.status(400).json({ message: "Order is already returned" });
     }
 
+    // If payment was completed, refund the amount to the user's wallet
+    if (order.paymentStatus === "Completed") {
+      const userId = order.user_id;
+      let wallet = await Wallet.findOne({ user: userId });
+    
+      if (!wallet) {
+        wallet = new Wallet({
+          user: userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+    
+      wallet.balance += order.finalAmount;
+      wallet.transactions.push({
+        type: "Refunded",
+        amount: order.finalAmount,
+        timestamp: new Date(),
+        description: "Order return refund",
+      });
+      await wallet.save();
+    }
+
+    // Update the stock for each ordered item
+    for (const item of order.orderedItems) {
+      await productDatabase.findByIdAndUpdate(item.productId, {
+        $inc: { stock: item.quantity },
+      });
+    }
+
     order.status = "Returned";
+    order.paymentStatus = "Refunded"; // Update the payment status
     await order.save();
 
-    res.status(200).json({ message: "Order returned successfully" });
+    res.status(200).json({ success: true, message: "Order returned successfully" });
   } catch (error) {
     console.error("Error returning order:", error);
-    res.status(500).json({ message: "Error returning order" });
+    res.status(500).json({ success: false, message: "Error returning order" });
   }
 };
 
+// New route to get wallet transactions
 // New route to get wallet transactions
 const getWalletTransactions = async (req, res) => {
   try {
@@ -636,6 +752,8 @@ const getWalletTransactions = async (req, res) => {
   }
 };
 
+
+
 const getWalletBalance = async (req, res) => {
   try {
     // Get user ID from session or request parameters
@@ -655,7 +773,6 @@ const getWalletBalance = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 const downloadInvoice = async (req, res) => {
   try {
@@ -680,7 +797,7 @@ const downloadInvoice = async (req, res) => {
     const PDFDocument = require('pdfkit');
 
     // Create a new PDF document
-    const doc = new PDFDocument({ margins: { top: 30, bottom: 30, left: 30, right: 30 } });
+    const doc = new PDFDocument({ margin: 50 });
 
     // Create the 'invoices' directory if it doesn't exist
     const invoicesDir = path.join(__dirname, 'public', 'invoices');
@@ -695,24 +812,37 @@ const downloadInvoice = async (req, res) => {
     doc.pipe(writeStream);
 
     // Set font and styles
-    doc.font('Helvetica-Bold');
+    doc.font('Helvetica');
     doc.fillColor('#333333');
 
+    // Add company details
+    doc.fontSize(18).text('Shoes Kampnay', { align: 'center', bold: true });
+    doc.fontSize(12).text('Address: Kochi, India', { align: 'center' });
+    doc.text('Phone: 8281935725', { align: 'center' });
+    doc.text('Email: shoesKampnay@gmail.com', { align: 'center' });
+    doc.moveDown();
+
     // Add invoice header
-    doc.fontSize(24).text('Invoice', { align: 'center' });
+    doc.fontSize(24).text('Invoice', { align: 'center', bold: true });
+    doc.moveDown();
+
+    // Add invoice date and number
+    const invoiceDate = new Date();
+    const invoiceNumber = `INV-${order._id.toString().slice(-6).toUpperCase()}`;
+    doc.fontSize(12).text(`Date: ${invoiceDate.toLocaleDateString()}`, { align: 'left' });
+    doc.text(`Invoice Number: ${invoiceNumber}`, { align: 'right' });
     doc.moveDown();
 
     // Add customer name
     const customerName = order.shippingAddress.user.firstname + ' ' + order.shippingAddress.user.lastname || 'Not available';
-    doc.fontSize(16).text(`Customer Name: ${customerName}`, { align: 'center', underline: true });
+    doc.fontSize(16).text(`Customer Name: ${customerName}`, { align: 'left', underline: true });
     doc.moveDown();
 
     // Add shipping address
-    doc.fontSize(16).text('Shipping Address:', { align: 'center', underline: true });
-    doc.font('Helvetica');
+    doc.fontSize(14).text('Shipping Address:', { align: 'left', underline: true });
     if (order.shippingAddress) {
       const address = order.shippingAddress;
-      doc.text(`Name: ${address.name}`);
+      doc.fontSize(12).text(`Name: ${address.name}`);
       doc.text(`Mobile: ${address.mobile}`);
       doc.text(`Address: ${address.address}`);
       doc.text(`District: ${address.district}`);
@@ -720,36 +850,50 @@ const downloadInvoice = async (req, res) => {
       doc.text(`Pincode: ${address.pincode}`);
       doc.text(`Landmark: ${address.landmark || 'Not specified'}`);
     } else {
-      doc.fontSize(12).text('Address: Not available');
+      doc.text('Address: Not available');
     }
     doc.moveDown();
 
     // Add ordered items
-    doc.fontSize(16).text('Ordered Items:', { align: 'center', underline: true });
-    doc.font('Helvetica');
+    doc.fontSize(14).text('Ordered Items:', { align: 'left', underline: true });
+    doc.fontSize(12);
     order.orderedItems.forEach(item => {
-      doc.fontSize(12).text(`- ${item.productId.product_name} x ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`);
+      const itemTotal = (item.price * item.quantity).toFixed(2);
+      doc.text(`- ${item.productId.product_name} x ${item.quantity} - ₹${itemTotal}`);
       // Add images if available
-      if (item.productId.images && item.productId.images.length > 0) {
-        item.productId.images.forEach(image => {
-          doc.image(image, { width: 100, align: 'center' });
-          doc.moveDown();
-        });
-      }
+
+      
     });
     doc.moveDown();
 
     // Add payment method
-    doc.fontSize(16).text(`Payment Method: ${order.paymentMethod}`, { align: 'center', underline: true });
+    doc.fontSize(14).text(`Payment Method: ${order.paymentMethod}`, { align: 'left', underline: true });
     doc.moveDown();
 
     // Add total amount
     const finalAmount = order.finalAmount || 0;
-    doc.fontSize(16).text(`Final Amount: $${finalAmount.toFixed(2)}`, { align: 'center', underline: true });
+    doc.fontSize(16).text(`Final Amount: ₹${finalAmount.toFixed(2)}`, { align: 'left', underline: true });
     doc.moveDown();
 
     // Add thank you message
-    doc.fontSize(18).text('Thank you for your order!', { align: 'center' });
+    doc.fontSize(14).text('Thank you for your order!', { align: 'center' });
+    doc.moveDown();
+
+    // Add manager's signature
+    const managerSignatureIcon = 0xf2bc; // Unicode code point for the 'user-tie' icon from Font Awesome
+    doc.fontSize(18).text(String.fromCodePoint(managerSignatureIcon), { align: 'center' });
+    doc.fontSize(10).text('Manager\'s Signature', { align: 'center' });
+    doc.moveDown();
+
+    // Add terms and conditions (if applicable)
+    doc.fontSize(10).text('Terms and Conditions:', { align: 'center', underline: true });
+    doc.text('- All sales are final.', { align: 'center' });
+
+    // Add more terms and conditions as needed
+
+    // Add footer
+    const footerText = 'Shoes Kampnay | www.shoeskampnay.com | shoesKampnay@gmail.com';
+    doc.fontSize(10).text(footerText, { align: 'center' });
 
     // Finalize the PDF document
     doc.end();
@@ -776,37 +920,113 @@ const downloadInvoice = async (req, res) => {
 
 const handleRetryPayment = async (req, res) => {
   try {
-    const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-    const order = await OrderDatabase.findById(orderId);
+    console.log("Request Body:", req.body);
 
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
+    const { totalPrice } = req.body;
 
-    // Verify the payment signature with Razorpay
+    // Convert total price to an integer representing paise
+    const totalAmountInPaise = Math.round(Number(totalPrice) * 100);
+    console.log("Total Amount in Paise:", totalAmountInPaise);
+
     const instance = new Razorpay({
-      key_id: 'YOUR_RAZORPAY_KEY_ID',
-      key_secret: 'YOUR_RAZORPAY_KEY_SECRET',
+      key_id: "rzp_test_OYzzRLNBCqZfkG",
+      key_secret: "h2eDgR2HYioEqKWp9tYzfQNO",
     });
 
-    const signatureValid = instance.validatePaymentSignature({
-      order_id: razorpay_order_id,
-      payment_id: razorpay_payment_id,
-      signature: razorpay_signature,
-    });
+    const options = {
+      amount: totalAmountInPaise, // Use the integer amount
+      currency: "INR",
+      receipt: "receipt#1",
+    };
+    console.log("Options for Creating Order:", options);
 
-    if (signatureValid) {
-      order.paymentStatus = 'Completed';
-      await order.save();
-      return res.status(200).json({ message: 'Payment retried successfully' });
-    } else {
-      return res.status(400).json({ error: 'Invalid payment signature' });
-    }
+    instance.orders.create(options, (err, order) => {
+      if (err) {
+        console.error("Error creating order:", err);
+        return res
+          .status(500)
+          .json({ error: "Error creating order", details: err });
+      }
+
+      console.log("Order created successfully:", order);
+      res.status(200).json({ orderId: order.id });
+    });
   } catch (error) {
-    console.error('Error handling retry payment:', error);
-    res.status(500).json({ error: 'Error handling retry payment' });
+    console.error("Error in postRazorpay:", error);
+    res
+      .status(500)
+      .json({ error: "Error while creating Razorpay payment", details: error });
   }
 };
+
+const addAddressController = async (req, res) => {
+  const userId = req.session.user._id;
+
+
+
+  try {
+    const name = req.body.name;
+    const mobile = req.body.mobile;
+    const address = req.body.address;
+    const district = req.body.district;
+    const state = req.body.state;
+    let pincode = req.body.pincode;
+    const landmark = req.body.landmark;
+
+    // Remove spaces from pincode before validation
+    pincode = pincode.replace(/\s/g, "");
+
+    // Check if any of the required fields are missing
+    if (!name || !mobile || !address || !district || !state || !pincode) {
+      return res.status(400).json({ errors: ["All fields are required"] });
+    }
+
+    // Validate mobile number to ensure it contains exactly 10 digits
+    if (!/^[\d]{10}$/.test(mobile)) {
+      return res.status(400).json({ errors: ["Mobile number must be 10 digits"] });
+    }
+
+    // Validate pincode to ensure it contains exactly 6 digits
+    if (!/^[\d]{6}$/.test(pincode)) {
+      return res.status(400).json({ errors: ["PinCode must be 6 digits"] });
+    }
+
+    // Check if the address already exists
+    const checkExists = await addressDatabase.findOne({
+      user: userId,
+      name: name.trim(),
+      mobile: mobile.trim(),
+      address: address.trim(),
+      district: district.trim(),
+      state: state,
+      pincode: pincode.trim()
+    });
+
+    if (checkExists) {
+      return res.status(400).json({ errors: ["Address already exists"] });
+    }
+
+    // Create a new address if it doesn't already exist
+    const newAddress = new addressDatabase({
+      user: userId,
+      name: name,
+      mobile: mobile,
+      address: address,
+      district: district,
+      state: state,
+      pincode: pincode,
+      landmark: landmark // Optional
+    });
+
+    await newAddress.save();
+
+    return res.status(200).json({ success: true, newAddress });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ errors: ["Server error"] });
+  }
+};
+
 
 module.exports = {
   getCheckout,
@@ -822,5 +1042,5 @@ module.exports = {
   postReturnOrder,
   getWalletTransactions,
   getWalletBalance,
-  downloadInvoice,handleFailedPayment,handleRetryPayment
+  downloadInvoice,handleFailedPayment,handleRetryPayment,changeStatus,addAddressController
 };
