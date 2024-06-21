@@ -11,6 +11,7 @@ const isAuthenticated = require('../middleware/isAuthenticated');
 const { block } = require('../middleware/userControls');
 const nocache = require('nocache');
 const walletController = require('../controller/user/walletController');
+const ratingController=require('../controller/user/ratingController');
 
 
 // Home
@@ -65,6 +66,7 @@ router.get('/cancelOrder/:id', checkoutController.getCancelOrder);
 router.post('/returnOrder/:id', checkoutController.postReturnOrder);
 router.get('/download-invoice/:orderId', checkoutController.downloadInvoice);
 router.post('/handleFailedPayment', checkoutController.handleFailedPayment);
+router.post('/submitReview',ratingController.submitReview)
 
 // router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
 

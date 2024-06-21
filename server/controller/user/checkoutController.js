@@ -11,6 +11,7 @@ const offerDatabase = require("../../model/offerModal");
 const Razorpay = require("razorpay");
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const ratingDatabase=require('../../model/ratingModel')
 
 const applyOffer = async (product, couponDiscount = 0) => {
   const productOffer = await offerDatabase.findOne({
@@ -342,7 +343,11 @@ const singleOrder = async (req, res) => {
     if (!order) {
       return res.status(404).send("No order found");
     }
-    res.render("orderDetail", { order, name, orders: [order] });
+
+    // Fetch the review for this order
+    const review = await ratingDatabase.findOne({ order: orderId });
+
+    res.render("orderDetail", { order, name, review, orders: [order] });
   } catch (e) {
     console.log(e.toString());
     res.status(500).send("Internal Server Error");

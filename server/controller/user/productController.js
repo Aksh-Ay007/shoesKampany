@@ -3,23 +3,34 @@ const userDatabase = require("../../model/user");
 const cartDatabase = require("../../model/cartModel");
 const categoryDatabase = require("../../model/categoryModel");
 const offerDatabase = require("../../model/offerModal");
+const Review = require('../../model/ratingModel');
+
 
 // Function to apply offer to a product
 const applyOffer = async (product) => {
   const productOffer = await offerDatabase.findOne({ product_name: product._id, unlist: true });
   const categoryOffer = await offerDatabase.findOne({ category_name: product.category, unlist: true });
+  
+  let discountPercentage = 0;
 
   if (productOffer && typeof productOffer.discount_Amount === 'number') {
-    product.offerPrice = Math.round(product.price - (product.price * (productOffer.discount_Amount / 100)));
+    discountPercentage = productOffer.discount_Amount;
   } else if (categoryOffer && typeof categoryOffer.discount_Amount === 'number') {
-    product.offerPrice = Math.round(product.price - (product.price * (categoryOffer.discount_Amount / 100)));
+    discountPercentage = categoryOffer.discount_Amount;
+  }
+
+  if (discountPercentage > 0) {
+    product.offerPrice = Math.round(product.price - (product.price * (discountPercentage / 100)));
+    product.discountPercentage = discountPercentage;
   } else {
     product.offerPrice = null;
+    product.discountPercentage = 0;
   }
 
   return product;
 };
 
+// Get Product Controller
 // Get Product Controller
 const getProduct = async (req, res) => {
   try {
@@ -27,6 +38,17 @@ const getProduct = async (req, res) => {
     let product = await productDatabase.findById(productId).populate('category');
     const isUser = req.session.user !== undefined;
     const cart = isUser ? await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId') : null;
+    
+    // Fetch reviews for the product
+    const reviews = await Review.find({ product: productId }).populate('user', 'firstname');
+
+    // Calculate average rating
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+
+    // Calculate full stars and half stars
+    const fullStars = Math.floor(averageRating);
+    const hasHalfStar = averageRating % 1 >= 0.5;
 
     let stockStatus = '';
     let stockColor = '';
@@ -49,7 +71,18 @@ const getProduct = async (req, res) => {
       }));
     }
 
-    res.render("productDetails", { isUser, product, cart, stockStatus, stockColor });
+    res.render("productDetails", { 
+      isUser, 
+      product, 
+      cart, 
+      stockStatus, 
+      stockColor,
+      reviews,
+      averageRating,
+      fullStars,
+      hasHalfStar,
+      totalReviews: reviews.length
+    });
   } catch (e) {
     console.error(e);
     res.status(500).render("../error");

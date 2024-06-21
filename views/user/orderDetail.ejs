@@ -573,6 +573,95 @@
     </div>
 </div>
 
+<% if (order.status === 'Delivered' && !order.isReviewed) { %>
+	<div class="card mb-4">
+	  <div class="card-body">
+		<h5 class="card-title">Write a Review</h5>
+		<form id="reviewForm" data-order-id="<%= order._id %>">
+		  <div class="form-group">
+			<label for="rating">Rating:</label>
+			<select class="form-control" id="rating" name="rating" required>
+			  <option value="">Select a rating</option>
+			  <option value="1">1 Star</option>
+			  <option value="2">2 Stars</option>
+			  <option value="3">3 Stars</option>
+			  <option value="4">4 Stars</option>
+			  <option value="5">5 Stars</option>
+			</select>
+		  </div>
+		  <div class="form-group">
+			<label for="review">Review:</label>
+			<textarea class="form-control" id="review" name="review" rows="3" required></textarea>
+		  </div>
+		  <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+		</form>
+	  </div>
+	</div>
+  <% } else if (order.isReviewed) { %>
+	<div class="card mb-4">
+	  <div class="card-body">
+		<h5 class="card-title">Your Review</h5>
+		<!-- Display the user's review here -->
+		<% if (review) { %>
+		  <div class="user-review">
+			<div class="star-rating-display" data-rating="<%= review.rating %>">
+			  <% for(let i = 1; i <= 5; i++) { %>
+				<span class="star <%= i <= review.rating ? 'filled' : '' %>">&#9733;</span>
+			  <% } %>
+			</div>
+			<p class="review-text mt-2"><%= review.review %></p>
+		  </div>
+		<% } else { %>
+		  <p>No review available for this order.</p>
+		<% } %>
+	  </div>
+	</div>
+  <% } %>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Include SweetAlert library -->
+  
+  <script>
+	document.getElementById('reviewForm').addEventListener('submit', function(e) {
+	  e.preventDefault();
+	  
+	  const orderId = this.dataset.orderId;
+	  const rating = document.getElementById('rating').value;
+	  const review = document.getElementById('review').value;
+  
+	  fetch('/submitReview', {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ orderId, rating, review }),
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		if (data.message === 'Review submitted successfully') {
+		  // Show SweetAlert message
+		  Swal.fire({
+			icon: 'success',
+			title: 'Review Submitted!',
+			text: 'Thank you for your review.',
+			confirmButtonText: 'OK'
+		  }).then((result) => {
+			if (result.isConfirmed || result.isDismissed) {
+			  location.reload(); // Reload the page to update the view
+			}
+		  });
+		} else {
+		  alert('Error submitting review');
+		}
+	  })
+	  .catch((error) => {
+		console.error('Error:', error);
+		alert('Error submitting review');
+	  });
+	});
+  </script>
+  
+
+
 		
 		 <script>
 			document.addEventListener('DOMContentLoaded', () => {
@@ -759,7 +848,7 @@
 
 	</div>
 
-
+	
 
 
 

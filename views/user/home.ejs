@@ -37,11 +37,26 @@
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.6.16/css/uikit.min.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
 	<!--===============================================================================================-->
 	<style>
+
+.product-rating {
+    margin-top: 5px;
+}
+.product-rating .fas, .product-rating .far, .product-rating .fa-star-half-alt {
+    color: #FFD700;
+    font-size: 14px;
+}
+.rating-count {
+    font-size: 12px;
+    color: #666;
+    margin-left: 5px;
+}
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -386,7 +401,7 @@
 	</div>
 
     <!-- Slider -->
-    <section class="section-slide">
+    <!-- <section class="section-slide">
 		
 	<div class="scroll-container" id="scroll-container">
         <div class="scroll-content">
@@ -396,7 +411,7 @@
             <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
             <span>Delivery Charge Free Below &#x20b9 500 Order</span>
         </div>
-    </div>
+    </div> -->
         <div class="wrap-slick1">
             <div class="slick1">
                 <div class="item-slick1" style="background-image: url(images/slide-01.jpg);">
@@ -556,60 +571,75 @@
         </div>
     </div>
 
-    <!-- Product -->
-    <section class="bg0 p-t-23 p-b-140">
-        <div class="container">
-            <div class="p-b-10">
-                <h3 class="ltext-103 cl5">Our Products</h3>
-            </div>
-            <div class="product-grid">
-                <% allProduct.forEach(product => { %>
-                <div class="product-item">
-                    <div class="product-image">
-                        <img src="<%= product.images[0] %>" alt="IMG-PRODUCT">
-                    </div>
-                    <div class="product-details">
-                        <a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name %></a>
-                        <div class="product-price">
-                            <% if (product.discountPercentage) { %>
-                                <span class="original-price">&#x20a8; <%= product.originalPrice %></span>
-                                <span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
-                                <span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
-                            <% } else { %>
-                                <span class="regular-price">&#x20a8; <%= product.price %></span>
-                            <% } %>
-                        </div>
-                        <% if (product.stock > 0) { %>
-                            <span class="stock-<%= product.stock < 10 ? 'low' : 'available' %>">
-                                <%= product.stock < 10 ? 'Only few left' : 'In Stock (' + product.stock + ' left)' %>
-                            </span>
+<!-- Product -->
+<section class="bg0 p-t-23 p-b-140">
+    <div class="container">
+        <div class="p-b-10">
+            <h3 class="ltext-103 cl5">Our Products</h3>
+        </div>
+        <div class="product-grid">
+            <% allProduct.forEach(product => { %>
+            <div class="product-item">
+                <div class="product-image">
+                    <img src="<%= product.images[0] %>" alt="IMG-PRODUCT">
+                </div>
+                <div class="product-details">
+                    <a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name %></a>
+                    <div class="product-price">
+                        <% if (product.discountPercentage) { %>
+                            <span class="original-price">&#x20a8; <%= product.originalPrice %></span>
+                            <span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
+                            <span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
                         <% } else { %>
-                            <span class="stock-unavailable">Out of Stock</span>
+                            <span class="regular-price">&#x20a8; <%= product.price %></span>
                         <% } %>
-                        <div class="product-actions">
-                            <button class="btn-addwish" data-tooltip="Add to wishlist" data-pdt-id="<%= product._id %>">
-                                <i class="zmdi zmdi-favorite"></i>
-                            </button>
-                            <% if (product.stock > 0) { %>
-                            <button class="btn-addcart" data-tooltip="Add to Cart" data-pdt-id="<%= product._id %>">
-                                <i class="zmdi zmdi-shopping-cart"></i>
-                            </button>
+                    </div>
+                    <% if (product.stock > 0) { %>
+                        <span class="stock-<%= product.stock < 10 ? 'low' : 'available' %>">
+                            <%= product.stock < 10 ? 'Only few left' : 'In Stock (' + product.stock + ' left)' %>
+                        </span>
+                    <% } else { %>
+                        <span class="stock-unavailable">Out of Stock</span>
+                    <% } %>
+                    <!-- Star Rating -->
+                    <div class="product-rating">
+                        <% const fullStars = Math.floor(product.averageRating); %>
+                        <% const hasHalfStar = product.averageRating % 1 >= 0.5; %>
+                        <% for(let i = 1; i <= 5; i++) { %>
+                            <% if(i <= fullStars) { %>
+                                <i class="fas fa-star filled"></i>
+                            <% } else if(i === fullStars + 1 && hasHalfStar) { %>
+                                <i class="fas fa-star-half-alt filled"></i>
                             <% } else { %>
-                            <!-- Disable cart button for out of stock products -->
-                            <button class="btn-addcart" data-tooltip="Out of Stock" disabled>
-                                <i class="zmdi zmdi-shopping-cart"></i>
-                            </button>
+                                <i class="far fa-star"></i>
                             <% } %>
-                        </div>
+                        <% } %>
+                        <span class="rating-count">(<%= product.totalReviews %> Reviews)</span>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn-addwish" data-tooltip="Add to wishlist" data-pdt-id="<%= product._id %>">
+                            <i class="zmdi zmdi-favorite"></i>
+                        </button>
+                        <% if (product.stock > 0) { %>
+                        <button class="btn-addcart" data-tooltip="Add to Cart" data-pdt-id="<%= product._id %>">
+                            <i class="zmdi zmdi-shopping-cart"></i>
+                        </button>
+                        <% } else { %>
+                        <!-- Disable cart button for out of stock products -->
+                        <button class="btn-addcart" data-tooltip="Out of Stock" disabled>
+                            <i class="zmdi zmdi-shopping-cart"></i>
+                        </button>
+                        <% } %>
                     </div>
                 </div>
-                <% }) %>
             </div>
-            <div class="flex-c-m flex-w w-full p-t-45">
-                <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">Load More</a>
-            </div>
+            <% }) %>
         </div>
-    </section>
+        <div class="flex-c-m flex-w w-full p-t-45">
+            <a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">Load More</a>
+        </div>
+    </div>
+</section>
   
   
 

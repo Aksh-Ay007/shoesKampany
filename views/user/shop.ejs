@@ -34,9 +34,23 @@
 	<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="css/util.css">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 	<!--===============================================================================================-->
 
 <style>
+
+.product-rating {
+  margin-top: 5px;
+}
+.product-rating .fas, .product-rating .far, .product-rating .fa-star-half-alt {
+  color: #FFD700;
+  font-size: 14px;
+}
+.rating-count {
+  font-size: 12px;
+  color: #666;
+  margin-left: 5px;
+}
 
 
     /* Adjust icon size for both add to cart and wishlist buttons */
@@ -538,6 +552,20 @@ transition: background-color 0.3s ease;
 							<% } else { %>
 								<span class="stock-unavailable">Out of Stock</span>
 							<% } %>
+							<div class="product-rating">
+								<% const fullStars = Math.floor(product.averageRating); %>
+								<% const hasHalfStar = product.averageRating % 1 >= 0.5; %>
+								<% for(let i = 1; i <= 5; i++) { %>
+								  <% if(i <= fullStars) { %>
+									<i class="fas fa-star filled"></i>
+								  <% } else if(i === fullStars + 1 && hasHalfStar) { %>
+									<i class="fas fa-star-half-alt filled"></i>
+								  <% } else { %>
+									<i class="far fa-star"></i>
+								  <% } %>
+								<% } %>
+								<span class="rating-count">(<%= product.totalReviews %> Reviews)</span>
+							  </div>
 							<div class="product-actions">
 								<button class="btn-addcart" data-pdt-id="<%= product._id %>" <%= product.stock <= 0 ? 'disabled' : '' %>>Add to cart</button>
 								<button class="btn-addwish" data-pdt-id="<%= product._id %>">Add to wishlist</button>

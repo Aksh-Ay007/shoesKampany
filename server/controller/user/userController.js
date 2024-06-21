@@ -8,6 +8,9 @@ const addressDatabase = require("../../model/addressModel");
 const offerDatabase = require("../../model/offerModal");
 const passport = require("passport")
 const google = require("../../../service/auth")
+const Review = require('../../model/ratingModel');
+
+
 const applyOffer = async (product) => {
   const productOffer = await offerDatabase.findOne({ product_name: product._id, unlist: true });
   const categoryOffer = await offerDatabase.findOne({ category_name: product.category, unlist: true });
@@ -21,6 +24,17 @@ const applyOffer = async (product) => {
   }
   return product;
 };
+
+
+const calculateAverageRating = async (productId) => {
+  const reviews = await Review.find({ product: productId });
+  if (reviews.length === 0) return { averageRating: 0, totalReviews: 0 };
+  
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const averageRating = totalRating / reviews.length;
+  return { averageRating, totalReviews: reviews.length };
+};
+
 const home = async (req, res) => {
   try {
     const isUser = req.session.user;
@@ -36,15 +50,18 @@ const home = async (req, res) => {
     let allProduct = await productDatabase.find({ list: 'listed' }).skip(skip).limit(limit).populate('category');
     allProduct = await Promise.all(allProduct.map(applyOffer));
 
-    allProduct = allProduct.map(product => {
+    allProduct = await Promise.all(allProduct.map(async (product) => {
+      const { averageRating, totalReviews } = await calculateAverageRating(product._id);
       const discountPercentage = product.offerPrice ? ((product.price - product.offerPrice) / product.price * 100).toFixed(0) : null;
       return {
         ...product._doc,
         discountPercentage: discountPercentage,
         originalPrice: product.price,
-        price: product.offerPrice || product.price
+        price: product.offerPrice || product.price,
+        averageRating,
+        totalReviews
       };
-    });
+    }));
 
     res.render('home', { isUser, allProduct, cart });
   } catch (error) {
@@ -52,7 +69,6 @@ const home = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 
 
