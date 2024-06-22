@@ -592,21 +592,29 @@
 </div>
 
   <!-- Ordered Items -->
-<div class="row">
+  <div class="row">
 	<% orders.forEach((order) => { %>
 	  <% order.orderedItems.forEach((item, index) => { %>
 		<div class="col-md-4 col-sm-12">
 		  <div class="card mb-4">
-			<% if (item.productimages && item.productimages.length > 0) { %>
-			  <img src="<%= item.productimages[0] %>" class="card-img-top custom-image" alt="Product Image">
+			<% if (item.productId && item.productId.images && item.productId.images.length > 0) { %>
+			  <img src="<%= item.productId.images[0] %>" class="card-img-top custom-image" alt="Product Image">
 			<% } else { %>
 			  <img src="/path/to/default/image.jpg" class="card-img-top custom-image" alt="Default Image">
 			<% } %>
 			<div class="card-body">
-			  <h5 class="card-title"><%= item.productname %></h5>
-			  <p class="card-text">Price: ₹<%= item.price %></p>
+			  <h5 class="card-title"><%= item.productId ? item.productId.product_name : item.productname %></h5>
+			  <% if (item.productId && item.productId.offerPrice) { %>
+				<p class="card-text">
+				  Original Price: <span class="original-price">₹<%= item.productId.price.toFixed(2) %></span>
+				  <br>
+				  Offer Price: <span class="offer-price">₹<%= item.productId.offerPrice.toFixed(2) %></span>
+				</p>
+			  <% } else { %>
+				<p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
+			  <% } %>
 			  <p class="card-text">Qty: <%= item.quantity %></p>
-			  <p class="card-text">Delivery Status: 
+			  <p class="card-text">Delivery Status:
 				<% if (item.status === 'Pending') { %>
 				  <span class="badge badge-warning">Pending</span>
 				<% } else if (item.status === 'Completed') { %>

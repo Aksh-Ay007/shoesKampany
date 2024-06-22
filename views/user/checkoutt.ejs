@@ -1265,43 +1265,51 @@ if (!paymentMethodSelected) {
     });
 
     async function handlePayment(response) {
-      let amountTotal = document.getElementById("totalAmount").innerText;
-      var selectedAddressId = document.getElementById('addressSelect').value;
-      var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-      var cartId = document.getElementById('cartId').value;
+  let amountTotal = document.getElementById("totalAmount").innerText.replace(/[^0-9.]/g, '');
+  let selectedAddressId = document.getElementById('addressSelect').value;
+  let selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+  let cartId = document.getElementById('cartId').value;
 
-      try {
-        let paymentDetails = {
-          addressId: selectedAddressId,
-          paymentMethod: selectedPaymentMethod,
-          cartId: cartId,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature,
-          amountTotal: amountTotal
-        };
+  let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
+  let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
+  let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
 
-        let paymentResponse = await fetch('/handlePayment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(paymentDetails)
-        });
+  try {
+    let paymentDetails = {
+      addressId: selectedAddressId,
+      paymentMethod: selectedPaymentMethod,
+      cartId: cartId,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_signature: response.razorpay_signature,
+      amountTotal: amountTotal,
+      offerDiscount: offerDiscount,
+      discountAmount: discountAmount,
+      deliveryCharge: deliveryCharge
+    };
 
-        if (paymentResponse.ok) {
-          // Payment successful, redirect to success page
-          window.location.href = '/successPage';
-        } else {
-          // Payment failed, update status and display message
-          let result = await paymentResponse.text();
-          handlePaymentFailure(result, null, selectedAddressId, selectedPaymentMethod, amountTotal);
-        }
-      } catch (error) {
-        console.error("Error handling payment:", error);
-        handlePaymentFailure(error.toString(), null, selectedAddressId, selectedPaymentMethod, amountTotal);
-      }
+    let paymentResponse = await fetch('/handlePayment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentDetails)
+    });
+
+    if (paymentResponse.ok) {
+      // Payment successful, redirect to success page
+      window.location.href = '/successPage';
+    } else {
+      // Payment failed, update status and display message
+      let result = await paymentResponse.text();
+      handlePaymentFailure(result, null, selectedAddressId, selectedPaymentMethod, amountTotal);
     }
+  } catch (error) {
+    console.error("Error handling payment:", error);
+    handlePaymentFailure(error.toString(), null, selectedAddressId, selectedPaymentMethod, amountTotal);
+  }
+}
+
 
     // Function to handle payment failure and redirect to vieworder page
     function handlePaymentFailure(error, orderId, selectedAddressId, paymentMethod, amountTotal) {

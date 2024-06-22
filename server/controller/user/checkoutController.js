@@ -149,8 +149,17 @@ const getCheckout = async (req, res) => {
 
 
 const postOrder = async (req, res) => {
+  console.log("post order is working ");
   try {
     const { addressId, cartId, paymentMethod, amountTotal, couponDiscount } = req.body;
+
+    // Logging each field of req.body
+    console.log("addressId:", addressId);
+    console.log("cartId:", cartId);
+    console.log("paymentMethod:", paymentMethod);
+    console.log("amountTotal:", amountTotal);
+    console.log("couponDiscount:", couponDiscount);
+
     const userId = req.session.user._id;
     const AddressId = addressId;
     const payment = paymentMethod;
@@ -234,6 +243,9 @@ const postOrder = async (req, res) => {
       offerDiscount: offerDiscount || 0,
     });
 
+    // Logging newOrder before saving
+    console.log("newOrder:", newOrder);
+
     await newOrder.save();
     await cartDatabase.findOneAndDelete({ user: userId, _id: cartId });
 
@@ -251,6 +263,7 @@ const postOrder = async (req, res) => {
     res.status(500).json({ error: "Error placing order" });
   }
 };
+
 
 
 const applyCoupon = async (req, res) => {
@@ -338,7 +351,10 @@ const singleOrder = async (req, res) => {
     const name = req.session.user.firstname;
     const order = await OrderDatabase.findById(orderId)
       .populate("shippingAddress")
-      .populate("orderedItems.productId"); // Ensure orderedItems.productId is populated
+      .populate({
+        path: "orderedItems.productId",
+        select: 'product_name images price offerPrice offerDiscount'
+      });
 
     if (!order) {
       return res.status(404).send("No order found");
@@ -395,25 +411,29 @@ const postRazorpay = async (req, res) => {
   }
 };
 
+
 const razorpay = async (req, res) => {
+  console.log("Razorpay payment processing...");
+
   try {
     const {
       addressId,
       cartId,
       paymentMethod,
       amountTotal,
-      couponDiscount,
+      offerDiscount,
+      discountAmount,
       razorpay_payment_id,
       razorpay_order_id,
       razorpay_signature,
+      deliveryCharge
     } = req.body;
+
+    console.log("Payment details:", req.body);
     const userId = req.session.user._id;
-    const AddressId = addressId;
     const payment = paymentMethod;
 
-    const userCartData = await cartDatabase
-      .findOne({ user: userId, _id: cartId })
-      .populate("items.productId");
+    const userCartData = await cartDatabase.findOne({ user: userId, _id: cartId }).populate("items.productId");
 
     if (!userCartData) {
       return res.status(404).json({ message: "Cart not found" });
@@ -426,45 +446,18 @@ const razorpay = async (req, res) => {
       price: item.productId.price,
       quantity: item.quantity,
       status: "Pending",
-      returned: false,
+      returned: false
     }));
 
     const totalAmount = userCartData.totalAmount;
 
-    // Calculate offer discount for the entire cart
-    const offerDiscount = calculateOfferDiscount(userCartData.items);
+    const amountTotalValue = parseFloat(amountTotal.replace(/[^0-9.]/g, ""));
+    const offerDiscountValue = parseFloat(offerDiscount.replace(/[^0-9.]/g, ""));
+    const discountAmountValue = parseFloat(discountAmount.replace(/[^0-9.]/g, ""));
+    const deliveryChargeValue = parseFloat(deliveryCharge.replace(/[^0-9.]/g, ""));
 
-    const amountTotalString = amountTotal.replace(/[^0-9.]/g, "");
-    const finalAmount = parseFloat(amountTotalString);
-
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ error: "Invalid final amount" });
-    }
-
-    if (paymentMethod === "COD" && totalAmount > 1000) {
-      return res.status(400).json({ error: "COD payment is not allowed for orders over Rs. 1000" });
-    }
-
-    let deliveryCharge = 0;
-    if (totalAmount > 500) {
-      deliveryCharge = 50;
-    }
-
-    if (paymentMethod === "wallet") {
-      const wallet = await Wallet.findOne({ user: userId });
-      if (!wallet || wallet.balance < finalAmount + deliveryCharge) {
-        return res.status(400).json({ error: "Insufficient wallet balance" });
-      }
-
-      // Deduct amount from wallet
-      wallet.balance -= finalAmount + deliveryCharge;
-      wallet.transactions.push({
-        type: "withdrawal",
-        amount: finalAmount + deliveryCharge,
-        timestamp: new Date(),
-        description: "Order payment",
-      });
-      await wallet.save();
+    if (isNaN(amountTotalValue) || isNaN(offerDiscountValue) || isNaN(discountAmountValue) || isNaN(deliveryChargeValue)) {
+      return res.status(400).json({ error: "Invalid numeric value" });
     }
 
     const newOrder = new OrderDatabase({
@@ -472,28 +465,27 @@ const razorpay = async (req, res) => {
       orderedItems: orderedItems,
       status: "Pending",
       returned: false,
-      paymentStatus: paymentMethod === "RazorPay" ? "Completed" : "Pending",
-      shippingAddress: AddressId,
+      paymentStatus: "Completed",
+      shippingAddress: addressId,
       paymentMethod: payment,
       totalAmount: totalAmount,
-      finalAmount: finalAmount, 
-      deliveryCharge: deliveryCharge,
-      couponDiscount: couponDiscount || 0,
-      offerDiscount: offerDiscount || 0,
+      finalAmount: amountTotalValue + deliveryChargeValue,
+      deliveryCharge: deliveryChargeValue,
+      couponDiscount: discountAmountValue || 0,
+      offerDiscount: offerDiscountValue || 0,
       razorpay_payment_id,
       razorpay_order_id,
-      razorpay_signature,
+      razorpay_signature
     });
+
     await newOrder.save();
     await cartDatabase.findOneAndDelete({ user: userId, _id: cartId });
 
-    await Promise.all(
-      userCartData.items.map(async (product) => {
-        await productDatabase.findByIdAndUpdate(product.productId, {
-          $inc: { stock: -product.quantity },
-        });
-      })
-    );
+    await Promise.all(userCartData.items.map(async (product) => {
+      await productDatabase.findByIdAndUpdate(product.productId, {
+        $inc: { stock: -product.quantity }
+      });
+    }));
 
     res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id, redirectUrl: `/order/${newOrder._id}/invoice` });
   } catch (error) {
@@ -501,6 +493,8 @@ const razorpay = async (req, res) => {
     res.status(500).json({ error: "Error placing order" });
   }
 };
+
+
 
 // In the server-side orderController.js
 const handleFailedPayment = async (req, res) => {
@@ -785,11 +779,11 @@ const downloadInvoice = async (req, res) => {
     const order = await OrderDatabase.findById(orderId)
       .populate({
         path: 'orderedItems.productId',
-        select: 'product_name images', // Select only necessary fields from product database
+        select: 'product_name images',
       })
       .populate({
         path: 'shippingAddress',
-        populate: { path: 'user', model: 'UserDatabase' } // Populate the 'user' field with the 'UserDatabase' model
+        populate: { path: 'user', model: 'UserDatabase' }
       });
 
     if (!order) {
@@ -802,7 +796,7 @@ const downloadInvoice = async (req, res) => {
     const PDFDocument = require('pdfkit');
 
     // Create a new PDF document
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
     // Create the 'invoices' directory if it doesn't exist
     const invoicesDir = path.join(__dirname, 'public', 'invoices');
@@ -812,93 +806,125 @@ const downloadInvoice = async (req, res) => {
 
     // Pipe the PDF document to a writable stream
     const fileName = `invoice_${orderId}.pdf`;
-    const filePath = path.join(invoicesDir, fileName); // Path where the PDF will be saved
+    const filePath = path.join(invoicesDir, fileName);
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
 
     // Set font and styles
-    doc.font('Helvetica');
+    doc.font('Helvetica-Bold');
     doc.fillColor('#333333');
 
+    // Add title
+    doc.fontSize(20).text('Order Invoice', { align: 'center' });
+    doc.moveDown();
+
     // Add company details
-    doc.fontSize(18).text('Shoes Kampnay', { align: 'center', bold: true });
-    doc.fontSize(12).text('Address: Kochi, India', { align: 'center' });
-    doc.text('Phone: 8281935725', { align: 'center' });
-    doc.text('Email: shoesKampnay@gmail.com', { align: 'center' });
+    doc.font('Helvetica');
+    doc.fontSize(10).text('Sold By: ShoesKampany Private Limited', { align: 'left' });
+    doc.text('Ship-from Address: Buildings Alyssa, Begonia & Clover, Embassy Tech Village, Outer Ring Road, Devarabeesanahalli Village,', { align: 'left' });
+    doc.text('Bengaluru, Bengaluru, Karnataka, IN - 560103', { align: 'left' });
+    doc.text('CIN: U51109KA2012PTC066107', { align: 'left' });
+    doc.text('GSTIN: 29AACCF0683K1ZD', { align: 'left' });
     doc.moveDown();
 
-    // Add invoice header
-    doc.fontSize(24).text('Invoice', { align: 'center', bold: true });
+    // Add order details
+    doc.fontSize(10).text(`Order ID: ${order._id}`, { align: 'left' });
+    doc.text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`, { align: 'left' });
+    doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, { align: 'left' });
+    doc.text(`Payment Method: ${order.paymentMethod}`, { align: 'left' });
+    doc.text(`Payment Status: ${order.paymentStatus}`, { align: 'left' });
     doc.moveDown();
 
-    // Add invoice date and number
-    const invoiceDate = new Date();
-    const invoiceNumber = `INV-${order._id.toString().slice(-6).toUpperCase()}`;
-    doc.fontSize(12).text(`Date: ${invoiceDate.toLocaleDateString()}`, { align: 'left' });
-    doc.text(`Invoice Number: ${invoiceNumber}`, { align: 'right' });
+    // Add billing address
+    doc.fontSize(10).text(`Billing Address:`, { align: 'left', underline: true });
+    doc.text(`Name: ${order.shippingAddress.user.firstname} ${order.shippingAddress.user.lastname}`, { align: 'left' });
+    doc.text(`Address: ${order.shippingAddress.address}`, { align: 'left' });
+    doc.text(`District: ${order.shippingAddress.district}`, { align: 'left' });
+    doc.text(`State: ${order.shippingAddress.state}`, { align: 'left' });
+    doc.text(`Pincode: ${order.shippingAddress.pincode}`, { align: 'left' });
     doc.moveDown();
 
-    // Add customer name
-    const customerName = order.shippingAddress.user.firstname + ' ' + order.shippingAddress.user.lastname || 'Not available';
-    doc.fontSize(16).text(`Customer Name: ${customerName}`, { align: 'left', underline: true });
-    doc.moveDown();
+    // Table configuration
+    const tableTop = doc.y;
+    const tableLeft = 50;
+    const tableWidth = 500;
+    const rowHeight = 20;
+    const columns = [
+      { name: 'Description', width: 200 },
+      { name: 'Qty', width: 50, align: 'center' },
+      { name: 'Gross Amount', width: 80, align: 'right' },
+      { name: 'Discount', width: 70, align: 'right' },
+      { name: 'Final Amount', width: 100, align: 'right' }
+    ];
 
-    // Add shipping address
-    doc.fontSize(14).text('Shipping Address:', { align: 'left', underline: true });
-    if (order.shippingAddress) {
-      const address = order.shippingAddress;
-      doc.fontSize(12).text(`Name: ${address.name}`);
-      doc.text(`Mobile: ${address.mobile}`);
-      doc.text(`Address: ${address.address}`);
-      doc.text(`District: ${address.district}`);
-      doc.text(`State: ${address.state}`);
-      doc.text(`Pincode: ${address.pincode}`);
-      doc.text(`Landmark: ${address.landmark || 'Not specified'}`);
-    } else {
-      doc.text('Address: Not available');
-    }
-    doc.moveDown();
-
-    // Add ordered items
-    doc.fontSize(14).text('Ordered Items:', { align: 'left', underline: true });
-    doc.fontSize(12);
-    order.orderedItems.forEach(item => {
-      const itemTotal = (item.price * item.quantity).toFixed(2);
-      doc.text(`- ${item.productId.product_name} x ${item.quantity} - ₹${itemTotal}`);
-      // Add images if available
-
-      
+    // Draw table header
+    doc.font('Helvetica-Bold');
+    doc.fontSize(10);
+    doc.rect(tableLeft, tableTop, tableWidth, rowHeight).stroke();
+    let currentX = tableLeft;
+    columns.forEach(column => {
+      doc.text(column.name, currentX + 5, tableTop + 5, {
+        width: column.width - 10,
+        align: column.align || 'left'
+      });
+      currentX += column.width;
     });
-    doc.moveDown();
 
-    // Add payment method
-    doc.fontSize(14).text(`Payment Method: ${order.paymentMethod}`, { align: 'left', underline: true });
-    doc.moveDown();
+    // Draw table rows
+    doc.font('Helvetica');
+    let currentY = tableTop + rowHeight;
+    order.orderedItems.forEach(item => {
+      doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
+      currentX = tableLeft;
+      columns.forEach(column => {
+        let value = '';
+        switch(column.name) {
+          case 'Description': value = item.productId.product_name; break;
+          case 'Qty': value = item.quantity.toString(); break;
+          case 'Gross Amount': value = `Rs:${item.price.toFixed(2)}`; break;
+          case 'Discount': value = `Rs:${(item.price * item.quantity - item.price * item.quantity).toFixed(2)}`; break;
+          case 'Final Amount': value = `Rs:${(item.price * item.quantity).toFixed(2)}`; break;
+        }
+        doc.text(value, currentX + 5, currentY + 5, {
+          width: column.width -15,
+          align: column.align || 'left'
+        });
+        currentX += column.width;
+      });
+      currentY += rowHeight;
+    });
+
+    // Add delivery charge
+    if (order.deliveryCharge > 0) {
+      doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
+      doc.text('Delivery Charge', tableLeft + 5, currentY + 5, { width: 195 });
+      doc.text('1', tableLeft + 205, currentY + 5, { width: 45, align: 'center' });
+      doc.text(`Rs:${order.deliveryCharge.toFixed(2)}`, tableLeft + 255, currentY + 5, { width: 75, align: 'right' });
+      doc.text('₹0.00', tableLeft + 330, currentY + 5, { width: 65, align: 'right' });
+      doc.text(`Rs:${order.deliveryCharge.toFixed(2)}`, tableLeft + 400, currentY + 5, { width: 95, align: 'right' });
+      currentY += rowHeight;
+    }
 
     // Add total amount
     const finalAmount = order.finalAmount || 0;
-    doc.fontSize(16).text(`Final Amount: ₹${finalAmount.toFixed(2)}`, { align: 'left', underline: true });
-    doc.moveDown();
+    doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
+    doc.font('Helvetica-Bold');
+    doc.text('Total', tableLeft + 5, currentY + 5, { width: 195 });
+    doc.text(`Rs:${order.totalAmount.toFixed(2)}`, tableLeft + 255, currentY + 5, { width: 75, align: 'right' });
+    doc.text(`Rs:${(order.discountAmount || 0).toFixed(2)}`, tableLeft + 330, currentY + 5, { width: 65, align: 'right' });
+    doc.text(`Rs:${finalAmount.toFixed(2)}`, tableLeft + 400, currentY + 5, { width: 95, align: 'right' });
+    currentY += rowHeight * 2;
 
-    // Add thank you message
-    doc.fontSize(14).text('Thank you for your order!', { align: 'center' });
-    doc.moveDown();
+    // Add grand total
+    doc.fontSize(12).text('Grand Total', tableLeft + 350, currentY, { width: 100, align: 'right' });
+    doc.text(`Rs:${finalAmount.toFixed(2)}`, tableLeft + 450, currentY, { width: 95, align: 'right' });
+    doc.moveDown(2);
 
-    // Add manager's signature
-    const managerSignatureIcon = 0xf2bc; // Unicode code point for the 'user-tie' icon from Font Awesome
-    doc.fontSize(18).text(String.fromCodePoint(managerSignatureIcon), { align: 'center' });
-    doc.fontSize(10).text('Manager\'s Signature', { align: 'center' });
-    doc.moveDown();
-
-    // Add terms and conditions (if applicable)
-    doc.fontSize(10).text('Terms and Conditions:', { align: 'center', underline: true });
-    doc.text('- All sales are final.', { align: 'center' });
-
-    // Add more terms and conditions as needed
-
-    // Add footer
-    const footerText = 'Shoes Kampnay | www.shoeskampnay.com | shoesKampnay@gmail.com';
-    doc.fontSize(10).text(footerText, { align: 'center' });
+    // Footer
+    doc.font('Helvetica');
+    doc.fontSize(10).text('shoesKampany Private Limited', { align: 'center' });
+    doc.moveDown(0.7);
+    doc.text('Authorized Signatory', { align: 'center' });
 
     // Finalize the PDF document
     doc.end();
@@ -920,8 +946,6 @@ const downloadInvoice = async (req, res) => {
     res.status(500).json({ error: 'Error generating invoice' });
   }
 };
-
-
 
 const handleRetryPayment = async (req, res) => {
   try {

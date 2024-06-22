@@ -14,14 +14,28 @@ const flash = require('connect-flash');
 const bodyParser = require("body-parser");
 const passport=require("passport")
 
+// Flash middleware
+app.use(flash());
+
+// Database Connection
 dbConnect();
 
+// Middleware setup
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: true
 }));
 
+// Flash middleware
+app.use(flash());
+
+// Middleware to pass flash messages to the views
+app.use((req, res, next) => {
+  res.locals.errorMessage = req.flash('error');
+  res.locals.successMessage = req.flash('success');
+  next();
+});
 
 // initialize the passport
 app.use(passport.initialize())

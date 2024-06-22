@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <title>Modern Login Page |</title>
+
+    <style>
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
@@ -222,11 +231,12 @@
                 <h1>Sign In</h1>
                 <br>
 
-                <% if (typeof message !== 'undefined') { %>
-                    <h4 class="userblock" style="color: red;"> <%= message %></h4>
-                   
-                <% } %>
-                
+                <% if (errorMessage.length > 0) { %>
+                    <div class="error"><%= errorMessage[0] %></div>
+                  <% } %>
+                  <% if (successMessage.length > 0) { %>
+                    <div class="success"><%= successMessage[0] %></div>
+                  <% } %>
               
                
                 <div class="social-icons">

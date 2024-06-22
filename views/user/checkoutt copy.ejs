@@ -20,6 +20,48 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+
+    /* Customize SweetAlert2 popup style */
+.swal2-popup.styled-popup {
+  width: 350px !important;
+  padding: 20px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.swal2-title {
+  font-size: 24px !important;
+  font-family: 'Arial', sans-serif;
+  color: #dc3545;
+}
+
+.swal2-html-container {
+  font-size: 16px !important;
+  font-family: 'Arial', sans-serif;
+  color: #721c24;
+}
+
+/* Customize SweetAlert2 icon */
+.swal2-icon.styled-icon {
+  border-color: #dc3545 !important;
+}
+
+.swal2-icon.styled-icon::before, 
+.swal2-icon.styled-icon::after {
+  background-color: #dc3545 !important;
+}
+
+/* Add animation */
+.swal2-popup {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
     .payment-method h3 {
       font-size: 1.5rem;
     }
@@ -643,255 +685,225 @@
       </span>
     </div>
   </div>
-
   <div class="container mt-4">
     <h1 class="text-center pt-5">Checkout</h1>
-    <% if (errorMessage) { %>
-      <div class="alert alert-danger mt-3" role="alert">
-        <%= errorMessage %>
-      </div>
-      <% } %>
 
-        <form id="orderForm" action="/placeOrder" method="POST" >
-          <div class="row mt-3" style="padding: 48px;">
-            <!-- Left Side Section -->
-            <div class="col-md-6">
-              <!-- Order Details Section -->
-              <div class="order-details container-box-1">
-                <h3>Your Order</h3>
-                <hr />
-                <div class="cart-items">
-                  <% cart.items.forEach(item=> { %>
-                    <div class="card mb-3">
-                      <div class="card-body">
-                        <div class="row align-items-center">
-                          <div class="col-md-2">
-                            <img src="<%= item.productId.images[0] %>" alt="Product Image"
-                              class="img-fluid object-fit-cover" />
-                          </div>
-                          <div class="col-md-8">
-                            <h5 class="card-title">
-                              <%= item.productId.product_name %>
-                            </h5>
-                            <% if (item.productId.offerPrice) { %>
-                              <p>
-                                Qty: <%= item.quantity %> ||
-                                  <span class="original-price" style="text-decoration: line-through; color: red;">Price:
-                                    &#x20a8; <%= item.productId.price * item.quantity %></span> ||
-                                  <span class="offer-price" style="color: green;">Offer Price: &#x20a8; <%=
-                                      item.productId.offerPrice * item.quantity %></span>
-                              </p>
-                              <p>
-                                <span class="discount-amount" style="color: green;">You saved: &#x20a8; <%=
-                                    (item.productId.price * item.quantity) - (item.productId.offerPrice * item.quantity)
-                                    %></span>
-                              </p>
-                              <% } else { %>
-                                <p>Qty: <%= item.quantity %> || Total Price: &#x20a8; <%= item.productId.price *
-                                      item.quantity %>
-                                </p>
-                                <% } %>
-                          </div>
+    <% if (cart.items.length === 0) { %>
+        <div class="alert alert-danger mt-3 text-center" role="alert" style="font-weight: bold; font-size: 1.2rem;">
+            Your cart is empty. Please add items to your cart before checking out.
+        </div>
+    <% } else { %>
+
+        <% if (errorMessage) { %>
+        <div class="alert alert-danger mt-3" role="alert">
+            <%= errorMessage %>
+        </div>
+        <% } %>
+
+        <form id="orderForm" action="/placeOrder" method="POST">
+            <div class="row mt-3" style="padding: 48px;">
+                <!-- Left Side Section -->
+                <div class="col-md-6">
+                    <!-- Order Details Section -->
+                    <div class="order-details container-box-1">
+                        <h3>Your Order</h3>
+                        <hr />
+                        <div class="cart-items">
+                            <% cart.items.forEach(item => { %>
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2">
+                                                <img src="<%= item.productId.images[0] %>" alt="Product Image" class="img-fluid object-fit-cover" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h5 class="card-title">
+                                                    <%= item.productId.product_name %>
+                                                </h5>
+                                                <% if (item.productId.offerPrice) { %>
+                                                    <p>
+                                                        Qty: <%= item.quantity %> || 
+                                                        <span class="original-price" style="text-decoration: line-through; color: red;">Price: &#x20a8; <%= item.productId.price * item.quantity %></span> || 
+                                                        <span class="offer-price" style="color: green;">Offer Price: &#x20a8; <%= item.productId.offerPrice * item.quantity %></span>
+                                                    </p>
+                                                    <p>
+                                                        <span class="discount-amount" style="color: green;">You saved: &#x20a8; <%= (item.productId.price * item.quantity) - (item.productId.offerPrice * item.quantity) %></span>
+                                                    </p>
+                                                <% } else { %>
+                                                    <p>Qty: <%= item.quantity %> || Total Price: &#x20a8; <%= item.productId.price * item.quantity %></p>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
                         </div>
-                      </div>
                     </div>
-                    <% }) %>
+                    <input type="hidden" id="cartId" name="cartId" value="<%= cart._id %>">
+
+                    <!-- Address Selection Section -->
+                    <div class="address-selection mt-2 container-box-1">
+                        <h3>Choose Address</h3>
+                        <hr />
+                        <select class="form-control" id="addressSelect" name="selectedAddress">
+                            <% addresses.forEach((address, i) => { %>
+                                <option value="<%= address._id %>" <%= i === 0 ? 'selected' : '' %>>
+                                    <%= address.name %> - Address <%= i + 1 %>: <%= address.address %>, <%= address.state %>, <%= address.pincode %>
+                                </option>
+                            <% }) %>
+                        </select>
+                        <button type="button" class="btn btn-warning mt-3" id="addAddressButton" data-toggle="modal" data-target="#addressModal">Add Address</button>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="payment-method mt-2 container-box-2">
+                        <h3 class="text-center" style="font-size: 1.5rem;">Payment Method</h3>
+                        <hr />
+                        <div class="form-check d-flex align-items-center">
+                            <input class="form-check-input" type="radio" name="paymentMethod" value="COD" id="codRadio" <% if (cart.totalAmount >= 1000) { %> disabled <% } %> />
+                            <label class="form-check-label ms-2" for="codRadio">Cash On Delivery</label>
+                        </div>
+                        <% if (cart.totalAmount >= 1000) { %>
+                            <div class="custom-alert mt-2" role="alert">
+                                Cash on Delivery is not available for orders above &#x20a8; 1000.
+                            </div>
+                        <% } %>
+                        <div class="form-check d-flex align-items-center" style="margin-left: 0px;">
+                            <input class="form-check-input" type="radio" name="paymentMethod" value="RazorPay" id="razorPayRadio" />
+                            <label class="form-check-label ms-2" for="razorPayRadio">RazorPay Payment</label>
+                        </div>
+                        <div class="form-check d-flex align-items-center">
+                            <input class="form-check-input" type="radio" name="paymentMethod" value="Wallet" id="walletRadio" <% if (walletBalance < cart.finalAmount) { %> disabled <% } %> />
+                            <label class="form-check-label ms-2" for="walletRadio">Wallet Payment (Balance: &#x20a8; <span id="walletBalance"><%= walletBalance %></span>)</label>
+                        </div>
+                        <% if (walletBalance < cart.finalAmount) { %>
+                            <div class="custom-alert mt-2" role="alert">
+                                Wallet balance is insufficient for this order. Please try another payment method.
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
-              </div>
-              <input type="hidden" id="cartId" name="cartId" value="<%= cart._id %>">
 
-              <!-- Address Selection Section -->
-              <div class="address-selection mt-2 container-box-1">
-                <h3>Choose Address</h3>
-                <hr />
-                <select class="form-control" id="addressSelect" name="selectedAddress">
-                  <% addresses.forEach((address, i)=> { %>
-                    <option value="<%= address._id %>" <%=i===0 ? 'selected' : '' %>>
-                      <%= address.name %> - Address <%= i + 1 %>: <%= address.address %>, <%= address.state %>, <%=
-                                address.pincode %>
-                    </option>
-                    <% }) %>
-                </select>
-                <button type="button" class="btn btn-warning mt-3" id="addAddressButton" data-toggle="modal"
-                  data-target="#addressModal">Add Address</button>
-              </div>
+                <!-- Right Side Section -->
+                <div class="col-md-6">
+                    <div class="container mt-4">
+                        <div class="container-box-2">
+                            <h3>Coupon</h3>
+                            <hr />
+                            <div id="couponSection">
+                                <% if (cart.appliedCoupon) { %>
+                                    <input type="text" class="form-control" id="couponCodeInput" placeholder="Coupon Applied" value="<%= cart.appliedCoupon %>" disabled>
+                                    <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" disabled>Apply Coupon</button>
+                                    <button type="button" class="btn btn-danger mt-2" onclick="removeCoupon()">Remove Coupon</button>
+                                    <p class="coupon-success" id="couponSuccessMessage">Coupon applied successfully!</p>
+                                <% } else { %>
+                                    <input type="text" class="form-control" id="couponCodeInput" placeholder="Enter coupon code manually">
+                                    <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" onclick="applyCoupon()">Apply Coupon</button>
+                                    <p class="coupon-success" id="couponSuccessMessage" style="display: none;">Coupon applied successfully!</p>
+                                <% } %>
+                            </div>
 
-<!-- Payment Method -->
-<div class="payment-method mt-2 container-box-2">
-  <h3 class="text-center" style="font-size: 1.5rem;">Payment Method</h3>
-  <hr />
-  <div class="form-check d-flex align-items-center">
-    <input class="form-check-input " type="radio" name="paymentMethod" value="COD" id="codRadio" <% if (cart.totalAmount >= 1000) { %> disabled <% } %> />
-    <label class="form-check-label ms-2" for="codRadio">Cash On Delivery</label>
-  </div>
-  <% if (cart.totalAmount >= 1000) { %>
-    <div class="custom-alert mt-2" role="alert">
-      Cash on Delivery is not available for orders above &#x20a8; 1000.
-    </div>
-  <% } %>
-  <div class="form-check d-flex align-items-center" style="margin-left: 0px;">
-    <input class="form-check-input" type="radio" name="paymentMethod" value="RazorPay" id="razorPayRadio" />
-    <label class="form-check-label ms-2" for="razorPayRadio">RazorPay Payment</label>
-  </div>
-  <div class="form-check d-flex align-items-center">
-    <input class="form-check-input" type="radio" name="paymentMethod" value="Wallet" id="walletRadio" 
-           <% if (walletBalance < cart.finalAmount) { %> disabled <% } %> />
-    <label class="form-check-label ms-2" for="walletRadio">Wallet Payment (Balance: &#x20a8; <span id="walletBalance"><%= walletBalance %></span>)</label>
-  </div>
-  <% if (walletBalance < cart.finalAmount) { %>
-    <div class="custom-alert mt-2" role="alert">
-      Wallet balance is insufficient for this order. Please try another payment method.
-    </div>
-  <% } %>
+                            <!-- Available Coupons -->
+                            <% if (coupon && coupon.length > 0) { %>
+                                <div class="dropdown mt-2">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="availableCouponDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Available Coupons
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="availableCouponDropdown">
+                                        <% coupon.forEach((coupon) => { %>
+                                            <a class="dropdown-item" href="#" onclick="copyCouponCode('<%= coupon.coupon_Code %>')">
+                                                <%= coupon.coupon_Name %> - <%= coupon.coupon_Code %>
+                                                <button type="button" class="btn btn-secondary btn-sm ml-2">Copy</button>
+                                                <input type="text" id="couponInput_<%= coupon.coupon_Code %>" style="display: none;">
+                                                <span id="copyMessage_<%= coupon.coupon_Code %>"></span>
+                                            </a>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            <% } else { %>
+                                <p>No Coupons available</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Total Amount Section -->
+                    <div class="total-amount mt-3 container-box-2 text-center">
+                        <h3 style="font-size: 1.5rem;">Total Amount</h3>
+                        <hr />
+                        <p id="appliedCoupon" style="color: green; font-size: 0.9rem;"><i class="fa fa-tag"></i> Applied Coupon: <%= cart.appliedCoupon || 'None' %></p>
+                        <p id="discountAmount" style="color: green; font-size: 0.9rem;"><i class="fa fa-percent"></i> Coupon Discount: &#x20a8; <%= cart.couponDiscount || 0 %></p>
+
+                        <% if (!isNaN(cart.offerDiscount) && cart.offerDiscount > 0) { %>
+                            <p id="offerDiscount" style="color: green; font-size: 0.9rem;"><i class="fa fa-gift"></i> Offer Discount: &#x20a8; <%= cart.offerDiscount %></p>
+                        <% } %>
+
+                        <p id="deliveryCharge" style="color: green; font-size: 0.9rem;"><i class="fa fa-truck"></i> Delivery Charge: &#x20a8; <%= cart.totalAmount >= 500 ? 50 : 0 %></p>
+                        <% var totalWithDeliveryCharge = cart.totalAmount + (cart.totalAmount >= 500 ? 50 : 0); %>
+                        <p id="totalAmount" style="color: black; font-weight: bold; font-size: 1.2rem;"><i class="fa fa-money"></i> Total Amount: &#x20a8; <%= totalWithDeliveryCharge %></p>
+
+                        <div id="removeCouponButton" <% if (!isNaN(cart.couponDiscount) && cart.couponDiscount > 0) { %> style="display: block;" <% } else { %> style="display: none;" <% } %>>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeCoupon()"><i class="fa fa-times"></i> Remove Coupon</button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-place-order mt-3 container-box-2" id="placeOrderBtn" style="width: 60%;"><i class="fa fa-shopping-cart"></i> Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    <% } %>
 </div>
 
-
-            </div>
-
-            <!-- Right Side Section -->
-            <div class="col-md-6">
-              <div class="container mt-4">
-                <div class="container-box-2">
-                  <h3>Coupon</h3>
-                  <hr />
-                  <div id="couponSection">
-                    <% if (cart.appliedCoupon) { %>
-                      <input type="text" class="form-control" id="couponCodeInput" placeholder="Coupon Applied"
-                        value="<%= cart.appliedCoupon %>" disabled>
-                      <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" disabled>Apply
-                        Coupon</button>
-                      <button type="button" class="btn btn-danger mt-2" onclick="removeCoupon()">Remove Coupon</button>
-                      <p class="coupon-success" id="couponSuccessMessage">Coupon applied successfully!</p>
-                      <% } else { %>
-                        <input type="text" class="form-control" id="couponCodeInput"
-                          placeholder="Enter coupon code manually">
-                        <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn"
-                          onclick="applyCoupon()">Apply Coupon</button>
-                        <p class="coupon-success" id="couponSuccessMessage" style="display: none;">Coupon applied
-                          successfully!</p>
-                        <% } %>
-                  </div>
-
-                  <!-- Available Coupons -->
-                  <% if (coupon && coupon.length> 0) { %>
-                    <div class="dropdown mt-2">
-                      <button class="btn btn-secondary dropdown-toggle" type="button" id="availableCouponDropdown"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Available Coupons
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="availableCouponDropdown">
-                        <% coupon.forEach((coupon)=> { %>
-                          <a class="dropdown-item" href="#" onclick="copyCouponCode('<%= coupon.coupon_Code %>')">
-                            <%= coupon.coupon_Name %> - <%= coupon.coupon_Code %>
-                                <button type="button" class="btn btn-secondary btn-sm ml-2">Copy</button>
-                                <input type="text" id="couponInput_<%= coupon.coupon_Code %>" style="display: none;">
-                                <span id="copyMessage_<%= coupon.coupon_Code %>"></span>
-                          </a>
-                          <% }) %>
-                      </div>
-                    </div>
-                    <% } else { %>
-                      <p>No Coupons available</p>
-                      <% } %>
-                </div>
-              </div>
-
-              <!-- Total Amount Section -->
-              <div class="total-amount mt-3 container-box-2 text-center">
-                <h3 style="font-size: 1.5rem;">Total Amount</h3>
-                <hr />
-                <p id="appliedCoupon" style="color: green; font-size: 0.9rem;"><i class="fa fa-tag"></i> Applied Coupon:
-                  <%= cart.appliedCoupon || 'None' %>
-                </p>
-                <p id="discountAmount" style="color: green; font-size: 0.9rem;"><i class="fa fa-percent"></i> Coupon
-                  Discount: &#x20a8; <%= cart.couponDiscount || 0 %>
-                </p>
-
-                <% if (!isNaN(cart.offerDiscount) && cart.offerDiscount> 0) { %>
-                  <p id="offerDiscount" style="color: green; font-size: 0.9rem;"><i class="fa fa-gift"></i> Offer
-                    Discount: &#x20a8; <%= cart.offerDiscount %>
-                  </p>
-                  <% } %>
-
-                    <p id="deliveryCharge" style="color: green; font-size: 0.9rem;"><i class="fa fa-truck"></i> Delivery
-                      Charge: &#x20a8; <%= cart.totalAmount>= 500 ? 50 : 0 %></p>
-                    <% var totalWithDeliveryCharge=cart.totalAmount + (cart.totalAmount>= 500 ? 50 : 0); %>
-                      <p id="totalAmount" style="color: black; font-weight: bold; font-size: 1.2rem;"><i
-                          class="fa fa-money"></i> Total Amount: &#x20a8; <%= totalWithDeliveryCharge %>
-                      </p>
-
-                      <div id="removeCouponButton" <% if (!isNaN(cart.couponDiscount) && cart.couponDiscount> 0) { %>
-                        style="display: block;" <% } else { %> style="display: none;" <% } %>>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="removeCoupon()"><i
-                                class="fa fa-times"></i> Remove Coupon</button>
-                      </div>
-
-                      <!-- <button type="submit" class="btn btn-primary btn-place-order mt-3 container-box-2"
-                        id="placeOrderBtn" style="width: 60%;"><i class="fa fa-shopping-cart"></i> Place Order</button>
-                      <hr /> -->
-                      <button type="submit" class="btn btn-primary btn-place-order mt-3 container-box-2"
-  id="placeOrderBtn" onclick="validateForm()" style="width: 60%;"><i class="fa fa-shopping-cart"></i> Place Order</button>
-              </div>
-
-
-            </div>
-          </div>
-        </form>
-
-  </div>
-
-
-  
-  <!-- Modal for Adding Address -->
-  <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+<!-- Modal for Adding Address -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered small-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addressModalLabel">Add Address</h5>
-          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">Add Address</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addressForm" action="/addaddresss" method="post">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name">
+                        <span id="nameValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input type="text" class="form-control" id="mobile" name="mobile">
+                        <span id="mobileValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" class="form-control" id="address" name="address">
+                        <span id="addressValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="district">District</label>
+                        <input type="text" class="form-control" id="district" name="district">
+                        <span id="districtValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" class="form-control" id="state" name="state">
+                        <span id="stateValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="pincode">PinCode</label>
+                        <input type="text" class="form-control" id="pincode" name="pincode">
+                        <span id="pincodeValidation" class="validation-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="landmark">Landmark (optional)</label>
+                        <input type="text" class="form-control" id="landmark" name="landmark">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-          <form id="addressForm" action="/addaddresss" method="post">
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" class="form-control" id="name" name="name">
-              <span id="nameValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="mobile">Mobile Number</label>
-              <input type="text" class="form-control" id="mobile" name="mobile">
-              <span id="mobileValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="address">Address</label>
-              <input type="text" class="form-control" id="address" name="address">
-              <span id="addressValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="district">District</label>
-              <input type="text" class="form-control" id="district" name="district">
-              <span id="districtValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="state">State</label>
-              <input type="text" class="form-control" id="state" name="state">
-              <span id="stateValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="pincode">PinCode</label>
-              <input type="text" class="form-control" id="pincode" name="pincode">
-              <span id="pincodeValidation" class="validation-message"></span>
-            </div>
-            <div class="form-group">
-              <label for="landmark">Landmark (optional)</label>
-              <input type="text" class="form-control" id="landmark" name="landmark">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
+
 
 
 
@@ -1060,11 +1072,48 @@
 
     document.getElementById('orderForm').addEventListener('submit', async function (event) {
       event.preventDefault(); // Prevent default form submission
+      let continuePayment = true
+
+      const selectedAddress = document.getElementById('addressSelect').value;
+      if (!selectedAddress) {
+  Swal.fire({
+    icon: 'error',
+    title: '<strong>Error</strong>',
+    html: '<p style="color: #721c24; font-weight: bold;">Please select an address.</p>',
+    background: '#fff3f3',
+    iconColor: '#dc3545',
+    confirmButtonColor: '#dc3545',
+    customClass: {
+      popup: 'styled-popup',
+      icon: 'styled-icon'
+    }
+  });
+  continuePayment = false;
+}
+
+// Check if payment method is selected
+const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+if (!paymentMethodSelected) {
+  Swal.fire({
+    icon: 'error',
+    title: '<strong>Error</strong>',
+    html: '<p style="color: #721c24; font-weight: bold;">Please select a payment method.</p>',
+    background: '#fff3f3',
+    iconColor: '#dc3545',
+    confirmButtonColor: '#dc3545',
+    customClass: {
+      popup: 'styled-popup',
+      icon: 'styled-icon'
+    }
+  });
+  continuePayment = false;
+}
+
 
       // Retrieve selected payment method
       var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-      if (selectedPaymentMethod === 'RazorPay') {
+      if (continuePayment && selectedPaymentMethod === 'RazorPay') {
         console.log("amountTotal", totalWithDeliveryCharge);
         // If RazorPay payment method is selected, initiate Razorpay payment
         try {
@@ -1150,7 +1199,7 @@
           console.error("Error initiating Razorpay payment:", error);
           alert('An error occurred while initiating payment. Please try again.');
         }
-      } else if (selectedPaymentMethod === 'Wallet') {
+      } else if (continuePayment && selectedPaymentMethod === 'Wallet') {
         // If Wallet payment method is selected, handle wallet payment logic
         try {
           let amountTotal = document.getElementById("totalAmount").innerText;
@@ -1179,7 +1228,7 @@
         } catch (error) {
           console.error("Error handling wallet payment:", error);
         }
-      } else {
+      } else if(continuePayment && selectedPaymentMethod === 'COD') {
         // If other payment method is selected (COD), submit the form normally
 
         let amountTotal = document.getElementById("totalAmount").innerText;
@@ -1221,6 +1270,12 @@
       var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       var cartId = document.getElementById('cartId').value;
 
+      const offerDiscount=document.getElementById("offerDiscount").innerText
+
+      const discountAmount=document.getElementById("discountAmount").innerText
+
+      
+
       try {
         let paymentDetails = {
           addressId: selectedAddressId,
@@ -1229,7 +1284,9 @@
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_order_id: response.razorpay_order_id,
           razorpay_signature: response.razorpay_signature,
-          amountTotal: amountTotal
+          amountTotal: amountTotal,
+          offerDiscount:offerDiscount,
+          discountAmount:discountAmount
         };
 
         let paymentResponse = await fetch('/handlePayment', {
@@ -1339,139 +1396,139 @@
 
 
   <script>
-document.addEventListener('DOMContentLoaded', function () {
-  let check = true;
+    document.addEventListener('DOMContentLoaded', function () {
+      let check = true;
 
-  function validateText(inputFieldId, errorMessageId) {
-    const inputField = document.getElementById(inputFieldId);
-    const errorMessageElement = document.getElementById(errorMessageId);
-    errorMessageElement.textContent = '';
-    const value = inputField.value.trim();
+      function validateText(inputFieldId, errorMessageId) {
+        const inputField = document.getElementById(inputFieldId);
+        const errorMessageElement = document.getElementById(errorMessageId);
+        errorMessageElement.textContent = '';
+        const value = inputField.value.trim();
 
-    if (value === "") {
-      check = false;
-      errorMessageElement.textContent = 'This field cannot be empty.';
-    } else if (!/^[a-zA-Z\s]*$/.test(value)) {
-      check = false;
-      errorMessageElement.textContent = 'Please enter a valid text.';
-    }
-  }
+        if (value === "") {
+          check = false;
+          errorMessageElement.textContent = 'This field cannot be empty.';
+        } else if (!/^[a-zA-Z\s]*$/.test(value)) {
+          check = false;
+          errorMessageElement.textContent = 'Please enter a valid text.';
+        }
+      }
 
-  function validateNumber(inputFieldId, errorMessageId) {
-    const inputField = document.getElementById(inputFieldId);
-    const errorMessageElement = document.getElementById(errorMessageId);
-    errorMessageElement.textContent = '';
-    const value = inputField.value.trim().replace(/\s/g, '');
+      function validateNumber(inputFieldId, errorMessageId) {
+        const inputField = document.getElementById(inputFieldId);
+        const errorMessageElement = document.getElementById(errorMessageId);
+        errorMessageElement.textContent = '';
+        const value = inputField.value.trim().replace(/\s/g, '');
 
-    if (value === "") {
-      check = false;
-      errorMessageElement.textContent = 'This field cannot be empty.';
-    } else if (!/^\d*$/.test(value)) {
-      check = false;
-      errorMessageElement.textContent = 'Please enter a valid number without spaces.';
-    }
-  }
+        if (value === "") {
+          check = false;
+          errorMessageElement.textContent = 'This field cannot be empty.';
+        } else if (!/^\d*$/.test(value)) {
+          check = false;
+          errorMessageElement.textContent = 'Please enter a valid number without spaces.';
+        }
+      }
 
-  function validatePincode(inputFieldId, errorMessageId) {
-    const inputField = document.getElementById(inputFieldId);
-    const errorMessageElement = document.getElementById(errorMessageId);
-    errorMessageElement.textContent = '';
-    const value = inputField.value.trim();
+      function validatePincode(inputFieldId, errorMessageId) {
+        const inputField = document.getElementById(inputFieldId);
+        const errorMessageElement = document.getElementById(errorMessageId);
+        errorMessageElement.textContent = '';
+        const value = inputField.value.trim();
 
-    if (value === "") {
-      check = false;
-      errorMessageElement.textContent = 'This field cannot be empty.';
-    } else if (!/^\d{6}$/.test(value)) {
-      check = false;
-      errorMessageElement.textContent = 'Pincode must be 6 digits.';
-    }
-  }
+        if (value === "") {
+          check = false;
+          errorMessageElement.textContent = 'This field cannot be empty.';
+        } else if (!/^\d{6}$/.test(value)) {
+          check = false;
+          errorMessageElement.textContent = 'Pincode must be 6 digits.';
+        }
+      }
 
-  document.getElementById('mobile').addEventListener('input', function () {
-    validateNumber('mobile', 'mobileValidation');
-  });
+      document.getElementById('mobile').addEventListener('input', function () {
+        validateNumber('mobile', 'mobileValidation');
+      });
 
-  document.getElementById('pincode').addEventListener('input', function () {
-    validatePincode('pincode', 'pincodeValidation');
-  });
+      document.getElementById('pincode').addEventListener('input', function () {
+        validatePincode('pincode', 'pincodeValidation');
+      });
 
-  document.getElementById('name').addEventListener('input', function () {
-    validateText('name', 'nameValidation');
-  });
+      document.getElementById('name').addEventListener('input', function () {
+        validateText('name', 'nameValidation');
+      });
 
-  document.getElementById('address').addEventListener('input', function () {
-    const inputField = document.getElementById('address');
-    const errorMessageElement = document.getElementById('addressValidation');
-    errorMessageElement.textContent = '';
-    if (inputField.value.trim() === "") {
-      check = false;
-      errorMessageElement.textContent = 'Address cannot be empty.';
-    }
-  });
-
-  document.getElementById('district').addEventListener('input', function () {
-    validateText('district', 'districtValidation');
-  });
-
-  document.getElementById('state').addEventListener('input', function () {
-    validateText('state', 'stateValidation');
-  });
-
-  function validateForm() {
-    check = true;
-    validateText('name', 'nameValidation');
-    validateNumber('mobile', 'mobileValidation');
-    validatePincode('pincode', 'pincodeValidation');
-    const addressField = document.getElementById('address');
-    if (addressField.value.trim() === "") {
-      check = false;
-      document.getElementById('addressValidation').textContent = 'Address cannot be empty.';
-    }
-    validateText('district', 'districtValidation');
-    validateText('state', 'stateValidation');
-    return check;
-  }
-
-  function submitAddressForm(event) {
-    event.preventDefault();
-    if (validateForm()) {
-      $.ajax({
-        url: '/addaddresss',
-        type: 'POST',
-        data: $('#addressForm').serialize(),
-        success: function (response) {
-          if (response.success) {
-            const newAddress = response.newAddress;
-            const newOption = `<option value="${newAddress._id}"> ${newAddress.name} - ${newAddress.address}, ${newAddress.state}, ${newAddress.pincode} </option>`;
-            $('#addressSelect').append(newOption);
-            $('#addressModal').modal('hide');
-            $('#addressForm')[0].reset();
-            location.reload(); // Refresh the page to update the checkout details
-          } else {
-            let errorMessage = '';
-            if (response.errors) {
-              const errors = response.errors;
-              if (Array.isArray(errors)) {
-                errorMessage = errors.join('<br>');
-              } else {
-                errorMessage = errors;
-              }
-            } else {
-              errorMessage = 'An error occurred. Please try again.';
-            }
-            alert('Error: ' + errorMessage);
-          }
-        },
-        error: function (xhr, status, error) {
-          alert('An error occurred: ' + error);
+      document.getElementById('address').addEventListener('input', function () {
+        const inputField = document.getElementById('address');
+        const errorMessageElement = document.getElementById('addressValidation');
+        errorMessageElement.textContent = '';
+        if (inputField.value.trim() === "") {
+          check = false;
+          errorMessageElement.textContent = 'Address cannot be empty.';
         }
       });
-    }
-  }
 
-  document.getElementById('addressForm').addEventListener('submit', submitAddressForm);
-});
-</script>
+      document.getElementById('district').addEventListener('input', function () {
+        validateText('district', 'districtValidation');
+      });
+
+      document.getElementById('state').addEventListener('input', function () {
+        validateText('state', 'stateValidation');
+      });
+
+      function validateFormAddress() {
+        check = true;
+        validateText('name', 'nameValidation');
+        validateNumber('mobile', 'mobileValidation');
+        validatePincode('pincode', 'pincodeValidation');
+        const addressField = document.getElementById('address');
+        if (addressField.value.trim() === "") {
+          check = false;
+          document.getElementById('addressValidation').textContent = 'Address cannot be empty.';
+        }
+        validateText('district', 'districtValidation');
+        validateText('state', 'stateValidation');
+        return check;
+      }
+
+      function submitAddressForm(event) {
+        event.preventDefault();
+        if (validateFormAddress()) {
+          $.ajax({
+            url: '/addaddresss',
+            type: 'POST',
+            data: $('#addressForm').serialize(),
+            success: function (response) {
+              if (response.success) {
+                const newAddress = response.newAddress;
+                const newOption = `<option value="${newAddress._id}"> ${newAddress.name} - ${newAddress.address}, ${newAddress.state}, ${newAddress.pincode} </option>`;
+                $('#addressSelect').append(newOption);
+                $('#addressModal').modal('hide');
+                $('#addressForm')[0].reset();
+                location.reload(); // Refresh the page to update the checkout details
+              } else {
+                let errorMessage = '';
+                if (response.errors) {
+                  const errors = response.errors;
+                  if (Array.isArray(errors)) {
+                    errorMessage = errors.join('<br>');
+                  } else {
+                    errorMessage = errors;
+                  }
+                } else {
+                  errorMessage = 'An error occurred. Please try again.';
+                }
+                alert('Error: ' + errorMessage);
+              }
+            },
+            error: function (xhr, status, error) {
+              alert('An error occurred: ' + error);
+            }
+          });
+        }
+      }
+
+      document.getElementById('addressForm').addEventListener('submit', submitAddressForm);
+    });
+  </script>
 
 
 
@@ -1485,47 +1542,13 @@ document.addEventListener('DOMContentLoaded', function () {
   </script>
 
 
-<!-- <script>
-  function validateForm() {
-  // Check if address is selected
-  const selectedAddress = document.getElementById('addressSelect').value;
-  if (!selectedAddress) {
-    swal("Error!", "Please select an address.", "error");
-    return false;
-  }
-
-  // Check if payment method is selected
-  const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
-  if (!paymentMethodSelected) {
-    swal("Error!", "Please select a payment method.", "error");
-    return false;
-  }
-
-  // If all conditions are met, allow form submission
-  return true;
-}
-</script> -->
-
+  
 
   <script>
 
-    function validateForm() {
-      const selectedAddress = document.getElementById('selectedAddress').value;
-      console.log('selectedAddress', selectedAddress);
-      if (!selectedAddress) {
-        swal("Error!", "Please select an address.", "error");
-        return false;
-      }
-
-      var codSelected = document.querySelector('input[name="paymentMethod"]:checked');
-      if (!codSelected) {
-        swal("Error!", "Please select Cash On Delivery as your payment method.", "error");
-        return false;
-      }
-
-      return true;
-    }
-
+    // function validateForm() {
+    //   const selectedAddress = document.getElementById('addressSelect').value;
+   
     // Update selected address container when a new address is selected from the dropdown menu
     $('#addressSelect').on('change', function () {
       const selectedAddressId = $(this).val();
@@ -1563,19 +1586,19 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addresses = <% - JSON.stringify(addresses) %>;
   </script>
 
-  
-<script>
-  // Fetch wallet balance from the server
-  fetch("/getWalletBalance")
-    .then(response => response.json())
-    .then(data => {
-      // Update wallet balance in the UI
-      // document.getElementById("walletBalance").innerText = data.balance;
-    })
-    .catch(error => {
-      console.error("Error fetching wallet balance:", error);
-    });
-</script>
+
+  <script>
+    // Fetch wallet balance from the server
+    fetch("/getWalletBalance")
+      .then(response => response.json())
+      .then(data => {
+        // Update wallet balance in the UI
+        // document.getElementById("walletBalance").innerText = data.balance;
+      })
+      .catch(error => {
+        console.error("Error fetching wallet balance:", error);
+      });
+  </script>
 
 
 

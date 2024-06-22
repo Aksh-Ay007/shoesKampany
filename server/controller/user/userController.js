@@ -132,7 +132,6 @@ const googleAuthCallback = (req, res, next) => {
 
 
 //Checking Membership
-// postLogin function
 const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -148,7 +147,7 @@ const postLogin = async (req, res) => {
 
     // Check if the user is blocked
     if (user.isBlocked) {
-      req.flash("error", "User is blocked.");
+      req.flash("error", "You are blocked by admin.");
       return res.redirect("/userlogin");
     }
 
@@ -176,7 +175,6 @@ const postLogin = async (req, res) => {
     return res.status(500).send("Error occurred");
   }
 };
-
 
 
 const userlogout = async (req, res) => {
