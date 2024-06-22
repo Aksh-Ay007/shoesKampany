@@ -151,14 +151,16 @@ const getCheckout = async (req, res) => {
 const postOrder = async (req, res) => {
   console.log("post order is working ");
   try {
-    const { addressId, cartId, paymentMethod, amountTotal, couponDiscount } = req.body;
+    const { addressId, cartId, paymentMethod, amountTotal, offerDiscount, discountAmount, deliveryCharge } = req.body;
 
     // Logging each field of req.body
     console.log("addressId:", addressId);
     console.log("cartId:", cartId);
     console.log("paymentMethod:", paymentMethod);
     console.log("amountTotal:", amountTotal);
-    console.log("couponDiscount:", couponDiscount);
+    console.log("offerDiscount:", offerDiscount);
+    console.log("discountAmount:", discountAmount);
+    console.log("deliveryCharge:", deliveryCharge);
 
     const userId = req.session.user._id;
     const AddressId = addressId;
@@ -181,22 +183,18 @@ const postOrder = async (req, res) => {
     }));
 
     const totalAmount = userCartData.totalAmount;
-    const offerDiscount = calculateOfferDiscount(userCartData.items);
 
-    const amountTotalString = amountTotal.replace(/[^0-9.]/g, "");
-    const finalAmount = parseFloat(amountTotalString);
+    const amountTotalValue = parseFloat(amountTotal.replace(/[^0-9.]/g, ""));
+    const offerDiscountValue = parseFloat(offerDiscount.replace(/[^0-9.]/g, ""));
+    const discountAmountValue = parseFloat(discountAmount.replace(/[^0-9.]/g, ""));
+    const deliveryChargeValue = parseFloat(deliveryCharge.replace(/[^0-9.]/g, ""));
 
-    if (isNaN(finalAmount)) {
-      return res.status(400).json({ error: "Invalid final amount" });
+    if (isNaN(amountTotalValue) || isNaN(offerDiscountValue) || isNaN(discountAmountValue) || isNaN(deliveryChargeValue)) {
+      return res.status(400).json({ error: "Invalid numeric value" });
     }
 
     if (paymentMethod === "COD" && totalAmount > 1000) {
       return res.status(400).json({ error: "COD payment is not allowed for orders over Rs. 1000" });
-    }
-
-    let deliveryCharge = 0;
-    if (totalAmount <= 500) {
-      deliveryCharge = 50;
     }
 
     let paymentStatus = "Pending";
@@ -211,15 +209,15 @@ const postOrder = async (req, res) => {
         });
         await wallet.save();
       }
-      if (wallet.balance < finalAmount + deliveryCharge) {
+      if (wallet.balance < amountTotalValue + deliveryChargeValue) {
         return res.status(400).json({ error: "Insufficient wallet balance" });
       }
 
       // Deduct amount from wallet
-      wallet.balance -= finalAmount + deliveryCharge;
+      wallet.balance -= amountTotalValue + deliveryChargeValue;
       wallet.transactions.push({
         type: "withdrawal",
-        amount: finalAmount + deliveryCharge,
+        amount: amountTotalValue + deliveryChargeValue,
         timestamp: new Date(),
         description: "Order payment",
       });
@@ -237,13 +235,12 @@ const postOrder = async (req, res) => {
       shippingAddress: AddressId,
       paymentMethod: payment,
       totalAmount: totalAmount,
-      finalAmount: finalAmount + deliveryCharge,
-      deliveryCharge: deliveryCharge,
-      couponDiscount: couponDiscount || 0,
-      offerDiscount: offerDiscount || 0,
+      finalAmount: amountTotalValue + deliveryChargeValue,
+      deliveryCharge: deliveryChargeValue,
+      couponDiscount: discountAmountValue || 0,
+      offerDiscount: offerDiscountValue || 0,
     });
 
-    // Logging newOrder before saving
     console.log("newOrder:", newOrder);
 
     await newOrder.save();

@@ -1060,255 +1060,266 @@
       // Show a message or perform any additional actions
       console.log("Coupon code copied: " + couponCode);
     }
-  </script>
+     </script>
 
 
-  <script>
+     <script>
     let totalAmount = <%= cart.totalAmount %>;
-    let discountAmount = 0; // Initialize discount amount
-    let couponCodeInput = document.getElementById('couponCodeInput');
-    let deliveryCharge = <%= cart.totalAmount >= 500 ? 50 : 0 %>;
-    let totalWithDeliveryCharge = totalAmount + deliveryCharge;
+  let discountAmount = 0; // Initialize discount amount
+  let couponCodeInput = document.getElementById('couponCodeInput');
+  let deliveryCharge = <%= cart.totalAmount >= 500 ? 50 : 0 %>;
+  let totalWithDeliveryCharge = totalAmount + deliveryCharge;
 
-    document.getElementById('orderForm').addEventListener('submit', async function (event) {
-      event.preventDefault(); // Prevent default form submission
-      let continuePayment = true
+  document.getElementById('orderForm').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Prevent default form submission
+    let continuePayment = true
 
-      const selectedAddress = document.getElementById('addressSelect').value;
-      if (!selectedAddress) {
-  Swal.fire({
-    icon: 'error',
-    title: '<strong>Error</strong>',
-    html: '<p style="color: #721c24; font-weight: bold;">Please select an address.</p>',
-    background: '#fff3f3',
-    iconColor: '#dc3545',
-    confirmButtonColor: '#dc3545',
-    customClass: {
-      popup: 'styled-popup',
-      icon: 'styled-icon'
-    }
-  });
-  continuePayment = false;
-}
-
-// Check if payment method is selected
-const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
-if (!paymentMethodSelected) {
-  Swal.fire({
-    icon: 'error',
-    title: '<strong>Error</strong>',
-    html: '<p style="color: #721c24; font-weight: bold;">Please select a payment method.</p>',
-    background: '#fff3f3',
-    iconColor: '#dc3545',
-    confirmButtonColor: '#dc3545',
-    customClass: {
-      popup: 'styled-popup',
-      icon: 'styled-icon'
-    }
-  });
-  continuePayment = false;
-}
-
-
-      // Retrieve selected payment method
-      var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-      if (continuePayment && selectedPaymentMethod === 'RazorPay') {
-        console.log("amountTotal", totalWithDeliveryCharge);
-        // If RazorPay payment method is selected, initiate Razorpay payment
-        try {
-          let response = await fetch('/createOrder', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ totalPrice: totalWithDeliveryCharge }) // Send the total amount including delivery charge
-          });
-
-          let data = await response.json();
-
-          if (data.orderId) {
-            var options = {
-              "key": "rzp_test_OYzzRLNBCqZfkG",
-              "amount": totalWithDeliveryCharge * 100, // Convert to paise and include delivery charge
-              "currency": "INR",
-              "name": "Shoes Kampany",
-              "description": "Test Transaction",
-              "order_id": data.orderId,
-              "handler": function (response) {
-                handlePayment(response); // Call function to handle payment
-              },
-
-              "prefill": {
-                "name": "Akshay",
-                "email": "akshayjyothip@gmail.com",
-                "contact": "8281935725"
-              },
-              "notes": {
-                "address": "Razorpay Corporate Office"
-              },
-              "theme": {
-                "color": "#F37254"
-              }
-            };
-
-            var rzp1 = new Razorpay(options);
-            rzp1.open();
-
-            rzp1.on('payment.failed', function (response) {
-              alert("Payment failed. Please try again.");
-
-              let amountTotal = document.getElementById("totalAmount").innerText;
-              var selectedAddressId = document.getElementById('addressSelect').value;
-              var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-              var cartId = document.getElementById('cartId').value;
-
-              fetch('/handleFailedPayment', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  cartId,
-                  selectedAddressId,
-                  paymentMethod,
-                  amountTotal,
-                  razorpay_payment_id: response.error.metadata.payment_id,
-                  razorpay_order_id: response.error.metadata.order_id,
-                  error_description: response.error.description
-                })
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    // Redirect to the order details page or any other page as needed
-                    window.location.href = '/vieworder';
-                  } else {
-                    alert('Failed to handle payment failure. Please try again.');
-                    window.location.href = '/vieworder';
-                  }
-                })
-                .catch(error => {
-                  console.error('Error handling payment failure:', error);
-                  alert('An error occurred while handling payment failure. Please try again.');
-                  window.location.href = '/vieworder';
-                });
-            });
-          }
-        } catch (error) {
-          console.error("Error initiating Razorpay payment:", error);
-          alert('An error occurred while initiating payment. Please try again.');
+    const selectedAddress = document.getElementById('addressSelect').value;
+    if (!selectedAddress) {
+      Swal.fire({
+        icon: 'error',
+        title: '<strong>Error</strong>',
+        html: '<p style="color: #721c24; font-weight: bold;">Please select an address.</p>',
+        background: '#fff3f3',
+        iconColor: '#dc3545',
+        confirmButtonColor: '#dc3545',
+        customClass: {
+          popup: 'styled-popup',
+          icon: 'styled-icon'
         }
-      } else if (continuePayment && selectedPaymentMethod === 'Wallet') {
-        // If Wallet payment method is selected, handle wallet payment logic
-        try {
-          let amountTotal = document.getElementById("totalAmount").innerText;
-          // Retrieve selected address ID
-          var selectedAddressId = document.getElementById('addressSelect').value;
+      });
+      continuePayment = false;
+    }
 
-          var cartId = document.getElementById('cartId').value;
+    // Check if payment method is selected
+    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+    if (!paymentMethodSelected) {
+      Swal.fire({
+        icon: 'error',
+        title: '<strong>Error</strong>',
+        html: '<p style="color: #721c24; font-weight: bold;">Please select a payment method.</p>',
+        background: '#fff3f3',
+        iconColor: '#dc3545',
+        confirmButtonColor: '#dc3545',
+        customClass: {
+          popup: 'styled-popup',
+          icon: 'styled-icon'
+        }
+      });
+      continuePayment = false;
+    }
 
-          let paymentDetails = {
-            addressId: selectedAddressId,
-            paymentMethod: selectedPaymentMethod,
-            cartId: cartId,
-            amountTotal: amountTotal
+    // Retrieve selected payment method
+    var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    // Common variables for all payment methods
+    let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
+    let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
+    let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
+
+    if (continuePayment && selectedPaymentMethod === 'RazorPay') {
+      console.log("amountTotal", totalWithDeliveryCharge);
+      // If RazorPay payment method is selected, initiate Razorpay payment
+      try {
+        let response = await fetch('/createOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ totalPrice: totalWithDeliveryCharge }) // Send the total amount including delivery charge
+        });
+
+        let data = await response.json();
+
+        if (data.orderId) {
+          var options = {
+            "key": "rzp_test_OYzzRLNBCqZfkG",
+            "amount": totalWithDeliveryCharge * 100, // Convert to paise and include delivery charge
+            "currency": "INR",
+            "name": "Shoes Kampany",
+            "description": "Test Transaction",
+            "order_id": data.orderId,
+            "handler": function (response) {
+              handlePayment(response); // Call function to handle payment
+            },
+
+            "prefill": {
+              "name": "Akshay",
+              "email": "akshayjyothip@gmail.com",
+              "contact": "8281935725"
+            },
+            "notes": {
+              "address": "Razorpay Corporate Office"
+            },
+            "theme": {
+              "color": "#F37254"
+            }
           };
 
-          let response = await fetch('/placeOrder', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(paymentDetails)
+          var rzp1 = new Razorpay(options);
+          rzp1.open();
+
+          rzp1.on('payment.failed', function (response) {
+            alert("Payment failed. Please try again.");
+
+            let amountTotal = document.getElementById("totalAmount").innerText;
+            var selectedAddressId = document.getElementById('addressSelect').value;
+            var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            var cartId = document.getElementById('cartId').value;
+
+            fetch('/handleFailedPayment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                cartId,
+                selectedAddressId,
+                paymentMethod,
+                amountTotal,
+                razorpay_payment_id: response.error.metadata.payment_id,
+                razorpay_order_id: response.error.metadata.order_id,
+                error_description: response.error.description
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Redirect to the order details page or any other page as needed
+                window.location.href = '/vieworder';
+              } else {
+                alert('Failed to handle payment failure. Please try again.');
+                window.location.href = '/vieworder';
+              }
+            })
+            .catch(error => {
+              console.error('Error handling payment failure:', error);
+              alert('An error occurred while handling payment failure. Please try again.');
+              window.location.href = '/vieworder';
+            });
           });
-
-          let result = await response.text();
-          window.location.href = '/successPage';
-        } catch (error) {
-          console.error("Error handling wallet payment:", error);
         }
-      } else if(continuePayment && selectedPaymentMethod === 'COD') {
-        // If other payment method is selected (COD), submit the form normally
-
+      } catch (error) {
+        console.error("Error initiating Razorpay payment:", error);
+        alert('An error occurred while initiating payment. Please try again.');
+      }
+    } else if (continuePayment && selectedPaymentMethod === 'Wallet') {
+      // If Wallet payment method is selected, handle wallet payment logic
+      try {
         let amountTotal = document.getElementById("totalAmount").innerText;
         // Retrieve selected address ID
         var selectedAddressId = document.getElementById('addressSelect').value;
 
-        // Retrieve selected payment method
-        var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
         var cartId = document.getElementById('cartId').value;
 
-        try {
-          let paymentDetails = {
-            addressId: selectedAddressId,
-            paymentMethod: selectedPaymentMethod,
-            cartId: cartId,
-            amountTotal: amountTotal
-          };
+        let paymentDetails = {
+          addressId: selectedAddressId,
+          paymentMethod: selectedPaymentMethod,
+          cartId: cartId,
+          amountTotal: amountTotal,
+          offerDiscount: offerDiscount,
+          discountAmount: discountAmount,
+          deliveryCharge: deliveryCharge
+        };
 
-          let response = await fetch('/placeOrder', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(paymentDetails)
-          });
+        let response = await fetch('/placeOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(paymentDetails)
+        });
 
-          let result = await response.text();
-          window.location.href = '/successPage';
-        } catch (error) {
-          console.error("Error handling cash on delivery payment:", error);
-        }
+        let result = await response.text();
+        window.location.href = '/successPage';
+      } catch (error) {
+        console.error("Error handling wallet payment:", error);
       }
-    });
+    } else if (continuePayment && selectedPaymentMethod === 'COD') {
+      // If other payment method is selected (COD), submit the form normally
 
-    async function handlePayment(response) {
-  let amountTotal = document.getElementById("totalAmount").innerText.replace(/[^0-9.]/g, '');
-  let selectedAddressId = document.getElementById('addressSelect').value;
-  let selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-  let cartId = document.getElementById('cartId').value;
+      let amountTotal = document.getElementById("totalAmount").innerText;
+      // Retrieve selected address ID
+      var selectedAddressId = document.getElementById('addressSelect').value;
 
-  let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
-  let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
-  let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
+      // Retrieve selected payment method
+      var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-  try {
-    let paymentDetails = {
-      addressId: selectedAddressId,
-      paymentMethod: selectedPaymentMethod,
-      cartId: cartId,
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_signature: response.razorpay_signature,
-      amountTotal: amountTotal,
-      offerDiscount: offerDiscount,
-      discountAmount: discountAmount,
-      deliveryCharge: deliveryCharge
-    };
+      var cartId = document.getElementById('cartId').value;
 
-    let paymentResponse = await fetch('/handlePayment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(paymentDetails)
-    });
+      try {
+        let paymentDetails = {
+          addressId: selectedAddressId,
+          paymentMethod: selectedPaymentMethod,
+          cartId: cartId,
+          amountTotal: amountTotal,
+          offerDiscount: offerDiscount,
+          discountAmount: discountAmount,
+          deliveryCharge: deliveryCharge
+        };
 
-    if (paymentResponse.ok) {
-      // Payment successful, redirect to success page
-      window.location.href = '/successPage';
-    } else {
-      // Payment failed, update status and display message
-      let result = await paymentResponse.text();
-      handlePaymentFailure(result, null, selectedAddressId, selectedPaymentMethod, amountTotal);
+        let response = await fetch('/placeOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(paymentDetails)
+        });
+
+        let result = await response.text();
+        window.location.href = '/successPage';
+      } catch (error) {
+        console.error("Error handling cash on delivery payment:", error);
+      }
     }
-  } catch (error) {
-    console.error("Error handling payment:", error);
-    handlePaymentFailure(error.toString(), null, selectedAddressId, selectedPaymentMethod, amountTotal);
+  });
+
+  async function handlePayment(response) {
+    let amountTotal = document.getElementById("totalAmount").innerText.replace(/[^0-9.]/g, '');
+    let selectedAddressId = document.getElementById('addressSelect').value;
+    let selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    let cartId = document.getElementById('cartId').value;
+
+    let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
+    let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
+    let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
+
+    try {
+      let paymentDetails = {
+        addressId: selectedAddressId,
+        paymentMethod: selectedPaymentMethod,
+        cartId: cartId,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+        amountTotal: amountTotal,
+        offerDiscount: offerDiscount,
+        discountAmount: discountAmount,
+        deliveryCharge: deliveryCharge
+      };
+
+      let paymentResponse = await fetch('/handlePayment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentDetails)
+      });
+
+      if (paymentResponse.ok) {
+        // Payment successful, redirect to success page
+        window.location.href = '/successPage';
+      } else {
+        // Payment failed, update status and display message
+        alert("Payment failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error handling payment:", error);
+      alert('An error occurred while handling payment. Please try again.');
+    }
   }
-}
+
+
 
 
     // Function to handle payment failure and redirect to vieworder page
