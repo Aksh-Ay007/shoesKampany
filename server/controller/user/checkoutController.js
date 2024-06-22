@@ -328,7 +328,6 @@ const viewOrderDetail = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 const singleOrder = async (req, res) => {
   try {
     if (!req.session.user || !req.session.user._id) {
@@ -337,9 +336,10 @@ const singleOrder = async (req, res) => {
 
     const orderId = req.query.oid;
     const name = req.session.user.firstname;
-    const order = await OrderDatabase.findById(orderId).populate(
-      "shippingAddress"
-    );
+    const order = await OrderDatabase.findById(orderId)
+      .populate("shippingAddress")
+      .populate("orderedItems.productId"); // Ensure orderedItems.productId is populated
+
     if (!order) {
       return res.status(404).send("No order found");
     }
@@ -349,7 +349,7 @@ const singleOrder = async (req, res) => {
 
     res.render("orderDetail", { order, name, review, orders: [order] });
   } catch (e) {
-    console.log(e.toString());
+    console.error('Error in singleOrder:', e);
     res.status(500).send("Internal Server Error");
   }
 };

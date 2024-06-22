@@ -3,7 +3,8 @@ const userDatabase = require("../../model/user");
 const cartDatabase = require("../../model/cartModel");
 const categoryDatabase = require("../../model/categoryModel");
 const offerDatabase = require("../../model/offerModal");
-const Review = require('../../model/ratingModel');
+const ratingModel = require('../../model/ratingModel');
+// const mongoose = require("mongoose");
 
 
 // Function to apply offer to a product
@@ -30,17 +31,27 @@ const applyOffer = async (product) => {
   return product;
 };
 
-// Get Product Controller
-// Get Product Controller
+const mongoose = require('mongoose');
+
 const getProduct = async (req, res) => {
   try {
     const productId = req.query.id;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
     let product = await productDatabase.findById(productId).populate('category');
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
     const isUser = req.session.user !== undefined;
     const cart = isUser ? await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId') : null;
-    
+
     // Fetch reviews for the product
-    const reviews = await Review.find({ product: productId }).populate('user', 'firstname');
+    const reviews = await ratingModel.find({ product: productId }).populate('user', 'firstname');
 
     // Calculate average rating
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -71,25 +82,37 @@ const getProduct = async (req, res) => {
       }));
     }
 
-    res.render("productDetails", { 
-      isUser, 
-      product, 
-      cart, 
-      stockStatus, 
-      stockColor,
+    // Recommended products logic
+    const recommendedProducts = await Promise.all((await productDatabase.find({
+      category: product.category,
+      _id: { $ne: productId }
+    }).limit(5)).map(async (recProduct) => {
+      return await applyOffer(recProduct);
+    }));
+
+    const userId = isUser ? req.session.user._id : null;
+
+    res.render('productDetails', {
+      product,
       reviews,
       averageRating,
       fullStars,
       hasHalfStar,
-      totalReviews: reviews.length
+      stockStatus,
+      stockColor,
+      userId,
+      cart,
+      recommendedProducts,
+      user: req.session.user || null,
+      message: 'Product details fetched successfully'
     });
-  } catch (e) {
-    console.error(e);
-    res.status(500).render("../error");
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ message: 'Error fetching product details' });
   }
 };
 
-// Category Filter Controller
+
 const catFilter = async (req, res) => {
   try {
     const { category: categoryFilter, q: searchQuery, sort: sortFilter } = req.query;

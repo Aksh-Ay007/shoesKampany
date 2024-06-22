@@ -1,0 +1,27 @@
+<div class="review" id="review-<%= review._id %>">
+    <p>Rating: <%= review.rating %> / 5</p>
+    <div class="star-rating">
+      <% for (let i = 1; i <= 5; i++) { %>
+        <span class="star <%= i <= review.rating ? 'filled' : '' %>">&#9733;</span>
+      <% } %>
+    </div>
+    <p class="review-text"><%= review.review %></p>
+    <p>By: <%= review.user.firstname ? review.user.firstname : 'Anonymous' %></p>
+    <p>Reviewed on: <%= new Date(review.createdAt).toLocaleString() %></p>
+    <% if (currentUser && review.user && review.user._id.toString() === currentUser._id.toString()) { %>
+      <button class="edit-review-btn" data-review-id="<%= review._id %>">Edit Review</button>
+      <form class="edit-review-form" style="display: none;" data-review-id="<%= review._id %>">
+        <div class="form-group">
+          <label for="rating">Rating</label>
+          <input type="number" name="rating" class="form-control" min="1" max="5" value="<%= review.rating %>" required>
+        </div>
+        <div class="form-group">
+          <label for="review">Review</label>
+          <textarea name="review" class="form-control" required><%= review.review %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+      </form>
+    <% } %>
+  </div>
+  

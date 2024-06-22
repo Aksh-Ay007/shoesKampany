@@ -67,6 +67,7 @@ router.post('/returnOrder/:id', checkoutController.postReturnOrder);
 router.get('/download-invoice/:orderId', checkoutController.downloadInvoice);
 router.post('/handleFailedPayment', checkoutController.handleFailedPayment);
 router.post('/submitReview',ratingController.submitReview)
+router.put('/reviews/:reviewId',ratingController.editReview)
 
 // router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
 

@@ -415,37 +415,44 @@ const getNewPassword = async (req, res) => {
 
 const postNewPassword = async (req, res) => {
   try {
-    // Extract email and new password from request
-    let newPassword = req.body.password;
-    const email = req.session.email;
+      const { oldPassword, newPassword, confirmPassword } = req.body;
+      const userId = req.session.user._id;
 
-    // Ensure newPassword is a string
-    if (typeof newPassword !== "string") {
-      newPassword = String(newPassword); // Convert to string if not already
-    }
+      // Find the user
+      const user = await userDatabase.findById(userId);
+      if (!user) {
+          return res.status(404).send("User not found");
+      }
 
-    // Hash the newPassword with bcrypt
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt
-      .hash(newPassword, saltRounds)
-      .catch((error) => {
-        throw error;
-      });
+      // Check if old password is correct
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+          req.flash('error', 'Old password is incorrect');
+          return res.redirect('/newPassword');
+      }
 
-    const user = await userDatabase.findOne({ email });
+      // Check if new password and confirm password match
+      if (newPassword !== confirmPassword) {
+          req.flash('error', 'New passwords do not match');
+          return res.redirect('/newPassword');
+      }
 
-    await userDatabase.findOneAndUpdate(
-      { email: email },
-      { password: hashedPassword }
-    );
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Redirect to login page
-    return res.redirect("/userLogin");
+      // Update the user's password
+      user.password = hashedPassword;
+      await user.save();
+
+      req.flash('success', 'Password updated successfully');
+      return res.redirect('/userlogin');
   } catch (error) {
-    return res.status(500).send("Error occurred during post new password");
+      console.error('Error in postNewPassword:', error);
+      req.flash('error', 'An error occurred while changing the password');
+      return res.redirect('/newPassword');
   }
 };
-
 
 
 

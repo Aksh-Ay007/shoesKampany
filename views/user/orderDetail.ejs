@@ -34,8 +34,52 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="images/icons/favicon.png">
 
-	
+	<style>
+		.custom-image {
+		  max-height: 200px;
+		  object-fit: cover;
+		}
+	  
+		.card {
+		  width: 100%;
+		  background-color: #f8f9fa;
+		  border: 1px solid #ddd;
+		  border-radius: 8px;
+		  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+	  
+		.card-body {
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  padding: 16px;
+		}
+	  
+		.card-title {
+		  margin-bottom: 16px;
+		}
+	  
+		.form-group {
+		  width: 100%;
+		  margin-bottom: 16px;
+		}
+	  
+		.btn-block {
+		  width: 100%;
+		}
+	  
+		.alert {
+		  width: 100%;
+		  margin-top: 16px;
+		}
+	  </style>
+	  
+	  
+	  
+	  
 		<style>
+
+			
         body {
             font-family: 'Times New Roman', Times, serif sans-serif;
             background-color: #f8f9fa;
@@ -188,6 +232,8 @@
 }
 
 .mb-4 {
+	margin:auto;
+	
     margin-bottom: 1.5rem; /* Add margin to the title */
 }
 
@@ -545,120 +591,157 @@
     </div>
 </div>
 
-    <!-- Ordered Items -->
-    <div class="row">
-        <% orders.forEach((order) => { %>
-            <% order.orderedItems.forEach((item, index) => { %>
-                <div class="col-md-4 col-sm-12">
-                    <div class="card mb-4">
-                        <img src="<%= item.productimages[0] %>" class="card-img-top custom-image" alt="Product Image">
-                        <div class="card-body">
-                            <h5 class="card-title"><%= item.productname %></h5>
-                            <p class="card-text">Price: ₹<%= item.price %></p>
-                            <p class="card-text">Qty: <%= item.quantity %></p>
-                            <p class="card-text">Delivery Status: <%= item.status %></p>
-                            <div class="d-flex flex-column align-items-center">
-                                <% if (order.status !== 'Delivered') { %>
-                                    <button class="btn btn-warning text-white mb-2 cancel" data-order-id="<%= order._id %>">Cancel</button>
-                                <% } else { %>
-                                    <button class="btn btn-secondary text-white mb-2 return completed-return" data-order-id="<%= order._id %>">Return</button>
-                                    <span class="payment-status-completed blink">Order Delivered Successfully</span>
-                                <% } %>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        <% }) %>
-    </div>
-</div>
-
-<% if (order.status === 'Delivered' && !order.isReviewed) { %>
-	<div class="card mb-4">
-	  <div class="card-body">
-		<h5 class="card-title">Write a Review</h5>
-		<form id="reviewForm" data-order-id="<%= order._id %>">
-		  <div class="form-group">
-			<label for="rating">Rating:</label>
-			<select class="form-control" id="rating" name="rating" required>
-			  <option value="">Select a rating</option>
-			  <option value="1">1 Star</option>
-			  <option value="2">2 Stars</option>
-			  <option value="3">3 Stars</option>
-			  <option value="4">4 Stars</option>
-			  <option value="5">5 Stars</option>
-			</select>
-		  </div>
-		  <div class="form-group">
-			<label for="review">Review:</label>
-			<textarea class="form-control" id="review" name="review" rows="3" required></textarea>
-		  </div>
-		  <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
-		</form>
-	  </div>
-	</div>
-  <% } else if (order.isReviewed) { %>
-	<div class="card mb-4">
-	  <div class="card-body">
-		<h5 class="card-title">Your Review</h5>
-		<!-- Display the user's review here -->
-		<% if (review) { %>
-		  <div class="user-review">
-			<div class="star-rating-display" data-rating="<%= review.rating %>">
-			  <% for(let i = 1; i <= 5; i++) { %>
-				<span class="star <%= i <= review.rating ? 'filled' : '' %>">&#9733;</span>
-			  <% } %>
+  <!-- Ordered Items -->
+<div class="row">
+	<% orders.forEach((order) => { %>
+	  <% order.orderedItems.forEach((item, index) => { %>
+		<div class="col-md-4 col-sm-12">
+		  <div class="card mb-4">
+			<% if (item.productimages && item.productimages.length > 0) { %>
+			  <img src="<%= item.productimages[0] %>" class="card-img-top custom-image" alt="Product Image">
+			<% } else { %>
+			  <img src="/path/to/default/image.jpg" class="card-img-top custom-image" alt="Default Image">
+			<% } %>
+			<div class="card-body">
+			  <h5 class="card-title"><%= item.productname %></h5>
+			  <p class="card-text">Price: ₹<%= item.price %></p>
+			  <p class="card-text">Qty: <%= item.quantity %></p>
+			  <p class="card-text">Delivery Status: 
+				<% if (item.status === 'Pending') { %>
+				  <span class="badge badge-warning">Pending</span>
+				<% } else if (item.status === 'Completed') { %>
+				  <span class="badge badge-success">Completed</span>
+				<% } else if (item.status === 'Delivered') { %>
+				  <span class="badge badge-info">Delivered</span>
+				<% } else if (item.status === 'Cancelled') { %>
+				  <span class="badge badge-danger">Cancelled</span>
+				<% } else if (item.status === 'Returned') { %>
+				  <span class="badge badge-info">Returned</span>
+				<% } else if (item.status === 'Shipped') { %>
+				  <span class="badge badge-warning">Shipped</span>
+				<% } else { %>
+				  <span class="badge badge-secondary">Unknown Status</span>
+				<% } %>
+			  </p>
+			  <div id="reviewContainer<%= index %>">
+				<div id="reviewMessage<%= index %>" style="display: none;"></div>
+				<% if (item.isReviewed) { %>
+				  <div class="alert alert-info">
+					You have already submitted a review for this product.
+					<button id="viewReview<%= index %>" class="btn btn-primary mt-2">View Your Review</button>
+				  </div>
+				<% } else { %>
+				  <form id="reviewForm<%= index %>" data-order-id="<%= order._id %>" data-product-id="<%= item.productId ? item.productId._id : '' %>">
+					<div class="form-group">
+					  <label for="rating<%= index %>">Rating:</label>
+					  <select class="form-control" id="rating<%= index %>" name="rating" required>
+						<option value="">Select a rating</option>
+						<option value="1">1 Star</option>
+						<option value="2">2 Stars</option>
+						<option value="3">3 Stars</option>
+						<option value="4">4 Stars</option>
+						<option value="5">5 Stars</option>
+					  </select>
+					</div>
+					<div class="form-group">
+					  <label for="review<%= index %>">Review:</label>
+					  <textarea class="form-control" id="review<%= index %>" name="review" rows="3" required></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+				  </form>
+				<% } %>
+			  </div>
 			</div>
-			<p class="review-text mt-2"><%= review.review %></p>
 		  </div>
-		<% } else { %>
-		  <p>No review available for this order.</p>
-		<% } %>
-	  </div>
-	</div>
-  <% } %>
+		</div>
+	  <% }) %>
+	<% }) %>
+  </div>
   
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Include SweetAlert library -->
-  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-	document.getElementById('reviewForm').addEventListener('submit', function(e) {
-	  e.preventDefault();
-	  
-	  const orderId = this.dataset.orderId;
-	  const rating = document.getElementById('rating').value;
-	  const review = document.getElementById('review').value;
+  document.addEventListener('DOMContentLoaded', function() {
+	document.querySelectorAll('[id^="reviewForm"]').forEach(form => {
+	  form.addEventListener('submit', function(e) {
+		e.preventDefault();
   
-	  fetch('/submitReview', {
-		method: 'POST',
-		headers: {
-		  'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ orderId, rating, review }),
-	  })
-	  .then(response => response.json())
-	  .then(data => {
-		if (data.message === 'Review submitted successfully') {
-		  // Show SweetAlert message
+		const formId = this.id;
+		const index = formId.replace('reviewForm', '');
+  
+		const orderId = this.dataset.orderId;
+		const productId = this.dataset.productId;
+		const rating = document.getElementById(`rating${index}`).value;
+		const review = document.getElementById(`review${index}`).value;
+  
+		fetch('/submitReview', {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json',
+		  },
+		  body: JSON.stringify({ orderId, productId, rating, review }),
+		})
+		.then(response => response.json())
+		.then(data => {
+		  if (data.message === 'Review submitted successfully') {
+			const reviewContainer = document.getElementById(`reviewContainer${index}`);
+			reviewContainer.querySelector('form').style.display = 'none';
+			reviewContainer.querySelector('#reviewMessage' + index).style.display = 'block';
+			reviewContainer.querySelector('#reviewMessage' + index).innerHTML = `
+			  <div class="alert alert-success">
+				Thank you for your review! It has been submitted successfully.
+				<button id="viewReview${index}" class="btn btn-primary mt-2">View Your Review</button>
+			  </div>`;
+  
+			document.getElementById(`viewReview${index}`).addEventListener('click', function() {
+			  window.location.href = `/product?id=${data.productId}#reviews`;
+			});
+  
+			// Update isReviewed status on the client-side to prevent form from showing again
+			reviewContainer.innerHTML = `
+			  <div class="alert alert-info">
+				You have already submitted a review for this product.
+				<button id="viewReview${index}" class="btn btn-primary mt-2">View Your Review</button>
+			  </div>`;
+		  } else if (data.message === 'You have already reviewed this product') {
+			const reviewContainer = document.getElementById(`reviewContainer${index}`);
+			reviewContainer.querySelector('form').style.display = 'none';
+			reviewContainer.querySelector('#reviewMessage' + index).style.display = 'block';
+			reviewContainer.querySelector('#reviewMessage' + index).innerHTML = `
+			  <div class="alert alert-info">
+				You have already submitted a review for this product.
+				<button id="viewReview${index}" class="btn btn-primary mt-2">View Your Review</button>
+			  </div>`;
+  
+			document.getElementById(`viewReview${index}`).addEventListener('click', function() {
+			  window.location.href = `/product?id=${data.productId}#reviews`;
+			});
+		  } else {
+			Swal.fire({
+			  icon: 'error',
+			  title: 'Oops...',
+			  text: data.message || 'Error submitting review',
+			});
+		  }
+		})
+		.catch((error) => {
+		  console.error('Error:', error);
 		  Swal.fire({
-			icon: 'success',
-			title: 'Review Submitted!',
-			text: 'Thank you for your review.',
-			confirmButtonText: 'OK'
-		  }).then((result) => {
-			if (result.isConfirmed || result.isDismissed) {
-			  location.reload(); // Reload the page to update the view
-			}
+			icon: 'error',
+			title: 'Oops...',
+			text: 'Error submitting review',
 		  });
-		} else {
-		  alert('Error submitting review');
-		}
-	  })
-	  .catch((error) => {
-		console.error('Error:', error);
-		alert('Error submitting review');
+		});
 	  });
 	});
+  });
   </script>
+  
+  
+	  
+	  
+	
+
+  
   
 
 

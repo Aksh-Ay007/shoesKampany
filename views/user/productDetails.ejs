@@ -48,6 +48,36 @@
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	
+	<style>
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: box-shadow 0.3s;
+  }
+  .card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .card-img-top {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .card-body {
+    padding: 1rem;
+  }
+  .card-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .card-text {
+    font-size: 0.9rem;
+  }
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+  }
+</style>
 	<style>
 
 .rating-stars {
@@ -434,7 +464,7 @@ display: inline-block;
 
 
 
-						<a href="#" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
+						<a href="/wishlist" class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti"
 							data-notify="0">
 							<i class="zmdi zmdi-favorite-outline"></i>
 						</a>
@@ -609,7 +639,6 @@ display: inline-block;
 		</div>
 	</div>
 
-
 	<!-- Product Details Section -->
 <section class="sec-product-detail bg0 p-t-65 p-b-60">
   <div class="container">
@@ -622,12 +651,13 @@ display: inline-block;
             <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
             <div class="slick3 gallery-lb">
               <% for (let i = 0; i < product.images.length; i++) { %>
-				<div class="item-slick3" data-thumb="<%= product.images[i % product.images.length] %>">
-                                <div class="wrap-pic-w pos-relative imageZoom" style="--url: url(<%= product.images[i % product.images.length] %>); --zoom-x: 0%; --zoom-y: 0%; --display: none;">
-                                    <img src="<%= product.images[i % product.images.length] %>" alt="IMG-PRODUCT" class="product-image-img">
-                                    <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="<%= product.images[i % product.images.length] %>">
-                                        <i class="fa fa-expand"></i>
-                                    </a>
+              <div class="item-slick3" data-thumb="<%= product.images[i % product.images.length] %>">
+                <div class="wrap-pic-w pos-relative imageZoom" style="--url: url(<%= product.images[i % product.images.length] %>);
+					--zoom-x: 0%; --zoom-y: 0%; --display: none;">
+                    <img src="<%= product.images[i % product.images.length] %>" alt="IMG-PRODUCT" class="product-image-img">
+                    <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="<%= product.images[i % product.images.length] %>">
+                      <i class="fa fa-expand"></i>
+                    </a>
                   </div>
                 </div>
               <% } %>
@@ -644,36 +674,35 @@ display: inline-block;
               <h1 class="product-name"><%= product.product_name %></h1>
               <p class="product-subtitle"><%= product.description %></p>
 
-			  <div class="rating">
-            <span class="rating-stars">
-                <% for(let i = 1; i <= 5; i++) { %>
-                    <% if(i <= fullStars) { %>
-                        <i class="fas fa-star filled"></i>
-                    <% } else if(i === fullStars + 1 && hasHalfStar) { %>
-                        <i class="fas fa-star-half-alt filled"></i>
+              <div class="rating">
+                <span class="rating-stars">
+                  <% for (let i = 1; i <= 5; i++) { %>
+                    <% if (i <= fullStars) { %>
+                      <i class="fas fa-star filled"></i>
+                    <% } else if (i === fullStars + 1 && hasHalfStar) { %>
+                      <i class="fas fa-star-half-alt filled"></i>
                     <% } else { %>
-                        <i class="far fa-star"></i>
+                      <i class="far fa-star"></i>
                     <% } %>
+                  <% } %>
+                </span>
+                <span class="rating-count">(<%= reviews.length %> Ratings)</span>
+                <span class="average-rating"><%= averageRating.toFixed(1) %> / 5</span>
+              </div>
+
+              <!-- Price Section -->
+              <div class="product-price">
+                <% if (product.offerPrice) { %>
+                  <p class="offer-price">
+                    ₹<%= product.offerPrice %>
+                    <span class="original-price">₹<%= product.price %></span>
+                    (<%= product.discountPercentage %>% OFF)
+                  </p>
+                <% } else { %>
+                  <p class="offer-price">₹<%= product.price %></p>
                 <% } %>
-            </span>
-            <span class="rating-count">(<%= totalReviews %> Ratings)</span>
-            <span class="average-rating"><%= averageRating.toFixed(1) %> / 5</span>
-        </div>
-
-
-        <!-- Price Section -->
-<div class="product-price">
-  <% if (product.offerPrice) { %>
-    <p class="offer-price">
-      ₹<%= product.offerPrice %> 
-      <span class="original-price">₹<%= product.price %></span> 
-      (<%= product.discountPercentage %>% OFF)
-    </p>
-  <% } else { %>
-    <p class="offer-price">₹<%= product.price %></p>
-  <% } %>
-  <p class="inclusive-taxes">inclusive of all taxes</p>
-</div>
+                <p class="inclusive-taxes">inclusive of all taxes</p>
+              </div>
 
               <!-- Add to Cart and Wishlist Buttons -->
               <div class="add-to-cart">
@@ -686,9 +715,9 @@ display: inline-block;
                     <span class="red-text uppercase bold-text">BACK IN STOCK SOON</span>
                   </div>
                 <% } %>
-                <button class="btn-wishlist">
-                  <i class="fas fa-heart"></i> WISHLIST
-                </button>
+				<button class="btn-wishlist" data-pdt-id="<%= product._id %>">
+  <i class="fas fa-heart"></i> WISHLIST
+</button>
               </div>
 
               <!-- Delivery Options -->
@@ -700,6 +729,26 @@ display: inline-block;
                 </ul>
               </div>
             </div>
+
+			<div class="product-reviews">
+  <h3>Customer Reviews</h3>
+  <% if (reviews && reviews.length > 0) { %>
+    <div id="reviewContainer">
+      <% reviews.slice(0, 2).forEach(review => { %>
+        <%- include('review-template', { review, currentUser: locals.user }) %>
+      <% }) %>
+    </div>
+    <% if (reviews.length > 3) { %>
+      <button id="toggleReviews" class="btn btn-primary">Load More Reviews</button>
+    <% } %>
+  <% } else { %>
+    <p>No reviews yet.</p>
+  <% } %>
+</div>
+
+
+
+
           </div>
         </div>
       </div>
@@ -707,195 +756,257 @@ display: inline-block;
   </div>
 </section>
 
-<div class="container">
-  <!-- Customer Reviews Section -->
-  <div class="product-reviews">
-    <h3>Customer Reviews</h3>
-    <% if (reviews && reviews.length > 0) { %>
-      <% reviews.forEach(review => { %>
-        <div class="review">
-          <p>Rating: <%= review.rating %> / 5</p>
-          <div class="star-rating">
-            <% for (let i = 1; i <= 5; i++) { %>
-              <span class="star <%= i <= review.rating ? 'filled' : '' %> <%= i <= review.rating ? 'blink' : '' %>">&#9733;</span>
-            <% } %>
-          </div>
-          <p><%= review.review %></p>
-          <p>By: <%= review.user.firstname %></p>
-        </div>
-      <% }) %>
-    <% } else { %>
-      <p>No reviews yet.</p>
-    <% } %>
-  </div>
-</div>
 
-<!-- jQuery Library -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Custom JavaScript for Dynamic Rating Display -->
 <script>
-$(document).ready(function() {
-    // Fetch reviews data passed from backend (assuming it's already embedded in the page)
-    const reviews = <%= JSON.stringify(reviews) %>;
-
-    if (reviews.length > 0) {
-        const totalRatings = reviews.length;
-        const totalRatingSum = reviews.reduce((sum, review) => sum + review.rating, 0);
-        const averageRating = totalRatingSum / totalRatings;
-
-        const starRatingContainer = $('#productRating');
-
-        // Clear existing content (if any) in the rating-stars container
-        starRatingContainer.empty();
-
-        // Generate star icons based on average rating
-        for (let i = 1; i <= 5; i++) {
-            const star = $('<i></i>').addClass('fas fa-star');
-            if (i <= averageRating) {
-                star.addClass('filled');
-            }
-            star.appendTo(starRatingContainer);
-        }
-
-        // Display the number of ratings and average rating
-        const ratingCount = $('<span></span>').addClass('rating-count').text(`(${totalRatings} Ratings)`);
-        starRatingContainer.append(ratingCount);
-
-        const avgRating = $('<span></span>').addClass('average-rating').text(`${averageRating.toFixed(1)} / 5`);
-        starRatingContainer.append(avgRating);
-    } else {
-        // If there are no reviews, display a message
-        $('#productRating').html('<p>No ratings yet.</p>');
-    }
-});
+  window.currentUser = <%- JSON.stringify(locals.user || null) %>;
+  window.allReviews = <%- JSON.stringify(reviews) %>;
 </script>
 
+<script src="/js/reviews.js"></script>
 
-	<!-- Related Products -->
-	<section class="sec-relate-product bg0 p-t-45 p-b-105">
-		<div class="container">
-			<div class="recommended-products-section">
-				<h3 class="recommended-products-title">Recommended Products</h3>
-			  </div>
-			<!-- Slide2 -->
-			<div class="wrap-slick2">
-				<div class="slick2">
-					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-						<!-- Block2 -->
-						<div class="block2">
-							<div class="block2-pic hov-img0">
-								<img src="<%= product.images %>" alt="IMG-PRODUCT">
 
-								<a href="#"
-									class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-									Quick View
-								</a>
-							</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-							<div class="block2-txt flex-w flex-t p-t-14">
-								<div class="block2-txt-child1 flex-col-l ">
-									<a href="product-detail.html"
-										class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-										Esprit Ruffle Shirt
-									</a>
 
-									<span class="stext-105 cl3">
-										$16.64
-									</span>
-								</div>
 
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-										<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png"
-											alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l"
-											src="images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  const initialReviewCount = 2;
+  let isExpanded = false;
+  const renderedReviewIds = new Set();
 
-					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-						<!-- Block2 -->
-						<div class="block2">
-							<div class="block2-pic hov-img0">
-								<img src="<%= product.images %>" alt="IMG-PRODUCT">
+  // Show edit form when edit button is clicked
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('edit-review-btn')) {
+      const reviewId = e.target.dataset.reviewId;
+      document.querySelector(`#review-${reviewId} .edit-review-form`).style.display = 'block';
+      e.target.style.display = 'none';
+    }
+  });
 
-								<a href="#"
-									class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-									Quick View
-								</a>
-							</div>
+  // Hide edit form when cancel button is clicked
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('cancel-edit')) {
+      const form = e.target.closest('.edit-review-form');
+      form.style.display = 'none';
+      form.previousElementSibling.style.display = 'inline-block';
+    }
+  });
 
-							<div class="block2-txt flex-w flex-t p-t-14">
-								<div class="block2-txt-child1 flex-col-l ">
-									<a href="product-detail.html"
-										class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-										Herschel supply
-									</a>
+  // Form submission for editing review
+  document.addEventListener('submit', function (e) {
+    if (e.target && e.target.classList.contains('edit-review-form')) {
+      e.preventDefault();
+      const form = e.target;
+      const reviewId = form.dataset.reviewId;
+      const updatedRating = form.querySelector('[name="rating"]').value;
+      const updatedReview = form.querySelector('[name="review"]').value;
 
-									<span class="stext-105 cl3">
-										$35.31
-									</span>
-								</div>
+      // Send the update request to the server
+      fetch(`/reviews/${reviewId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: updatedRating,
+          review: updatedReview
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+      })
+      .then(data => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Review Updated!',
+          text: 'Your review has been successfully updated.',
+          confirmButtonText: 'OK'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload(); // Refresh the page
+          }
+        });
+      })
+      .catch(error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.message || 'Error updating review',
+        });
+        console.error('Error:', error);
+      });
+    }
+  });
 
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-										<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png"
-											alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l"
-											src="images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
+  // Form submission for adding review
+  document.addEventListener('submit', function (e) {
+    if (e.target && e.target.classList.contains('submit-review-form')) {
+      e.preventDefault();
+      const form = e.target;
+      const rating = form.querySelector('[name="rating"]').value;
+      const review = form.querySelector('[name="review"]').value;
+      const productId = form.dataset.productId; // Assuming you have this data attribute
 
-					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
+      // Send the add request to the server
+      fetch(`/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: rating,
+          review: review,
+          productId: productId
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+      })
+      .then(data => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Review Added!',
+          text: 'Your review has been successfully added.',
+          confirmButtonText: 'OK'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload(); // Refresh the page
+          }
+        });
+      })
+      .catch(error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.message || 'Error adding review',
+        });
+        console.error('Error:', error);
+      });
+    }
+  });
 
-						<div class="block2">
-							<div class="block2-pic hov-img0">
-								<img src="<%= product.images %>" alt="IMG-PRODUCT">
+  // Toggle reviews
+  const toggleButton = document.getElementById('toggleReviews');
+  if (toggleButton) {
+    toggleButton.addEventListener('click', function () {
+      isExpanded = !isExpanded;
+      renderReviews(window.allReviews, isExpanded ? window.allReviews.length : initialReviewCount);
+      toggleButton.textContent = isExpanded ? 'Show Less' : 'Load More Reviews';
+    });
+  }
 
-								<a href="#"
-									class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-									Quick View
-								</a>
-							</div>
+  function generateStarRating(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      stars += `<span class="star ${i <= rating ? 'filled' : ''}">&#9733;</span>`;
+    }
+    return stars;
+  }
 
-							<div class="block2-txt flex-w flex-t p-t-14">
-								<div class="block2-txt-child1 flex-col-l ">
-									<a href="product-detail.html"
-										class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-										Shirt in Stretch Cotton
-									</a>
+  function generateReviewHtml(review) {
+    const canEdit = window.currentUser && review.user && review.user._id && window.currentUser._id && review.user._id === window.currentUser._id;
+    return `
+      <div class="review" id="review-${review._id}">
+        <p>Rating: ${review.rating} / 5</p>
+        <div class="star-rating">
+          ${generateStarRating(review.rating)}
+        </div>
+        <p class="review-text">${review.review}</p>
+        <p>By: ${review.user && review.user.firstname ? review.user.firstname : 'Anonymous'}</p>
+        <p>Reviewed on: ${new Date(review.createdAt).toLocaleString()}</p>
+        ${canEdit ? `
+          <button class="edit-review-btn" data-review-id="${review._id}">Edit Review</button>
+          <form class="edit-review-form" style="display: none;" data-review-id="${review._id}">
+            <div class="form-group">
+              <label for="rating">Rating</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" value="${review.rating}" required>
+            </div>
+            <div class="form-group">
+              <label for="review">Review</label>
+              <textarea name="review" class="form-control" required>${review.review}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+          </form>
+        ` : ''}
+      </div>
+    `;
+  }
 
-									<span class="stext-105 cl3">
-										$52.66
-									</span>
-								</div>
+  function renderReviews(reviews, limit) {
+    const reviewContainer = document.getElementById('reviewContainer');
+    reviewContainer.innerHTML = ''; // Clear existing reviews
+    renderedReviewIds.clear(); // Reset the set of rendered review IDs
+    
+    reviews.slice(0, limit).forEach(review => {
+      if (!renderedReviewIds.has(review._id)) {
+        const reviewHtml = generateReviewHtml(review);
+        reviewContainer.insertAdjacentHTML('beforeend', reviewHtml);
+        renderedReviewIds.add(review._id);
+      }
+    });
+  }
 
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-										<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png"
-											alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l"
-											src="images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
+  // Initial load of reviews
+  renderReviews(window.allReviews, initialReviewCount);
+});
+	</script>
 
-					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
 
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+<!-- jQuery and Bootstrap scripts for modal -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Related Products -->
+<section class="sec-relate-product bg0 p-t-45 p-b-105">
+  <div class="container">
+    <div class="recommended-products-section mb-4">
+      <h3 class="recommended-products-title">Recommended Products</h3>
+    </div>
+    <div class="row">
+      <% recommendedProducts.forEach(function(recProduct) { %>
+        <div class="col-sm-6 col-md-3 mb-4">
+          <div class="card h-100">
+            <img src="<%= recProduct.images[0] %>" class="card-img-top" alt="<%= recProduct.product_name %>" style="height: 200px; object-fit: cover;">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                <a href="/product?id=<%= recProduct._id %>" class="text-dark">
+                  <%= recProduct.product_name %>
+                </a>
+              </h5>
+              <p class="card-text">
+                <% if (recProduct.offerPrice && recProduct.offerPrice < recProduct.price) { %>
+                  <span class="header-cart-item-info" style="color: green;">₹ <%= recProduct.offerPrice.toFixed(2) %></span>
+                  <small class="text-muted">(₹ <%= recProduct.price.toFixed(2) %>)</small><br>
+                  <span class="badge bg-success"><%= recProduct.discountPercentage %>% OFF</span>
+                <% } else { %>
+                  <span class="header-cart-item-info">₹ <%= recProduct.price.toFixed(2) %></span><br>
+                  <small class="text-muted">Sorry, no offer available for this product</small>
+                <% } %>
+              </p>
+              <p class="card-text mt-auto">
+                <% if (recProduct.stock > 0) { %>
+                  <small class="text-success">In Stock (<%= recProduct.stock %> left)</small>
+                <% } else { %>
+                  <small class="text-danger">Out of Stock</small>
+                <% } %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
 
 
 	<!-- Footer -->
@@ -1246,7 +1357,56 @@ $(document).ready(function() {
 					});
 				  });
 				});
+
+				
 			  </script>
+
+
+			  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const addToWishlistButtons = document.querySelectorAll('.btn-wishlist');
+
+    addToWishlistButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const productId = button.dataset.pdtId;
+
+        try {
+          const response = await fetch(`/wishlist/${productId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to wishlist',
+              showConfirmButton: false,
+              timer: 1500
+            }).then(() => {
+              location.reload(); // Refresh the page after adding to wishlist
+            });
+          } else {
+            const data = await response.json();
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: data.message || 'Error adding to wishlist'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!'
+          });
+        }
+      });
+    });
+  });
+</script>
 
 
 
