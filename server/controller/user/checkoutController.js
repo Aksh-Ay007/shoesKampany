@@ -177,6 +177,7 @@ const postOrder = async (req, res) => {
       productname: item.productId.product_name,
       productimages: item.productId.images,
       price: item.productId.price,
+      finalPrice: item.productId.finalPrice || item.productId.price, // Use price as fallback
       quantity: item.quantity,
       status: "Pending",
       returned: false,
@@ -217,7 +218,7 @@ const postOrder = async (req, res) => {
       wallet.balance -= amountTotalValue + deliveryChargeValue;
       wallet.transactions.push({
         type: "withdrawal",
-        amount: amountTotalValue + deliveryChargeValue,
+        amount: amountTotalValue ,
         timestamp: new Date(),
         description: "Order payment",
       });
@@ -235,7 +236,7 @@ const postOrder = async (req, res) => {
       shippingAddress: AddressId,
       paymentMethod: payment,
       totalAmount: totalAmount,
-      finalAmount: amountTotalValue + deliveryChargeValue,
+      finalAmount: amountTotalValue ,
       deliveryCharge: deliveryChargeValue,
       couponDiscount: discountAmountValue || 0,
       offerDiscount: offerDiscountValue || 0,
@@ -350,7 +351,7 @@ const singleOrder = async (req, res) => {
       .populate("shippingAddress")
       .populate({
         path: "orderedItems.productId",
-        select: 'product_name images price offerPrice offerDiscount'
+        select: 'product_name images price offerPrice offerDiscount finalPrice'
       });
 
     if (!order) {
@@ -441,10 +442,12 @@ const razorpay = async (req, res) => {
       productname: item.productId.product_name,
       productimages: item.productId.images,
       price: item.productId.price,
+      finalPrice: item.productId.finalPrice || item.productId.price, // Use price as fallback
       quantity: item.quantity,
       status: "Pending",
-      returned: false
+      returned: false,
     }));
+    console.log(orderedItems,"testttt");
 
     const totalAmount = userCartData.totalAmount;
 
@@ -466,7 +469,7 @@ const razorpay = async (req, res) => {
       shippingAddress: addressId,
       paymentMethod: payment,
       totalAmount: totalAmount,
-      finalAmount: amountTotalValue + deliveryChargeValue,
+      finalAmount: amountTotalValue,
       deliveryCharge: deliveryChargeValue,
       couponDiscount: discountAmountValue || 0,
       offerDiscount: offerDiscountValue || 0,
@@ -521,6 +524,7 @@ console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     productname: item.productId.product_name,
     productimages: item.productId.images,
     price: item.productId.price,
+    finalPrice:item.productId.finalPrice,
     quantity: item.quantity,
     status: "Pending",
     returned: false,

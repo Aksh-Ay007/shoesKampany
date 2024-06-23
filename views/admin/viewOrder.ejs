@@ -7,6 +7,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+
+.product-status.pending {
+    color: orange;
+}
+.product-status.shipped {
+    color: blue;
+}
+.product-status.processing {
+    color: yellow;
+}
+.product-status.delivered {
+    color: green;
+}
+.product-status.cancelled {
+    color: red;
+}
+.product-status.returned {
+    color: grey;
+}
+
         body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
         #sidebar {
             width: 250px; background-color: #2c3e50; color: white; padding: 0;
@@ -163,19 +183,21 @@
                             <% } else { %>
                                 <img src="placeholder.jpg" class="product-image" alt="Product Image">
                             <% } %>
-    
+                            
                             <div class="product-details">
                                 <h5 class="product-title"><%= item.productId.productname %></h5>
-                                <p class="product-info"><strong>Price:</strong> ₹<%= item.price %></p>
+                                <p class="product-info"><strong>Product Price:</strong> ₹<%= item.finalPrice %></p>
                                 <p class="product-info"><strong>Qty:</strong> <%= item.quantity %></p>
-                                <p class="product-info"><strong>Total:</strong> ₹<%= item.price * item.quantity %></p>
+                                <p class="product-info"><strong>Total:</strong> ₹<%= item.finalPrice * item.quantity %></p>
                                 <p class="product-info">
                                     <strong>Status:</strong>
-                                    <span class="product-status <%= item.status === 'Delivered' ? 'status-delivered' : 'status-pending' %>">
-                                        <%= item.status %>
+                                    <span class="product-status <%= item.status.toLowerCase() %>">
+                                        <%= order.status %>
                                     </span>
                                 </p>
                             </div>
+                            
+                            
                         </div>
                     <% } %>
                     <% for (let k = order.orderedItems.length % 4; k < 4; k++) { %>

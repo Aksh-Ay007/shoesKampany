@@ -39,6 +39,27 @@ var productsSchema = new mongoose.Schema({
   images: {
     type: [String],
   },
+  offerApplied: {
+    type: Boolean,
+    default: false,
+  },
+  offerDetails: {
+    offerName: {
+      type: String,
+    },
+    discountAmount: {
+      type: Number,
+    },
+    discountPercentage: {
+      type: Number, // Store discount percentage
+    },
+  },
+  finalPrice: {
+    type: Number,
+    default: function() {
+      return this.price; // Default to the price field if finalPrice is not set
+    }
+  },
 });
 
 const productDatabase = mongoose.model("productDatabase", productsSchema);

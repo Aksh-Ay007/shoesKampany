@@ -194,29 +194,33 @@
         }
 
         .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
 
-        .pagination a {
-            color: #3498db;
-            text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            margin: 0 4px;
-            border-radius: 4px;
-        }
+.pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color .3s;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+}
 
-        .pagination a.active {
-            background-color: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
+.pagination a.active {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #4CAF50;
+}
 
-        .pagination a:hover:not(.active) {
-            background-color: #f5f5f5;
-        }
+.pagination a:hover:not(.active) {background-color: #ddd;}
+
+.pagination a.disabled {
+    color: #ddd;
+    pointer-events: none;
+}
     </style>
 </head>
 <body>
@@ -278,32 +282,86 @@
                         <td>&#x20a8; <%= order.totalAmount %></td>
                         <td>&#x20a8; <%= order.finalAmount %></td>
                         <td>
-                        <div style="white-space: nowrap;">
-                        <%= order.orderDate.toLocaleDateString() %><br>
-                        <%= order.orderDate.toLocaleTimeString() %>
-                        </div>
+                            <div style="white-space: nowrap;">
+                                <%= order.orderDate.toLocaleDateString() %><br>
+                                <%= order.orderDate.toLocaleTimeString() %>
+                            </div>
                         </td>
                         <td><%= order.paymentMethod %></td>
                         <td class="<%= order.status === 'Delivered' ? 'status-delivered' : '' %>"><%= order.status %></td>
                         <td>
-                        <% if (order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Canceled') { %>
-                        <select class="status-dropdown" data-order-id="<%= order._id %>">
-                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        </select>
-                        <% } else { %>
-                        <span class="status-delivered"><%= order.status %></span>
-                        <% } %>
+                            <% if (order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Cancelled') { %>
+                                <select class="status-dropdown" data-order-id="<%= order._id %>">
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                 
+                                </select>
+                            <% } else { %>
+                                <span class="status-delivered"><%= order.status %></span>
+                            <% } %>
                         </td>
                         <td>
-                        <a href="/admin/singleorder/<%= order._id %>" class="btn-view">View</a>
+                            <a href="/admin/singleorder/<%= order._id %>" class="btn-view">View</a>
+                            
                         </td>
-                        </tr>
-                        <% }); %>
-                        </tbody>
-                        </table>
-                        </div>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        
+        <script>
+            document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+                dropdown.addEventListener('change', function () {
+                    const orderId = this.getAttribute('data-order-id');
+                    const status = this.value;
+                    fetch(`/admin/order/${status.toLowerCase()}/${orderId}`, {
+                        method: 'POST'
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.success) {
+                              location.reload();
+                          } else {
+                              alert(data.msg);
+                          }
+                      });
+                });
+            });
+        
+            document.querySelectorAll('.btn-cancel').forEach(button => {
+                button.addEventListener('click', function () {
+                    const orderId = this.getAttribute('data-order-id');
+                    fetch(`/admin/order/cancel/${orderId}`, {
+                        method: 'POST'
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.success) {
+                              location.reload();
+                          } else {
+                              alert(data.msg);
+                          }
+                      });
+                });
+            });
+        
+            document.querySelectorAll('.btn-return').forEach(button => {
+                button.addEventListener('click', function () {
+                    const orderId = this.getAttribute('data-order-id');
+                    fetch(`/admin/order/return/${orderId}`, {
+                        method: 'POST'
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (data.success) {
+                              location.reload();
+                          } else {
+                              alert(data.msg);
+                          }
+                      });
+                });
+            });
+        </script>
+        
                         <div class="pagination">
                             <!-- Pagination links will be rendered here -->
                         </div>
@@ -402,46 +460,78 @@
                                 });
                             });
                     
-                            // Pagination functionality
                             const itemsPerPage = 5; // Number of items to display per page
-                            const tableRows = $('tbody tr');
-                            const totalItems = tableRows.length;
-                            const totalPages = Math.ceil(totalItems / itemsPerPage);
-                    
-                            function showPage(pageNumber) {
-                                const startIndex = (pageNumber - 1) * itemsPerPage;
-                                const endIndex = startIndex + itemsPerPage;
-                    
-                                tableRows.hide();
-                                tableRows.slice(startIndex, endIndex).show();
-                    
-                                $('.pagination a').removeClass('active');
-                                $(`.pagination a[data-page="${pageNumber}"]`).addClass('active');
-                            }
-                    
-                            function renderPagination() {
-                                const pagination = $('.pagination');
-                                pagination.empty();
-                    
-                                for (let i = 1; i <= totalPages; i++) {
-                                    const pageLink = $('<a>', {
-                                        'data-page': i,
-                                        text: i,
-                                        click: function() {
-                                            showPage(i);
-                                        }
-                                    });
-                    
-                                    if (i === 1) {
-                                        pageLink.addClass('active');
-                                    }
-                    
-                                    pagination.append(pageLink);
-                                }
-                            }
-                    
-                            renderPagination();
-                            showPage(1);
+    const tableRows = $('tbody tr');
+    const totalItems = tableRows.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    let currentPage = 1;
+
+    function showPage(pageNumber) {
+        const startIndex = (pageNumber - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        tableRows.hide();
+        tableRows.slice(startIndex, endIndex).show();
+
+        currentPage = pageNumber;
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const pagination = $('.pagination');
+        pagination.empty();
+
+        // Previous button
+        const prevButton = $('<a>', {
+            class: 'page-link',
+            text: 'Previous',
+            click: function() {
+                if (currentPage > 1) showPage(currentPage - 1);
+            }
+        });
+        if (currentPage === 1) prevButton.addClass('disabled');
+        pagination.append(prevButton);
+
+        // Page numbers
+        const windowSize = 3; // Number of page links to show
+        let startPage = Math.max(1, currentPage - Math.floor(windowSize / 2));
+        let endPage = Math.min(totalPages, startPage + windowSize - 1);
+
+        if (endPage - startPage + 1 < windowSize) {
+            startPage = Math.max(1, endPage - windowSize + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLink = $('<a>', {
+                class: 'page-link',
+                'data-page': i,
+                text: i,
+                click: function() {
+                    showPage(i);
+                }
+            });
+
+            if (i === currentPage) {
+                pageLink.addClass('active');
+            }
+
+            pagination.append(pageLink);
+        }
+
+        // Next button
+        const nextButton = $('<a>', {
+            class: 'page-link',
+            text: 'Next',
+            click: function() {
+                if (currentPage < totalPages) showPage(currentPage + 1);
+            }
+        });
+        if (currentPage === totalPages) nextButton.addClass('disabled');
+        pagination.append(nextButton);
+    }
+
+    renderPagination();
+    showPage(1);
                         });
                     </script>
                     </body>

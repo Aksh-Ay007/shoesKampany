@@ -29,6 +29,10 @@ const orderSchema = new Schema({
             type: Number,
             required: true
         },
+        finalPrice: {
+            type: Number,
+            required: true
+        },
         quantity: {
             type: Number,
             min: 1,

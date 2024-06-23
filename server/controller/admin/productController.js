@@ -25,7 +25,6 @@ const upload = multer({
 
 const list = async (req, res) => {
   try {
-
     const offers = await OfferDatabase.find().populate('product_name');
     const categories = await categoryDatabase.find();
 
@@ -38,18 +37,49 @@ const list = async (req, res) => {
     const itemsPerPage = 6; // Number of items to display per page
 
     // Find and sort products with pagination
-    const products = await productDatabase.find().populate('category').sort({ [sortField]: sortOrder }).skip((currentPage - 1) * itemsPerPage).limit(itemsPerPage);
+    let products = await productDatabase.find().populate('category').sort({ [sortField]: sortOrder }).skip((currentPage - 1) * itemsPerPage).limit(itemsPerPage);
 
     // Calculate total pages
     const totalProducts = await productDatabase.countDocuments();
     const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
-    res.render("products", { products, categories, sortField, sortOrder, currentPage,offers, totalPages, itemsPerPage });
+    // Apply offers and update final price in products
+    products = products.map(pdt => {
+      let offerApplied = false;
+      let savedAmount = 0;
+      let finalPrice = pdt.price;
+      let discountPercentage = 0;
+
+      offers.forEach(offer => {
+        if (offer.product_name && offer.product_name._id.toString() === pdt._id.toString()) {
+          offerApplied = true;
+          savedAmount = offer.discount_Amount;
+          discountPercentage = offer.discount_Percentage;
+          finalPrice = pdt.price - offer.discount_Amount;
+
+          // Update product with offer details
+          pdt.offerApplied = true;
+          pdt.offerDetails = {
+            offerName: offer.offerName,
+            discountAmount: offer.discount_Amount,
+            discountPercentage: offer.discount_Percentage,
+          };
+          pdt.finalPrice = finalPrice;
+        }
+      });
+
+      // Save updates to database
+      pdt.save(); // Assuming pdt is a Mongoose model instance
+      return pdt;
+    });
+
+    res.render("products", { products, categories, sortField, sortOrder, currentPage, offers, totalPages, itemsPerPage });
   } catch (error) {
     console.error(error);
     res.render("error"); // Render error page
   }
 };
+
 
 // Other controller methods remain the same
 // Render add product page
@@ -90,12 +120,6 @@ const createproduct = async (req, res) => {
     }
 
     const totalPrice = Math.round(price * (1 - discount / 100));
-    const categories = await categoryDatabase.findById(category);
-
-    if (!categories) {
-      res.status(404).send({ message: "Category not found" });
-      return;
-    }
 
     const product = new productDatabase({
       product_name: req.body.p_name,
@@ -108,7 +132,10 @@ const createproduct = async (req, res) => {
       discount: discount,
       stock: parseInt(stock),
       images: images,
-      total_price: totalPrice,
+      offerDetails: {
+        discountPercentage: discount, // Store discount percentage
+      },
+      finalPrice: totalPrice, // Store final price
     });
 
     await product.save();

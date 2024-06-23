@@ -12,11 +12,10 @@ const isAuthenticated = (req, res, next) => {
 
 const getSalesReports = async (req, res) => {
     try {
-        const { start, end, range, page = 1, limit = 5 } = req.query;
+        const { start, end, range, page = 1, limit = 10 } = req.query;
         let startDate, endDate;
 
-        // Same logic as before to determine start and end dates
-
+        // Date range logic
         if (range === 'daily') {
             startDate = moment().startOf('day');
             endDate = moment().endOf('day');
@@ -41,37 +40,47 @@ const getSalesReports = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-    
+        // Fetch paginated orders
         const orders = await OrderDatabase.find({
             status: "Delivered",
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         })
         .populate('user_id', 'firstname lastname')
         .skip(skip)
-        .limit(limit)
+        .limit(parseInt(limit))
         .sort({ orderDate: -1 });
 
-
+        // Count total orders
         const totalOrders = await OrderDatabase.countDocuments({
             status: "Delivered",
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         });
+
+        // Calculate totals for all orders in the date range
+        const totals = await OrderDatabase.aggregate([
+            {
+                $match: {
+                    status: "Delivered",
+                    orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSales: { $sum: "$finalAmount" },
+                    totalDiscount: { $sum: { $ifNull: ["$discountAmount", 0] } },
+                    totalCoupons: { $sum: { $ifNull: ["$couponDiscount", 0] } },
+                    totalOfferDiscount: { $sum: { $ifNull: ["$offerDiscount", 0] } }
+                }
+            }
+        ]);
+
+        const { totalSales, totalDiscount, totalCoupons, totalOfferDiscount } = totals[0] || 
+            { totalSales: 0, totalDiscount: 0, totalCoupons: 0, totalOfferDiscount: 0 };
+
         const totalPages = Math.ceil(totalOrders / limit);
 
-        let totalSales = 0;
-        let totalDiscount = 0;
-        let totalCoupons = 0;
-
-      
-        orders.forEach(order => {
-            order.orderedItems.forEach(item => {
-                totalSales += item.price * item.quantity;
-            });
-            totalDiscount += order.discount || 0;
-            totalCoupons += order.couponDiscount || 0;
-        });
-
-       const queryString = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+        const queryString = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
 
         res.render('salesReport', {
             orders,
@@ -79,28 +88,34 @@ const getSalesReports = async (req, res) => {
             totalSales,
             totalDiscount,
             totalCoupons,
-            totalOrders, // Pass the actual total orders count
+            totalOfferDiscount,
+            totalOrders,
             startDate: startDate.format('YYYY-MM-DD'),
             endDate: endDate.format('YYYY-MM-DD'),
             range,
             queryString,
-            currentPage: page,
+            currentPage: parseInt(page),
             totalPages: totalPages,
-            startIndex: (page - 1) * limit + 1 // Pass the starting index for the current page
+            limit: parseInt(limit)
         });
     } catch (error) {
-        res.status(500).render('error', {
+        console.error('Error fetching sales report:', error);
+        res.status(500).render('error', { 
             message: "Error occurred while fetching sales report",
             user: req.session.user
         });
     }
 };
 
+
+
+
 const generatePDFReport = async (req, res) => {
     try {
         const { start, end, range } = req.query;
         let startDate, endDate;
-        // Same logic as in getSalesReports function
+
+        // Date range logic (keep as is)
         if (range === 'daily') {
             startDate = moment().startOf('day');
             endDate = moment().endOf('day');
@@ -121,8 +136,6 @@ const generatePDFReport = async (req, res) => {
             endDate = moment().endOf('day');
         }
 
-        console.log(`Generating PDF report from ${startDate.toDate()} to ${endDate.toDate()}`);
-
         const orders = await OrderDatabase.find({
             status: "Delivered",
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
@@ -130,9 +143,71 @@ const generatePDFReport = async (req, res) => {
         .populate('user_id', 'firstname lastname')
         .sort({ orderDate: -1 });
 
-        // Rest of the generatePDFReport function remains the same
-        // ...
+        // Create a new PDF document
+        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+        // Pipe the PDF document to the response
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=sales_report_${startDate.format('YYYY-MM-DD')}_to_${endDate.format('YYYY-MM-DD')}.pdf`);
+        doc.pipe(res);
+
+        // Add title
+        doc.fontSize(18).text('Sales Report', { align: 'center' });
+        doc.moveDown();
+
+        // Add date range
+        doc.fontSize(12).text(`From: ${startDate.format('YYYY-MM-DD')} To: ${endDate.format('YYYY-MM-DD')}`, { align: 'center' });
+        doc.moveDown();
+
+        // Add summary statistics
+        let totalSales = 0, totalDiscount = 0, totalCoupons = 0, totalOfferDiscount = 0;
+        orders.forEach(order => {
+            totalSales += order.finalAmount;
+            totalDiscount += order.discountAmount || 0;
+            totalCoupons += order.couponDiscount || 0;
+            totalOfferDiscount += order.offerDiscount || 0;
+        });
+
+        doc.fontSize(14).text('Summary');
+        doc.fontSize(10)
+           .text(`Total Sales: Rs:${totalSales.toFixed(2)}`)
+         
+           .text(`Total Coupons: Rs:${totalCoupons.toFixed(2)}`)
+           .text(`Total Offer Discount: Rs:${totalOfferDiscount.toFixed(2)}`)
+           .text(`Total Orders:Rs:${orders.length}`);
+        doc.moveDown();
+
+        // Create the table
+        const table = {
+            title: "Orders",
+            headers: ['Order ID', 'User', 'Total Amount', 'Discount', 'Coupon', 'Offer', 'Final Amount', 'Payment', 'Date'],
+            rows: orders.map(order => [
+                order._id.toString().slice(-6),
+                `${order.user_id.firstname} ${order.user_id.lastname}`,
+                `Rs:${order.totalAmount.toFixed(2)}`,
+                `Rs:${(order.discountAmount || 0).toFixed(2)}`,
+                `Rs:${(order.couponDiscount || 0).toFixed(2)}`,
+                `Rs:${(order.offerDiscount || 0).toFixed(2)}`,
+                `Rs:${order.finalAmount.toFixed(2)}`,
+                order.paymentMethod,
+                moment(order.orderDate).format('YYYY-MM-DD HH:mm')
+            ])
+        };
+
+        // Draw the table
+        await doc.table(table, {
+            prepareHeader: () => doc.font('Helvetica-Bold').fontSize(8),
+            prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+                doc.font('Helvetica').fontSize(8);
+                indexColumn === 0 && doc.addBackground(rectRow, 'white', 0.15);
+            },
+        });
+
+        // Finalize the PDF and end the stream
+        doc.end();
+
     } catch (error) {
+        console.error('Error generating PDF:', error);
         res.status(500).send("Error generating PDF report");
     }
 };

@@ -58,6 +58,8 @@ const singleOrder = async (req, res) => {
             console.log(`Stock updated for product with ID ${productId}`);
         }
 
+        console.log("hdfvjhdfvjh",order);
+
         res.render('viewOrder', { order });
     } catch (e) {
         console.log(e.toString());
@@ -72,7 +74,8 @@ const statusShipped = async (req, res) => {
         // Update order status to "Shipped" in MongoDB
         const updatedOrder = await OrderDatabase.findByIdAndUpdate(orderId, {
             $set: {
-                status: "Shipped"
+                status: "Shipped",
+                "orderedItems.$[].status": "Shipped" // Update status for all items
             }
         }, { new: true });
 
@@ -88,16 +91,17 @@ const statusShipped = async (req, res) => {
         res.status(500).json({ msg: "Internal server error" });
     }
 };
-
 const statusDelivered = async (req, res) => {
     try {
         const orderId = req.params.oid;
 
-        // Update order status to "Delivered" and payment status to "Completed" in MongoDB
+        // Update order status to "Delivered", payment status to "Completed",
+        // and update status for all items in orderedItems
         const updatedOrder = await OrderDatabase.findByIdAndUpdate(orderId, {
             $set: {
                 status: "Delivered",
-                paymentStatus: "Completed"
+                paymentStatus: "Completed",
+                "orderedItems.$[].status": "Delivered" // Update status for all items
             }
         }, { new: true });
 
@@ -108,12 +112,11 @@ const statusDelivered = async (req, res) => {
 
         // Send response
         res.status(200).json({ success: true, message: "Order status updated to Delivered and payment status updated to Completed" });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ msg: "Internal server error" });
+    }catch (error) {
+        console.error('Error generating PDF:', error);
+        res.status(500).send("Error generating PDF report");
     }
 };
-
 module.exports = {
     viewOrders, singleOrder, statusShipped, statusDelivered
 };
