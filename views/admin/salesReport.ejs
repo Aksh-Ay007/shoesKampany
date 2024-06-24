@@ -7,7 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Include jQuery and Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <style>
         .ordered-items {
             margin-top: 10px;
@@ -30,6 +34,36 @@
             margin-left: 10px;
             color: #888; /* Adjust color as needed */
         }
+    </style>
+     <style>
+        .pagination .btn {
+            margin: 2px;
+        }
+        .custom-modal {
+    width: 800px; /* Adjust the width to match your needs */
+}
+
+.custom-modal .modal-body {
+    max-height: 400px; /* Adjust the height to fit content */
+    overflow-y: auto; /* Ensure content is scrollable if it exceeds the height */
+}
+
+.transaction-item {
+    border: 1px solid #ddd; /* Add border to transaction items */
+    padding: 10px; /* Add padding for better spacing */
+    margin-bottom: 10px; /* Add margin between items */
+    background-color: #f9f9f9; /* Optional: Add background color for better visibility */
+}
+
+.transaction-item p {
+    margin: 0; /* Remove default margin */
+    padding: 2px 0; /* Add padding for better readability */
+}
+
+.transaction-item strong {
+    color: #333; /* Optional: Adjust text color for labels */
+}
+
     </style>
     
 
@@ -354,7 +388,6 @@
         </ul>
     </nav>
     <!-- ... -->
-
     <div id="content">
         <div class="breadcrumb">
             <a href="/admin">Dashboard</a>
@@ -384,6 +417,7 @@
             <a href="/admin/generate-pdf-report<%= queryString %>" class="btn btn-success" target="_blank">
                 <i class="fas fa-download"></i> Download PDF
             </a>
+            <button id="viewReturnedCanceledOrders" class="btn btn-secondary">View Returned and Canceled Orders</button>
         </div>
     
         <div class="stats-container">
@@ -391,7 +425,6 @@
                 <h3>Total Sales</h3>
                 <p>₹<%= totalSales.toFixed(2) %></p>
             </div>
-           
             <div class="stat-card">
                 <h3>Total Coupons Discount</h3>
                 <p>₹<%= totalCoupons.toFixed(2) %></p>
@@ -402,21 +435,24 @@
             </div>
             <div class="stat-card">
                 <h3>Total Orders</h3>
-                <p><%= totalOrders %></p>
+                <p><%= totalSalesCount %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Canceled/Returned Orders</h3>
+                <p><%= totalCanceledReturnedCount %></p>
             </div>
         </div>
-    
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>index</th> <!-- Index column -->
+                        <th>Index</th>
+                        <th>Status</th>
                         <th>User</th>
                         <th>Products</th>
                         <th>Total Amount</th>
-                        <!-- <th>Discount</th> -->
-                        <th>CouponDiscount</th>
-                        <th>OfferDiscount</th>
+                        <th>Coupon Discount</th>
+                        <th>Offer Discount</th>
                         <th>Final Amount</th>
                         <th>Payment</th>
                         <th>Date</th>
@@ -426,6 +462,7 @@
                     <% orders.forEach((order, index) => { %>
                         <tr>
                             <td><%= (currentPage - 1) * limit + index + 1 %></td>
+                            <td><%= order.status %></td>
                             <td><%= order.user_id.firstname %> <%= order.user_id.lastname %></td>
                             <td>
                                 <div class="ordered-items">
@@ -435,10 +472,8 @@
                                         </div>
                                     <% }); %>
                                 </div>
-                                
                             </td>
                             <td>₹<%= order.totalAmount.toFixed(2) %></td>
-                            <!-- <td>₹<%= order.discountAmount.toFixed(2) %></td> -->
                             <td>₹<%= order.couponDiscount.toFixed(2) %></td>
                             <td>₹<%= order.offerDiscount.toFixed(2) %></td>
                             <td>₹<%= order.finalAmount.toFixed(2) %></td>
@@ -451,75 +486,133 @@
                     <% }); %>
                 </tbody>
             </table>
-            
         </div>
+        
+        <div class="pagination">
+            <!-- Pagination will be rendered here by JavaScript -->
+        </div>
+    </div>
+<!-- Modal for Returned and Canceled Orders -->
+<div class="modal fade" id="returnedCanceledOrdersModal" tabindex="-1" role="dialog" aria-labelledby="returnedCanceledOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="returnedCanceledOrdersModalLabel">Returned and Canceled Orders</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Table to display returned and canceled orders -->
+                <div id="returnedCanceledOrdersContent">
+                    <!-- Content will be dynamically appended here -->
+                </div>
 
+                <!-- Pagination for returned and canceled orders -->
+                <div class="pagination" id="returnedCanceledOrdersPagination">
+                    <!-- Pagination links will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-    <div class="pagination">
-        <!-- Pagination will be rendered here by JavaScript -->
-    </div>
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            const itemsPerPage = <%= limit %>;
-            const totalItems = <%= totalOrders %>;
-            const totalPages = <%= totalPages %>;
-            let currentPage = <%= currentPage %>;
-    
-            function showPage(pageNumber) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('page', pageNumber);
-                window.location.href = url.toString();
-            }
-    
-            function renderPagination() {
-                const pagination = $('.pagination');
-                pagination.empty();
-    
-                // Previous button
-                const prevButton = $('<a>', {
-                    class: 'btn btn-secondary',
-                    text: 'Previous',
-                    click: function() {
-                        if (currentPage > 1) showPage(currentPage - 1);
-                    }
+</div>
+
+
+<script>
+    // Function to fetch and display returned and canceled orders
+    function showReturnedCanceledOrders(pageNumber) {
+        $.ajax({
+            url: '/admin/returned-canceled-orders',
+            method: 'GET',
+            data: { page: pageNumber },
+            dataType: 'json',
+            success: function(response) {
+                const orders = response.orders;
+                const modalBody = $('#returnedCanceledOrdersContent');
+                modalBody.empty();
+
+                orders.forEach((order, index) => {
+                    const html = `
+                        <div class="transaction-item">
+                            <p><strong>Status:</strong> ${order.status}</p>
+                            <p><strong>User:</strong> ${order.user_id.firstname} ${order.user_id.lastname}</p>
+                            <p><strong>Products:</strong> ${order.orderedItems.map(item => `<div class="item">${item.productname} *${item.quantity}</div>`).join('')}</p>
+                            <p><strong>Total Amount:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+                            <p><strong>Coupon Discount:</strong> ₹${order.couponDiscount.toFixed(2)}</p>
+                            <p><strong>Offer Discount:</strong> ₹${order.offerDiscount.toFixed(2)}</p>
+                            <p><strong>Final Amount:</strong> ₹${order.finalAmount.toFixed(2)}</p>
+                            <p><strong>Payment:</strong> ${order.paymentMethod}</p>
+                            <p><strong>Date:</strong> ${new Date(order.orderDate).toLocaleDateString()} ${new Date(order.orderDate).toLocaleTimeString()}</p>
+                        </div>
+                    `;
+                    modalBody.append(html);
                 });
-                if (currentPage === 1) prevButton.addClass('disabled');
-                pagination.append(prevButton);
-    
-                // Page numbers
-                const windowSize = 3;
-                let startPage = Math.max(1, currentPage - Math.floor(windowSize / 2));
-                let endPage = Math.min(totalPages, startPage + windowSize - 1);
-                if (endPage - startPage + 1 < windowSize) {
-                    startPage = Math.max(1, endPage - windowSize + 1);
-                }
-                for (let i = startPage; i <= endPage; i++) {
-                    const pageLink = $('<a>', {
-                        class: i === currentPage ? 'btn btn-primary' : 'btn btn-outline-primary',
-                        text: i,
-                        click: function() {
-                            showPage(i);
-                        }
-                    });
-                    pagination.append(pageLink);
-                }
-    
-                // Next button
-                const nextButton = $('<a>', {
-                    class: 'btn btn-secondary',
-                    text: 'Next',
-                    click: function() {
-                        if (currentPage < totalPages) showPage(currentPage + 1);
-                    }
-                });
-                if (currentPage === totalPages) nextButton.addClass('disabled');
-                pagination.append(nextButton);
+
+                renderModalPagination(response.currentPage, response.totalPages);
             }
-    
-            renderPagination();
         });
-    </script>
+    }
+
+    // Function to render pagination links
+    function renderModalPagination(currentPage, totalPages) {
+        const pagination = $('#returnedCanceledOrdersPagination');
+        pagination.empty();
+
+        // Previous button
+        const prevButton = $('<button>', {
+            class: 'btn btn-secondary',
+            text: 'Previous',
+            click: function() {
+                if (currentPage > 1) showReturnedCanceledOrders(currentPage - 1);
+            }
+        });
+        if (currentPage === 1) prevButton.prop('disabled', true);
+        pagination.append(prevButton);
+
+        // Page numbers
+        const windowSize = 3;
+        let startPage = Math.max(1, currentPage - Math.floor(windowSize / 2));
+        let endPage = Math.min(totalPages, startPage + windowSize - 1);
+        if (endPage - startPage + 1 < windowSize) {
+            startPage = Math.max(1, endPage - windowSize + 1);
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLink = $('<button>', {
+                class: i === currentPage ? 'btn btn-primary' : 'btn btn-outline-primary',
+                text: i,
+                click: function() {
+                    showReturnedCanceledOrders(i);
+                }
+            });
+            pagination.append(pageLink);
+        }
+
+        // Next button
+        const nextButton = $('<button>', {
+            class: 'btn btn-secondary',
+            text: 'Next',
+            click: function() {
+                if (currentPage < totalPages) showReturnedCanceledOrders(currentPage + 1);
+            }
+        });
+        if (currentPage === totalPages) nextButton.prop('disabled', true);
+        pagination.append(nextButton);
+    }
+
+    // Modal logic
+    $(document).ready(function () {
+        // Trigger modal and fetch orders
+        $('#viewReturnedCanceledOrders').click(function() {
+            showReturnedCanceledOrders(1); // Initial load of orders
+            $('#returnedCanceledOrdersModal').modal('show');
+        });
+    });
+</script>
+
+
+
 </body>
 </html>

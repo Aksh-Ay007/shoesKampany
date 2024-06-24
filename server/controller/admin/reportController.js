@@ -40,9 +40,9 @@ const getSalesReports = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
-        // Fetch paginated orders
+        // Fetch paginated orders including returned and canceled statuses
         const orders = await OrderDatabase.find({
-            status: "Delivered",
+            status: { $in: ["Delivered", "Returned", "Canceled"] },
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         })
         .populate('user_id', 'firstname lastname')
@@ -52,7 +52,7 @@ const getSalesReports = async (req, res) => {
 
         // Count total orders
         const totalOrders = await OrderDatabase.countDocuments({
-            status: "Delivered",
+            status: { $in: ["Delivered", "Returned", "Canceled"] },
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         });
 
@@ -60,23 +60,35 @@ const getSalesReports = async (req, res) => {
         const totals = await OrderDatabase.aggregate([
             {
                 $match: {
-                    status: "Delivered",
+                    status: { $in: ["Delivered", "Returned", "Canceled"] },
                     orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
                 }
             },
             {
                 $group: {
                     _id: null,
-                    totalSales: { $sum: "$finalAmount" },
-                    totalDiscount: { $sum: { $ifNull: ["$discountAmount", 0] } },
+                    totalSales: { $sum: { $cond: [{ $eq: ["$status", "Delivered"] }, "$finalAmount", 0] } },
                     totalCoupons: { $sum: { $ifNull: ["$couponDiscount", 0] } },
-                    totalOfferDiscount: { $sum: { $ifNull: ["$offerDiscount", 0] } }
+                    totalOfferDiscount: { $sum: { $ifNull: ["$offerDiscount", 0] } },
+                    totalSalesCount: { $sum: { $cond: [{ $eq: ["$status", "Delivered"] }, 1, 0] } },
+                    totalCanceledReturnedCount: { $sum: { $cond: [{ $in: ["$status", ["Returned", "Canceled"]] }, 1, 0] } }
                 }
             }
         ]);
 
-        const { totalSales, totalDiscount, totalCoupons, totalOfferDiscount } = totals[0] || 
-            { totalSales: 0, totalDiscount: 0, totalCoupons: 0, totalOfferDiscount: 0 };
+        const { 
+            totalSales, 
+            totalCoupons, 
+            totalOfferDiscount, 
+            totalSalesCount, 
+            totalCanceledReturnedCount 
+        } = totals[0] || { 
+            totalSales: 0, 
+            totalCoupons: 0, 
+            totalOfferDiscount: 0, 
+            totalSalesCount: 0, 
+            totalCanceledReturnedCount: 0 
+        };
 
         const totalPages = Math.ceil(totalOrders / limit);
 
@@ -86,10 +98,11 @@ const getSalesReports = async (req, res) => {
             orders,
             user: req.session.user,
             totalSales,
-            totalDiscount,
             totalCoupons,
             totalOfferDiscount,
             totalOrders,
+            totalSalesCount,
+            totalCanceledReturnedCount,
             startDate: startDate.format('YYYY-MM-DD'),
             endDate: endDate.format('YYYY-MM-DD'),
             range,
@@ -212,8 +225,44 @@ const generatePDFReport = async (req, res) => {
     }
 };
 
+
+// controllers/adminController.js
+// controllers/adminController.js
+const getReturnedCanceledOrders = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const skip = (page - 1) * limit;
+
+        // Fetch returned and canceled orders
+        const orders = await OrderDatabase.find({
+            status: { $in: ["Returned", "Canceled"] }
+        })
+        .populate('user_id', 'firstname lastname')
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ orderDate: -1 });
+
+        const totalOrders = await OrderDatabase.countDocuments({
+            status: { $in: ["Returned", "Canceled"] }
+        });
+
+        res.json({
+            orders,
+            totalOrders,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(totalOrders / limit),
+            limit: parseInt(limit)
+        });
+    } catch (error) {
+        console.error('Error fetching returned and canceled orders:', error);
+        res.status(500).json({ message: 'Error occurred while fetching returned and canceled orders' });
+    }
+};
+
+
+
 module.exports = {
     isAuthenticated,
     getSalesReports,
-    generatePDFReport
+    generatePDFReport,getReturnedCanceledOrders
 };

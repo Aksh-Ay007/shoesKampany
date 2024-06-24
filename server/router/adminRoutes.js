@@ -112,6 +112,7 @@ route.get('/sales-report', reportController.getSalesReports);
 
 route.get('/generate-pdf-report', reportController.generatePDFReport);
 
+route.get('/returned-canceled-orders', reportController.getReturnedCanceledOrders);
 
 
 //couponcontroler
