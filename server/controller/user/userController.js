@@ -63,6 +63,8 @@ const home = async (req, res) => {
       };
     }));
 
+    // console.log("allProduct",allProduct);
+
     res.render('home', { isUser, allProduct, cart });
   } catch (error) {
     console.error("Home Page Error:", error);

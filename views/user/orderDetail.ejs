@@ -603,13 +603,15 @@
 			  <img src="/path/to/default/image.jpg" class="card-img-top custom-image" alt="Default Image">
 			<% } %>
 			<div class="card-body">
-			  <h5 class="card-title"><%= item.productId ? item.productId.product_name : item.productname %></h5>
+			  <h5 class="card-title"><%= item.productId ? item.productId.product_name : order.productname %></h5>
 			  <% if (item.productId && item.productId.offerPrice) { %>
 				<p class="card-text">
-				  Original Price: <span class="original-price">₹<%= item.productId.price.toFixed(2) %></span>
+				  Original Price: <span class="original-price">₹<%= order.productId.price.toFixed(2) %></span>
 				  <br>
-				  Offer Price: <span class="offer-price">₹<%= item.productId.offerPrice.toFixed(2) %></span>
+				  Offer Price: <span class="offer-price">₹<%= order.productId.offerPrice.toFixed(2) %></span>
 				</p>
+			  <% } else if (item.finalPrice) { %>
+				<p class="card-text">Price: ₹<%= item.finalPrice.toFixed(2) %></p>
 			  <% } else { %>
 				<p class="card-text">Price: ₹<%= item.price.toFixed(2) %></p>
 			  <% } %>

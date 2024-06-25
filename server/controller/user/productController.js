@@ -5,30 +5,31 @@ const categoryDatabase = require("../../model/categoryModel");
 const offerDatabase = require("../../model/offerModal");
 const ratingModel = require('../../model/ratingModel');
 // const mongoose = require("mongoose");
+// const Review = require('../../model/ratingModel');
 
 
 // Function to apply offer to a product
 const applyOffer = async (product) => {
   const productOffer = await offerDatabase.findOne({ product_name: product._id, unlist: true });
   const categoryOffer = await offerDatabase.findOne({ category_name: product.category, unlist: true });
-  
-  let discountPercentage = 0;
 
   if (productOffer && typeof productOffer.discount_Amount === 'number') {
-    discountPercentage = productOffer.discount_Amount;
+    product.offerPrice = Math.round(product.price - (product.price * (productOffer.discount_Amount / 100)));
   } else if (categoryOffer && typeof categoryOffer.discount_Amount === 'number') {
-    discountPercentage = categoryOffer.discount_Amount;
-  }
-
-  if (discountPercentage > 0) {
-    product.offerPrice = Math.round(product.price - (product.price * (discountPercentage / 100)));
-    product.discountPercentage = discountPercentage;
+    product.offerPrice = Math.round(product.price - (product.price * (categoryOffer.discount_Amount / 100)));
   } else {
     product.offerPrice = null;
-    product.discountPercentage = 0;
   }
-
   return product;
+};
+
+const calculateAverageRating = async (productId) => {
+  const reviews = await ratingModel.find({ product: productId });
+  if (reviews.length === 0) return { averageRating: 0, totalReviews: 0 };
+  
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const averageRating = totalRating / reviews.length;
+  return { averageRating, totalReviews: reviews.length };
 };
 
 const mongoose = require('mongoose');
@@ -140,6 +141,7 @@ const catFilter = async (req, res) => {
     }
 
     // Apply sorting if present
+    console.log("sortFilter",sortFilter);
     if (sortFilter) {
       const sortCriteria = JSON.parse(sortFilter);
       selectedProduct.sort((a, b) => {
@@ -152,14 +154,36 @@ const catFilter = async (req, res) => {
     // Apply offers to the products
     selectedProduct = await Promise.all(selectedProduct.map(applyOffer));
 
+    selectedProduct = await Promise.all(selectedProduct.map(async (product) => {
+      const { averageRating, totalReviews } = await calculateAverageRating(product._id);
+      const discountPercentage = product.offerPrice ? ((product.price - product.offerPrice) / product.price * 100).toFixed(0) : null;
+      return {
+        ...product._doc,
+        discountPercentage: discountPercentage,
+        originalPrice: product.price,
+        price: product.offerPrice || product.price,
+        averageRating,
+        totalReviews
+      };
+    }));
+    // console.log(selectedProduct,"12345678");
+
     // Determine selected category
     const selectedCategory = categoryFilter || 'All';
 
     // Check if user session exists and retrieve cart if user is logged in
     const cart = isUser ? await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId') : null;
-
+// console.log("selectedProduct",selectedProduct);
     // Render the shop page with filtered products and categories
-    res.render('shop', { categories, isUser, selectedProduct, selectedCategory, selectedSort: sortFilter || '{"_id": 1}', cart });
+    res.render('shop', { 
+      categories, 
+      isUser, 
+      selectedProduct, 
+      selectedCategory, 
+      selectedSort: sortFilter || '{"_id": 1}', 
+      cart,
+      searchQuery: searchQuery || ''  // Add this line
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');

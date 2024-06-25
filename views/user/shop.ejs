@@ -535,10 +535,12 @@ transition: background-color 0.3s ease;
 						<div class="product-details">
 							<a href="/product?id=<%= product._id %>" class="product-name"><%= product.product_name.toUpperCase() %></a>
 							<div class="product-price">
-								<% if (product.offerPrice) { %>
-									<span class="original-price">&#x20a8; <%= product.price %> (Original Price)</span>
-									<span class="discount-percentage">(<%= ((product.price - product.offerPrice) / product.price * 100).toFixed(0) %>% off)</span>
-									<span class="offer-price">Offer Price: &#x20a8; <%= product.offerPrice %></span>
+								
+								<% if (product.discountPercentage) { %>
+								
+									<span class="original-price">&#x20a8; <%= product.originalPrice %> (Original Price)</span>
+									<span class="discount-percentage">(<%= product.discountPercentage %>% off)</span><br>
+									<span class="offer-price">Offer Price: &#x20a8; <%= product.price %></span>
 								<% } else if (product.categoryOffer && typeof product.categoryOffer.discount_Amount === 'number') { %>
 									<span class="category-offer-price">Category Offer: &#x20a8; <%= Math.round(product.price - (product.price * (product.categoryOffer.discount_Amount / 100))) %></span>
 								<% } else { %>
@@ -808,66 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		</span>
 	</div>
 
-	<!-- Modal1 -->
-	<!-- <div class="wrap-modal1 js-modal1 p-t-60 p-b-20">
-		<div class="overlay-modal1 js-hide-modal1"></div>
-
-		<div class="container">
-			<div class="bg0 p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
-				<button class="how-pos3 hov3 trans-04 js-hide-modal1">
-					<img src="images/icons/icon-close.png" alt="CLOSE">
-				</button>
-
-				<div class="row">
-					<div class="col-md-6 col-lg-7 p-b-30">
-						<div class="p-l-25 p-r-30 p-lr-0-lg">
-							<div class="wrap-slick3 flex-sb flex-w">
-								<div class="wrap-slick3-dots"></div>
-								<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
-
-								<div class="slick3 gallery-lb">
-									<div class="item-slick3" data-thumb="images/product-detail-01.jpg">
-										<div class="wrap-pic-w pos-relative">
-											<img src="images/product-detail-01.jpg" alt="IMG-PRODUCT">
-
-											<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-												href="images/product-detail-01.jpg">
-												<i class="fa fa-expand"></i>
-											</a>
-										</div>
-									</div>
-
-									<div class="item-slick3" data-thumb="images/product-detail-02.jpg">
-										<div class="wrap-pic-w pos-relative">
-											<img src="images/product-detail-02.jpg" alt="IMG-PRODUCT">
-
-											<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-												href="images/product-detail-02.jpg">
-												<i class="fa fa-expand"></i>
-											</a>
-										</div>
-									</div>
-
-									<div class="item-slick3" data-thumb="images/product-detail-03.jpg">
-										<div class="wrap-pic-w pos-relative">
-											<img src="images/product-detail-03.jpg" alt="IMG-PRODUCT">
-
-											<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04"
-												href="images/product-detail-03.jpg">
-												<i class="fa fa-expand"></i>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div>
-	</div> -->
-
+	
 	<!--===============================================================================================-->
 	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
 	<!--===============================================================================================-->

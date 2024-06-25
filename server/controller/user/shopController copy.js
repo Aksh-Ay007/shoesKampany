@@ -6,11 +6,12 @@ const offerDatabase = require("../../model/offerModal"); // Ensure this path is 
 const Review = require('../../model/ratingModel');
 
 const applyOffer = async (product) => {
-
+  if (!product) {
+    return null;
+  }
 
   const productOffer = await offerDatabase.findOne({ product_name: product._id, unlist: true });
   const categoryOffer = await offerDatabase.findOne({ category_name: product.category, unlist: true });
-  let discountPercentage = 0;
 
   if (productOffer && typeof productOffer.discount_Amount === 'number') {
     product.offerPrice = Math.round(product.price - (product.price * (productOffer.discount_Amount / 100)));
@@ -57,20 +58,16 @@ const getShop = async (req, res) => {
     }
 
     // Apply offers and calculate ratings
-    selectedProduct = await Promise.all(selectedProduct.map(applyOffer));
-
     selectedProduct = await Promise.all(selectedProduct.map(async (product) => {
+      const offeredProduct = await applyOffer(product);
       const { averageRating, totalReviews } = await calculateAverageRating(product._id);
-      const discountPercentage = product.offerPrice ? ((product.price - product.offerPrice) / product.price * 100).toFixed(0) : null;
       return {
-        ...product._doc,
-        discountPercentage: discountPercentage,
-        originalPrice: product.price,
-        price: product.offerPrice || product.price,
+        ...offeredProduct._doc,
         averageRating,
         totalReviews
       };
     }));
+console.log(selectedProduct,"DFSFDS");
 
     // Apply sorting if present
     if (sortFilter) {
@@ -92,7 +89,7 @@ const getShop = async (req, res) => {
     let selectedCategory = categoryId || "All";
     const selectedSort = sortFilter || '{"_id": 1}';
 
-// console.log("selectedProduct",selectedProduct);
+    console.log("selectedSort",selectedSort);
 
     res.render('shop', { 
       selectedCategory, 

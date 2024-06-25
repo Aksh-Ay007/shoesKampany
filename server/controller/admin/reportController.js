@@ -12,7 +12,7 @@ const isAuthenticated = (req, res, next) => {
 
 const getSalesReports = async (req, res) => {
     try {
-        const { start, end, range, page = 1, limit = 10 } = req.query;
+        const { start, end, range, page = 1, limit = 5 } = req.query;
         let startDate, endDate;
 
         // Date range logic
@@ -32,6 +32,7 @@ const getSalesReports = async (req, res) => {
             startDate = moment(start);
             endDate = moment(end).endOf('day');
         } else {
+            // Default to show orders from the past month
             startDate = moment().subtract(1, 'month').startOf('day');
             endDate = moment().endOf('day');
         }
@@ -42,7 +43,7 @@ const getSalesReports = async (req, res) => {
 
         // Fetch paginated orders including returned and canceled statuses
         const orders = await OrderDatabase.find({
-            status: { $in: ["Delivered", "Returned", "Canceled"] },
+            status: { $in: ["Delivered", "Returned", "Cancelled"] },
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         })
         .populate('user_id', 'firstname lastname')
@@ -52,7 +53,7 @@ const getSalesReports = async (req, res) => {
 
         // Count total orders
         const totalOrders = await OrderDatabase.countDocuments({
-            status: { $in: ["Delivered", "Returned", "Canceled"] },
+            status: { $in: ["Delivered", "Returned", "Cancelled"] },
             orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
         });
 
@@ -60,7 +61,7 @@ const getSalesReports = async (req, res) => {
         const totals = await OrderDatabase.aggregate([
             {
                 $match: {
-                    status: { $in: ["Delivered", "Returned", "Canceled"] },
+                    status: { $in: ["Delivered", "Returned", "Cancelled"] },
                     orderDate: { $gte: startDate.toDate(), $lte: endDate.toDate() }
                 }
             },
@@ -71,7 +72,7 @@ const getSalesReports = async (req, res) => {
                     totalCoupons: { $sum: { $ifNull: ["$couponDiscount", 0] } },
                     totalOfferDiscount: { $sum: { $ifNull: ["$offerDiscount", 0] } },
                     totalSalesCount: { $sum: { $cond: [{ $eq: ["$status", "Delivered"] }, 1, 0] } },
-                    totalCanceledReturnedCount: { $sum: { $cond: [{ $in: ["$status", ["Returned", "Canceled"]] }, 1, 0] } }
+                    totalCanceledReturnedCount: { $sum: { $cond: [{ $in: ["$status", ["Returned", "Cancelled"]] }, 1, 0] } }
                 }
             }
         ]);
@@ -108,7 +109,7 @@ const getSalesReports = async (req, res) => {
             range,
             queryString,
             currentPage: parseInt(page),
-            totalPages: totalPages,
+            totalPages,
             limit: parseInt(limit)
         });
     } catch (error) {
@@ -119,9 +120,6 @@ const getSalesReports = async (req, res) => {
         });
     }
 };
-
-
-
 
 const generatePDFReport = async (req, res) => {
     try {
@@ -227,31 +225,30 @@ const generatePDFReport = async (req, res) => {
 
 
 // controllers/adminController.js
-// controllers/adminController.js
 const getReturnedCanceledOrders = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 2; // Number of orders per page (changed to 2)
         const skip = (page - 1) * limit;
 
-        // Fetch returned and canceled orders
-        const orders = await OrderDatabase.find({
-            status: { $in: ["Returned", "Canceled"] }
-        })
-        .populate('user_id', 'firstname lastname')
-        .skip(skip)
-        .limit(parseInt(limit))
-        .sort({ orderDate: -1 });
+        // Fetch returned/canceled orders using OrderDatabase model
+        const orders = await OrderDatabase.find({ status: { $in: ['Cancelled', 'Returned'] } })
+                                 .populate('user_id') // Assuming user_id is a reference to the User model
+                                 .sort({ orderDate: -1 })
+                                 .skip(skip)
+                                 .limit(limit)
+                                 .exec();
 
-        const totalOrders = await OrderDatabase.countDocuments({
-            status: { $in: ["Returned", "Canceled"] }
-        });
+        // Calculate total pages for pagination
+        const totalCount = await OrderDatabase.countDocuments({ status: { $in: ['Cancelled', 'Returned'] } });
+        const totalPages = Math.ceil(totalCount / limit);
+
+        console.log('Fetched orders:', orders); // Check fetched orders in console
 
         res.json({
-            orders,
-            totalOrders,
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(totalOrders / limit),
-            limit: parseInt(limit)
+            orders: orders,
+            currentPage: page,
+            totalPages: totalPages
         });
     } catch (error) {
         console.error('Error fetching returned and canceled orders:', error);
