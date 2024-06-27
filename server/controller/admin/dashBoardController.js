@@ -191,7 +191,7 @@ const topCategories = await OrderDatabase.aggregate([
 
 console.log(topCategories);
 
-      res.render('admindashboard', {
+      res.render('adminDashboard', {
           totalRevenue,
           totalOrders,
           totalDiscount,
