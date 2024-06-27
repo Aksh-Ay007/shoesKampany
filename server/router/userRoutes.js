@@ -7,19 +7,22 @@ const productController = require("../controller/user/productController");
 const cartController = require('../controller/user/cartController');
 const wishlistController = require("../controller/user/wishlistController");
 const checkoutController = require('../controller/user/checkoutController');
-const isAuthenticated = require('../middleware/isAuthenticated');
-const { block } = require('../middleware/userControls');
+const isAuthenticated = require('../middleware/isAuthenticated'); // Import your authentication middleware
+const { block } = require('../middleware/userControls'); // Import your block middleware
 const nocache = require('nocache');
 const walletController = require('../controller/user/walletController');
 const ratingController=require('../controller/user/ratingController');
 
 
+// Middleware
+router.use(nocache()); // Using nocache middleware globally
+
 // Home
 router.get('/', block, userController.home);
 
-//google auth
-router.get('/auth/google',userController.googleAuth)
-router.get('/auth/google/callback',userController.googleAuthCallback)
+// Google Auth
+router.get('/auth/google', userController.googleAuth);
+router.get('/auth/google/callback', userController.googleAuthCallback);
 
 // User Authentication
 router.get('/userlogin', userController.userLogin);
@@ -32,7 +35,7 @@ router.get('/resendOtp', userController.getResendOtp);
 router.get('/forgototp', otpController.getForgotOtp);
 router.post('/postforgototp', otpController.postForgotOtp);
 router.get('/forgotpassword', userController.getForgotPassword);
-router.post('/postforgotpassword', userController.postForgotPassword);
+router.post('/postforgotpassword', userController.postNewPassword);
 router.get('/getnewPassword', userController.getNewPassword);
 router.post('/newPassword', userController.postNewPassword);
 router.get('/resendForgotOtp', userController.getForgotResendOtp);
@@ -44,63 +47,50 @@ router.get('/product', block, productController.getProduct);
 router.get('/filter', productController.catFilter);
 
 // Cart and Wishlist
-router.get('/shoping-cart', cartController.getCart);
-router.post('/shoping-cart/:id', cartController.addtocart);
-router.delete('/delete/:id', cartController.deleteCartItem);
-router.get('/quantity/:id', cartController.quantity);
-router.get('/wishlist', wishlistController.getWishlist);
-router.post('/wishlist/:id', wishlistController.addToWishlist);
-router.delete('/wishlist/remove/:id', wishlistController.removeWishlist);
+router.get('/shoping-cart', block, cartController.getCart);
+router.post('/shoping-cart/:id', block, cartController.addtocart);
+router.delete('/delete/:id', block, cartController.deleteCartItem);
+router.get('/quantity/:id', block, cartController.quantity);
+router.get('/wishlist', block, wishlistController.getWishlist);
+router.post('/wishlist/:id', block, wishlistController.addToWishlist);
+router.delete('/wishlist/remove/:id', block, wishlistController.removeWishlist);
 
 // Checkout and Order
-router.get('/checkout', checkoutController.getCheckout);
-router.post('/placeOrder', checkoutController.postOrder);
-router.post('/createOrder', checkoutController.postRazorpay);
-router.post('/handlePayment', checkoutController.razorpay);
-router.post("/applyCoupon", checkoutController.applyCoupon);
-router.get('/vieworder', checkoutController.viewOrders);
-router.get('/vieworderdetail', checkoutController.viewOrderDetail);
-router.get('/viewsingleorder', checkoutController.singleOrder);
-router.get('/successPage', checkoutController.sucessPage);
-router.get('/cancelOrder/:id', checkoutController.getCancelOrder);
-router.post('/returnOrder/:id', checkoutController.postReturnOrder);
-router.get('/download-invoice/:orderId', checkoutController.downloadInvoice);
-router.post('/handleFailedPayment', checkoutController.handleFailedPayment);
-router.post('/submitReview',ratingController.submitReview)
-router.put('/reviews/:reviewId',ratingController.editReview)
+router.get('/checkout', block, checkoutController.getCheckout);
+router.post('/placeOrder', block, checkoutController.postOrder);
+router.post('/createOrder', block, checkoutController.postRazorpay);
+router.post('/handlePayment', block, checkoutController.razorpay);
+router.post("/applyCoupon", block, checkoutController.applyCoupon);
+router.get('/vieworder', block, checkoutController.viewOrders);
+router.get('/vieworderdetail', block, checkoutController.viewOrderDetail);
+router.get('/viewsingleorder', block, checkoutController.singleOrder);
+router.get('/successPage', block, checkoutController.sucessPage);
+router.get('/cancelOrder/:id', block, checkoutController.getCancelOrder);
+router.post('/returnOrder/:id', block, checkoutController.postReturnOrder);
+router.get('/download-invoice/:orderId', block, checkoutController.downloadInvoice);
+router.post('/handleFailedPayment', block, checkoutController.handleFailedPayment);
+router.post('/submitReview', block, ratingController.submitReview);
+router.put('/reviews/:reviewId', block, ratingController.editReview);
 
-// router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
-
-router.post('/getOrderDetails',checkoutController.handleRetryPayment)
-
-
-router.put('/changeToSucess',checkoutController.changeStatus)
-
-
-
-
-//wallet
-
-router.get('/wallet', walletController.getWallet);
-router.post('/wallet/add', walletController.addToWallet);
-router.get('/wallet/history', walletController.getWalletHistory);
-
-router.get('/wallet/transactions',checkoutController .getWalletTransactions);
-router.get('/getWalletBalance',checkoutController.getWalletBalance)
+// Wallet
+router.get('/wallet', block, walletController.getWallet);
+router.post('/wallet/add', block, walletController.addToWallet);
+router.get('/wallet/history', block, walletController.getWalletHistory);
+router.get('/wallet/transactions', block, checkoutController.getWalletTransactions);
+router.get('/getWalletBalance', block, checkoutController.getWalletBalance);
 
 // User Profile
-router.get('/profile', userController.Showprofile);
-router.get('/addaddress', userController.getAddress);
-router.post('/addaddress', userController.addaddress);
-router.get('/manageAddresses', userController.getmanageAddress);
-router.delete('/deleteAddress/:id', userController.deleteAddress);
-router.get('/editaddress/:id', userController.showEditAddress);
-router.post('/saveaddress/:id', userController.saveAddress);
-router.get('/changename', userController.showEditUsername);
-router.post('/savename', userController.editUsername);
-router.post('/checkoutaddress', userController.checkoutaddress);
-router.post('/addaddresss', checkoutController.addAddressController);
-
+router.get('/profile', block, userController.Showprofile);
+router.get('/addaddress', block, userController.getAddress);
+router.post('/addaddress', block, userController.addaddress);
+router.get('/manageAddresses', block, userController.getmanageAddress);
+router.delete('/deleteAddress/:id', block, userController.deleteAddress);
+router.get('/editaddress/:id', block, userController.showEditAddress);
+router.post('/saveaddress/:id', block, userController.saveAddress);
+router.get('/changename', block, userController.showEditUsername);
+router.post('/savename', block, userController.editUsername);
+router.post('/checkoutaddress', block, userController.checkoutaddress);
+router.post('/addaddresss', block, checkoutController.addAddressController);
 
 // Catch-all route for undefined routes
 router.get('**', (req, res) => {

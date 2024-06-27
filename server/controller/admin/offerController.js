@@ -7,19 +7,18 @@ const moment = require('moment');
 // Get all offers
 const getOffers = async (req, res) => {
   try {
-      const offers = await OfferDatabase.find()
-          .populate('product_name', 'product_name')
-          .populate('category_name', 'categoryName');
+    const offers = await OfferDatabase.find()
+      .populate('product_name', 'product_name')
+      .populate('category_name', 'categoryName');
 
-      // Format dates using moment.js before passing to the template
-      offers.forEach(offer => {
-          offer.formattedExpiryDate = moment(offer.expiryDate).format('DD/MM/YYYY');
-      });
+    offers.forEach(offer => {
+      offer.formattedExpiryDate = moment(offer.expiryDate).format('DD/MM/YYYY');
+    });
 
-      res.render('offerManagement', { offers });
+    res.render('offerManagement', { offers });
   } catch (error) {
-      console.error(error);
-      res.status(500).send("Error occurred while rendering offer management page");
+    console.error(error);
+    res.status(500).send("Error occurred while rendering offer management page");
   }
 };
 
@@ -28,7 +27,7 @@ const getAddOffer = async (req, res) => {
   try {
     const products = await ProductDatabase.find({}, 'product_name');
     const categories = await CategoryDatabase.find({}, 'categoryName');
-    
+
     res.render('addOffer', { products, categories });
   } catch (error) {
     console.error(error);
@@ -48,7 +47,6 @@ const postAddOffer = async (req, res) => {
       return res.status(400).send("Product ID is required for product offer");
     }
 
-    // Check if the selected product or category exists
     let productExists = true;
     let categoryExists = true;
 
@@ -68,13 +66,27 @@ const postAddOffer = async (req, res) => {
       return res.status(400).send("The selected category does not exist");
     }
 
-    // Check if an offer already exists for the same product or category
     const existingOffer = offerType === 'product'
       ? await OfferDatabase.findOne({ product_name: productId })
       : await OfferDatabase.findOne({ category_name: categoryId });
 
     if (existingOffer) {
       const errorMessage = `An offer already exists for the selected ${offerType}`;
+      const products = await ProductDatabase.find({}, 'product_name');
+      const categories = await CategoryDatabase.find({}, 'categoryName');
+      return res.render('addOffer', { products, categories, errorMessage });
+    }
+
+    const duplicateOfferName = await OfferDatabase.findOne({ offerName });
+    if (duplicateOfferName) {
+      const errorMessage = "An offer with this name already exists";
+      const products = await ProductDatabase.find({}, 'product_name');
+      const categories = await CategoryDatabase.find({}, 'categoryName');
+      return res.render('addOffer', { products, categories, errorMessage });
+    }
+
+    if (moment(expiryDate).isBefore(moment(), 'day')) {
+      const errorMessage = "Expiry date cannot be a past date";
       const products = await ProductDatabase.find({}, 'product_name');
       const categories = await CategoryDatabase.find({}, 'categoryName');
       return res.render('addOffer', { products, categories, errorMessage });
@@ -87,7 +99,7 @@ const postAddOffer = async (req, res) => {
       category_name: mongoose.Types.ObjectId.isValid(categoryId) ? categoryId : null,
       discount_Amount: productDiscount || categoryDiscount,
       expiryDate,
-      unlist: false
+      unlist: true
     });
 
     await newOffer.save();
@@ -124,9 +136,37 @@ const getEditOffer = async (req, res) => {
 const postEditOffer = async (req, res) => {
   try {
     const offerId = req.params.id;
-    const { productId, categoryId, discount, expiryDate } = req.body;
+    const { offerName, productId, categoryId, discount, expiryDate } = req.body;
+
+    const existingOffer = await OfferDatabase.findById(offerId);
+
+    if (!existingOffer) {
+      return res.status(404).send("Offer not found");
+    }
+
+    if (moment(expiryDate).isBefore(moment(), 'day')) {
+      const errorMessage = "Expiry date cannot be a past date";
+      const offer = await OfferDatabase.findById(offerId)
+        .populate('product_name')
+        .populate('category_name');
+      const products = await ProductDatabase.find();
+      const categories = await CategoryDatabase.find();
+      return res.render('editOffer', { offer, products, categories, moment, errorMessage });
+    }
+
+    const duplicateOfferName = await OfferDatabase.findOne({ offerName, _id: { $ne: offerId } });
+    if (duplicateOfferName) {
+      const errorMessage = "An offer with this name already exists";
+      const offer = await OfferDatabase.findById(offerId)
+        .populate('product_name')
+        .populate('category_name');
+      const products = await ProductDatabase.find();
+      const categories = await CategoryDatabase.find();
+      return res.render('editOffer', { offer, products, categories, moment, errorMessage });
+    }
 
     const updatedOffer = await OfferDatabase.findByIdAndUpdate(offerId, {
+      offerName,
       product_name: productId || null,
       category_name: categoryId || null,
       discount_Amount: discount,
@@ -138,9 +178,10 @@ const postEditOffer = async (req, res) => {
     res.redirect('/admin/offermanage');
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error occurred while updating offer");
+    res.status(500).send("Server Error");
   }
 };
+
 
 // Unlist an offer
 const unlistOffer = async (req, res) => {

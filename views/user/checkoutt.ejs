@@ -19,7 +19,40 @@
   <link rel="stylesheet" type="text/css" href="css/main.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb7O5ChI5Y9Y5mIRGnIjD7HihSNF+h3jcqMIe" crossorigin="anonymous"></script>
   <style>
+
+.coupon-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-item {
+  padding: 10px;
+  border-bottom: 1px solid #ec8282;
+}
+
+.dropdown-item:hover {
+  background-color: #ac5050;
+}
+
+.copy-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.no-coupons {
+  font-size: 16px;
+  color: #666;
+  margin-top: 10px;
+}
 
     /* Customize SweetAlert2 popup style */
 .swal2-popup.styled-popup {
@@ -435,7 +468,9 @@
       color: green;
       margin-top: 10px;
     }
-
+.error-message{
+  color: #bc0b0b;
+}
     .dropdown-menu a {
       display: flex;
       align-items: center;
@@ -791,38 +826,42 @@
                             <h3>Coupon</h3>
                             <hr />
                             <div id="couponSection">
-                                <% if (cart.appliedCoupon) { %>
-                                    <input type="text" class="form-control" id="couponCodeInput" placeholder="Coupon Applied" value="<%= cart.appliedCoupon %>" disabled>
-                                    <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" disabled>Apply Coupon</button>
-                                    <button type="button" class="btn btn-danger mt-2" onclick="removeCoupon()">Remove Coupon</button>
-                                    <p class="coupon-success" id="couponSuccessMessage">Coupon applied successfully!</p>
-                                <% } else { %>
-                                    <input type="text" class="form-control" id="couponCodeInput" placeholder="Enter coupon code manually">
-                                    <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" onclick="applyCoupon()">Apply Coupon</button>
-                                    <p class="coupon-success" id="couponSuccessMessage" style="display: none;">Coupon applied successfully!</p>
-                                <% } %>
-                            </div>
-
+                              <% if (cart.appliedCoupon) { %>
+                                <input type="text" class="form-control" id="couponCodeInput" placeholder="Coupon Applied" value="<%= cart.appliedCoupon %>" disabled>
+                                <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" disabled>Apply Coupon</button>
+                                <button type="button" class="btn btn-danger mt-2" onclick="removeCoupon()">Remove Coupon</button>
+                                <p class="coupon-success" id="couponSuccessMessage">Coupon applied successfully!</p>
+                              <% } else { %>
+                                <input type="text" class="form-control" id="couponCodeInput" placeholder="Enter coupon code manually">
+                                <button type="button" class="btn btn-primary mt-2" id="applyCouponBtn" onclick="applyCoupon()">Apply Coupon</button>
+                                <p class="coupon-success" id="couponSuccessMessage" style="display: none;">Coupon applied successfully!</p>
+                                <p class=" error-message" id="couponErrorMessage" style="display: none;">">No coupon code entered. Please enter a coupon code..</p>
+                              <% } %>
+                          </div>
+                          
+                          
                             <!-- Available Coupons -->
-                            <% if (coupon && coupon.length > 0) { %>
-                                <div class="dropdown mt-2">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="availableCouponDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Available Coupons
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="availableCouponDropdown">
-                                        <% coupon.forEach((coupon) => { %>
-                                            <a class="dropdown-item" href="#" onclick="copyCouponCode('<%= coupon.coupon_Code %>')">
-                                                <%= coupon.coupon_Name %> - <%= coupon.coupon_Code %>
-                                                <button type="button" class="btn btn-secondary btn-sm ml-2">Copy</button>
-                                                <input type="text" id="couponInput_<%= coupon.coupon_Code %>" style="display: none;">
-                                                <span id="copyMessage_<%= coupon.coupon_Code %>"></span>
-                                            </a>
-                                        <% }) %>
-                                    </div>
-                                </div>
-                            <% } else { %>
-                                <p>No Coupons available</p>
-                            <% } %>
+                       <!-- Available Coupons -->
+<!-- Available Coupons -->
+<div class="coupon-dropdown mt-2">
+  <% if (coupon && coupon.length > 0) { %>
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="availableCouponDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Available Coupons <span class="caret"></span>
+    </button>
+    <div class="dropdown-menu" aria-labelledby="availableCouponDropdown">
+      <% coupon.forEach((coupon) => { %>
+        <a class="dropdown-item" href="#" onclick="copyCouponCode(event, '<%= coupon.coupon_Code %>')">
+          <%= coupon.coupon_Name %> - <%= coupon.coupon_Code %>
+          <button type="button" class="btn btn-secondary btn-sm ml-2 copy-btn">Copy</button>
+          <input type="text" id="couponInput_<%= coupon.coupon_Code %>" style="display: none;">
+          <span id="copyMessage_<%= coupon.coupon_Code %>"></span>
+        </a>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="no-coupons">No Coupons available</p>
+  <% } %>
+</div>
                         </div>
                     </div>
 
@@ -1046,25 +1085,31 @@
 
 
   <script>
-    function copyCouponCode(couponCode) {
-      // Create a temporary input element
-      var tempInput = document.createElement("input");
-      tempInput.value = couponCode;
-      document.body.appendChild(tempInput);
-      // Select the text within the input element
-      tempInput.select();
-      // Copy the selected text
-      document.execCommand("copy");
-      // Remove the temporary input element
-      document.body.removeChild(tempInput);
-      // Show a message or perform any additional actions
-      console.log("Coupon code copied: " + couponCode);
-    }
+function copyCouponCode(event, couponCode) {
+  event.stopPropagation();
+  event.preventDefault();
+  // Create a temporary input element
+  var tempInput = document.createElement("input");
+  tempInput.value = couponCode;
+  document.body.appendChild(tempInput);
+  // Select the text within the input element
+  tempInput.select();
+  // Copy the selected text
+  document.execCommand("copy");
+  // Remove the temporary input element
+  document.body.removeChild(tempInput);
+  // Show a message or perform any additional actions
+  console.log("Coupon code copied: " + couponCode);
+  // Add a success message
+  var messageId = "copyMessage_" + couponCode;
+  document.getElementById(messageId).innerHTML = "Copied!";
+  setTimeout(function() {
+    document.getElementById(messageId).innerHTML = "";
+  }, 2000);
+}
      </script>
-
-
-     <script>
-    let totalAmount = <%= cart.totalAmount %>;
+<script>
+  let totalAmount = <%= cart.totalAmount %>;
   let discountAmount = 0; // Initialize discount amount
   let couponCodeInput = document.getElementById('couponCodeInput');
   let deliveryCharge = <%= cart.totalAmount >= 500 ? 50 : 0 %>;
@@ -1072,7 +1117,7 @@
 
   document.getElementById('orderForm').addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent default form submission
-    let continuePayment = true
+    let continuePayment = true;
 
     const selectedAddress = document.getElementById('addressSelect').value;
     if (!selectedAddress) {
@@ -1110,16 +1155,25 @@
     }
 
     // Retrieve selected payment method
-    var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    var selectedPaymentMethod = paymentMethodSelected.value;
+    console.log("selectedPaymentMethod", selectedPaymentMethod);
 
-    // Common variables for all payment methods
-    let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
-    let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
-    let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
+    // Ensure the elements exist before accessing their properties
+    let offerDiscountElement = document.getElementById("offerDiscount");
+    let discountAmountElement = document.getElementById("discountAmount");
+    let deliveryChargeElement = document.getElementById("deliveryCharge");
+
+    // Use nullish coalescing to set a default value if the element is null
+    let offerDiscount = offerDiscountElement ? offerDiscountElement.innerText.replace(/[^0-9.]/g, '') : '0';
+    let discountAmount = discountAmountElement ? discountAmountElement.innerText.replace(/[^0-9.]/g, '') : '0';
+    let deliveryCharge = deliveryChargeElement ? deliveryChargeElement.innerText.replace(/[^0-9.]/g, '') : '0';
+
+    console.log('Offer Discount:', offerDiscount);
+    console.log('Discount Amount:', discountAmount);
+    console.log('Delivery Charge:', deliveryCharge);
 
     if (continuePayment && selectedPaymentMethod === 'RazorPay') {
-      console.log("amountTotal", totalWithDeliveryCharge);
-      // If RazorPay payment method is selected, initiate Razorpay payment
+      console.log("here");
       try {
         let response = await fetch('/createOrder', {
           method: 'POST',
@@ -1185,7 +1239,6 @@
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                // Redirect to the order details page or any other page as needed
                 window.location.href = '/vieworder';
               } else {
                 alert('Failed to handle payment failure. Please try again.');
@@ -1204,12 +1257,9 @@
         alert('An error occurred while initiating payment. Please try again.');
       }
     } else if (continuePayment && selectedPaymentMethod === 'Wallet') {
-      // If Wallet payment method is selected, handle wallet payment logic
       try {
         let amountTotal = document.getElementById("totalAmount").innerText;
-        // Retrieve selected address ID
         var selectedAddressId = document.getElementById('addressSelect').value;
-
         var cartId = document.getElementById('cartId').value;
 
         let paymentDetails = {
@@ -1236,15 +1286,9 @@
         console.error("Error handling wallet payment:", error);
       }
     } else if (continuePayment && selectedPaymentMethod === 'COD') {
-      // If other payment method is selected (COD), submit the form normally
-
       let amountTotal = document.getElementById("totalAmount").innerText;
-      // Retrieve selected address ID
       var selectedAddressId = document.getElementById('addressSelect').value;
-
-      // Retrieve selected payment method
       var selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
       var cartId = document.getElementById('cartId').value;
 
       try {
@@ -1275,14 +1319,20 @@
   });
 
   async function handlePayment(response) {
+    // Ensure the elements exist before accessing their properties
+    let offerDiscountElement = document.getElementById("offerDiscount");
+    let discountAmountElement = document.getElementById("discountAmount");
+    let deliveryChargeElement = document.getElementById("deliveryCharge");
+
+    // Use nullish coalescing to set a default value if the element is null
+    let offerDiscount = offerDiscountElement ? offerDiscountElement.innerText.replace(/[^0-9.]/g, '') : '0';
+    let discountAmount = discountAmountElement ? discountAmountElement.innerText.replace(/[^0-9.]/g, '') : '0';
+    let deliveryCharge = deliveryChargeElement ? deliveryChargeElement.innerText.replace(/[^0-9.]/g, '') : '0';
+
     let amountTotal = document.getElementById("totalAmount").innerText.replace(/[^0-9.]/g, '');
     let selectedAddressId = document.getElementById('addressSelect').value;
     let selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
     let cartId = document.getElementById('cartId').value;
-
-    let offerDiscount = document.getElementById("offerDiscount").innerText.replace(/[^0-9.]/g, '');
-    let discountAmount = document.getElementById("discountAmount").innerText.replace(/[^0-9.]/g, '');
-    let deliveryCharge = document.getElementById("deliveryCharge").innerText.replace(/[^0-9.]/g, '');
 
     try {
       let paymentDetails = {
@@ -1307,10 +1357,8 @@
       });
 
       if (paymentResponse.ok) {
-        // Payment successful, redirect to success page
         window.location.href = '/successPage';
       } else {
-        // Payment failed, update status and display message
         alert("Payment failed. Please try again.");
       }
     } catch (error) {
@@ -1319,91 +1367,93 @@
     }
   }
 
-
-
-
-    // Function to handle payment failure and redirect to vieworder page
-    function handlePaymentFailure(error, orderId, selectedAddressId, paymentMethod, amountTotal) {
-      console.error("Payment failed:", error);
-      alert('Payment failed. Redirecting to order page.');
-      fetch('/handleFailedPayment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          orderId,
-          addressId: selectedAddressId,
-          paymentMethod: paymentMethod,
-          amountTotal: amountTotal,
-          error: error
-        })
+  function handlePaymentFailure(error, orderId, selectedAddressId, paymentMethod, amountTotal) {
+    console.error("Payment failed:", error);
+    alert('Payment failed. Redirecting to order page.');
+    fetch('/handleFailedPayment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        orderId,
+        addressId: selectedAddressId,
+        paymentMethod: paymentMethod,
+        amountTotal: amountTotal,
+        error: error
       })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            window.location.href = '/vieworder';
-          } else {
-            alert('Failed to handle payment failure. Redirecting to order page.');
-            window.location.href = '/vieworder';
-          }
-        })
-        .catch(err => {
-          console.error('Error handling payment failure:', err);
-          alert('An error occurred while handling payment failure. Redirecting to order page.');
-          window.location.href = '/vieworder';
-        });
-    }
-
-    async function applyCoupon() {
-      const couponCode = couponCodeInput.value;
-
-      if (!couponCode) {
-        alert('Please enter a coupon code');
-        return;
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = '/vieworder';
+      } else {
+        alert('Failed to handle payment failure. Redirecting to order page.');
+        window.location.href = '/vieworder';
       }
+    })
+    .catch(err => {
+      console.error('Error handling payment failure:', err);
+      alert('An error occurred while handling payment failure. Redirecting to order page.');
+      window.location.href = '/vieworder';
+    });
+  }
 
-      const response = await fetch('/applyCoupon', {
+  async function applyCoupon() {
+    const couponCode = document.getElementById('couponCodeInput').value;
+
+  
+    if (!couponCode) {
+    document.getElementById('couponCodeInput').placeholder = 'No coupon code entered. Please enter a coupon code.';
+    return;
+  }
+
+    const response = await fetch('/applyCoupon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ couponCode, cartTotal: totalAmount })
-      });
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.message) {
+    if (data.message) {
         alert(data.message);
         return;
-      }
-
-      discountAmount = data.discountAmount || 0;
-      totalAmount = data.total || totalAmount - discountAmount;
-      deliveryCharge = totalAmount >= 500 ? 50 : 0;
-      totalWithDeliveryCharge = totalAmount + deliveryCharge;
-
-      document.getElementById('appliedCoupon').innerHTML = `<i class="fa fa-tag"></i> <strong>Applied Coupon: ${couponCode}</strong>`;
-      document.getElementById('discountAmount').innerHTML = `<i class="fa fa-tags"></i> <strong>Discount: &#x20a8; ${discountAmount}</strong>`;
-      document.getElementById('deliveryCharge').innerHTML = `<i class="fa fa-truck"></i> Delivery Charge: &#x20a8; ${deliveryCharge}`;
-      document.getElementById('totalAmount').innerHTML = `<i class="fa fa-money"></i> <strong>Total Amount: &#x20a8; ${totalWithDeliveryCharge}</strong>`;
-      document.getElementById('removeCouponButton').style.display = 'block';
-      couponCodeInput.disabled = true;
     }
 
-    function removeCoupon() {
-      totalAmount += discountAmount;
-      discountAmount = 0;
-      deliveryCharge = totalAmount >= 500 ? 50 : 0;
-      totalWithDeliveryCharge = totalAmount + deliveryCharge;
+    discountAmount = data.discountAmount || 0;
+    totalAmount = data.total || totalAmount - discountAmount;
+    deliveryCharge = totalAmount >= 500 ? 50 : 0;
+    totalWithDeliveryCharge = totalAmount + deliveryCharge;
 
-      document.getElementById('appliedCoupon').innerHTML = '<i class="fa fa-tag"></i> <strong>Applied Coupon: None</strong>';
-      document.getElementById('discountAmount').innerHTML = '<i class="fa fa-tags"></i> <strong>Discount: &#x20a8; 0</strong>';
-      document.getElementById('deliveryCharge').innerHTML = `<i class="fa fa-truck"></i> Delivery Charge: &#x20a8; ${deliveryCharge}`;
-      document.getElementById('totalAmount').innerHTML = `<i class="fa fa-money"></i> <strong>Total Amount: &#x20a8; ${totalWithDeliveryCharge}</strong>`;
-      document.getElementById('removeCouponButton').style.display = 'none';
-      couponCodeInput.value = '';
-      couponCodeInput.disabled = false;
-    }
-  </script>
+    document.getElementById('appliedCoupon').innerHTML = ` Applied Coupon: ${couponCode}`;
+    document.getElementById('discountAmount').innerHTML = ` Discount: ₨ ${discountAmount}`;
+    document.getElementById('deliveryCharge').innerHTML = ` Delivery Charge: ₨ ${deliveryCharge}`;
+    document.getElementById('totalAmount').innerHTML = ` Total Amount: ₨ ${totalWithDeliveryCharge}`;
+    document.getElementById('removeCouponButton').style.display = 'block';
+    document.getElementById('couponCodeInput').disabled = true;
+    document.getElementById('applyCouponBtn').disabled = true;
+    document.getElementById('couponSuccessMessage').style.display = 'block';
+}
+
+function removeCoupon() {
+    totalAmount += discountAmount;
+    discountAmount = 0;
+    deliveryCharge = totalAmount >= 500 ? 50 : 0;
+    totalWithDeliveryCharge = totalAmount + deliveryCharge;
+
+    document.getElementById('appliedCoupon').innerHTML = ' Applied Coupon: None';
+    document.getElementById('discountAmount').innerHTML = ' Discount: ₨ 0';
+    document.getElementById('deliveryCharge').innerHTML = ` Delivery Charge: ₨ ${deliveryCharge}`;
+    document.getElementById('totalAmount').innerHTML = ` Total Amount: ₨ ${totalWithDeliveryCharge}`;
+    document.getElementById('removeCouponButton').style.display = 'none';
+    document.getElementById('couponCodeInput').value = '';
+    document.getElementById('couponCodeInput').disabled = false;
+    document.getElementById('applyCouponBtn').disabled = false;
+    document.getElementById('couponSuccessMessage').style.display = 'none';
+}
+
+</script>
 
 
   <script>

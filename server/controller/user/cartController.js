@@ -19,39 +19,50 @@ const applyOffer = async (product) => {
 
   return product;
 };
-
 const getCart = async (req, res) => {
   try {
-    const userId = req.session.user._id;
+    const userId = req.session.user && req.session.user._id;
+    
+    if (!userId) {
+      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
+    }
+
     let userCart = await cartDatabase.findOne({ user: userId }).populate('items.productId');
 
     let totalAmount = 0;
 
-    if (userCart && userCart.items && userCart.items.length > 0) {
-      userCart.items = await Promise.all(userCart.items.map(async (item) => {
-        item.productId = await applyOffer(item.productId || {});
-        item.productId.images = item.productId.images && item.productId.images.length > 0 ? item.productId.images : ['default_image_path'];
-        item.productId.product_name = item.productId.product_name || 'No product name available';
-        item.productId.price = item.productId.price || 0;
-        item.productId.offerPrice = item.productId.offerPrice || item.productId.price;
-        const totalPrice = item.productId.offerPrice * item.quantity;
-        totalAmount += totalPrice;
-        return item;
-      }));
-      userCart.totalAmount = totalAmount;
-      await userCart.save();
+    if (!userCart || !userCart.items || userCart.items.length === 0) {
+      return res.render('shoping-cart', { 
+        user: req.session.user || {}, 
+        cart: { items: [], totalAmount: 0 }
+      });
     }
 
-    // Fetch the user's wallet balance
+    userCart.items = await Promise.all(userCart.items.map(async (item) => {
+      if (!item.productId) {
+        return item; // Handle case where productId is undefined
+      }
 
+      item.productId = await applyOffer(item.productId || {});
+      item.productId.images = item.productId.images && item.productId.images.length > 0 ? item.productId.images : ['default_image_path'];
+      item.productId.product_name = item.productId.product_name || 'No product name available';
+      item.productId.price = item.productId.price || 0;
+      item.productId.offerPrice = item.productId.offerPrice || item.productId.price;
+
+      const totalPrice = item.productId.offerPrice * item.quantity;
+      totalAmount += totalPrice;
+      return item;
+    }));
+
+    userCart.totalAmount = totalAmount;
+    await userCart.save();
 
     res.render('shoping-cart', { 
       user: req.session.user || {}, 
       cart: userCart,
-  
     });
   } catch (error) {
-    console.error('Error fetching cart:', error);
+   
     res.status(500).render("../error");
   }
 };
@@ -59,8 +70,15 @@ const getCart = async (req, res) => {
 
 const addtocart = async (req, res) => {
   try {
+ 
+
     const productId = req.params.id;
-    const userId = req.session.user._id;
+  
+    const userId = req.session.user && req.session.user._id;
+    
+    if (!userId) {
+      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
+    }
 
     let userCart = await cartDatabase.findOne({ user: userId });
 
@@ -94,8 +112,15 @@ const addtocart = async (req, res) => {
 
 const deleteCartItem = async (req, res) => {
   try {
+
+
     const productId = req.params.id;
-    const userId = req.session.user._id;
+
+    const userId = req.session.user && req.session.user._id;
+    
+    if (!userId) {
+      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
+    }
 
     let userCart = await cartDatabase.findOne({ user: userId });
 
@@ -120,9 +145,14 @@ const deleteCartItem = async (req, res) => {
 
 const quantity = async (req, res) => {
   try {
+
     const productId = req.params.id;
     const action = req.query.action;
-    const userId = req.session.user._id;
+    const userId = req.session.user && req.session.user._id;
+    
+    if (!userId) {
+      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
+    }rs
 
     const cart = await cartDatabase.findOne({ user: userId });
     const product = await productDatabase.findById(productId);
@@ -154,7 +184,7 @@ const quantity = async (req, res) => {
 
     res.status(200).json({ message: 'Quantity updated successfully' });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };

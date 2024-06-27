@@ -3,7 +3,6 @@ const OrderDatabase = require('../../model/orderModal');
 const ratingDatabase = require('../../model/ratingModel');
 const ProductDatabase=require("../../model/productsModel")
 const mongoose = require("mongoose");
-
 const submitReview = async (req, res) => {
   try {
     const { orderId, productId, rating, review } = req.body;
@@ -50,7 +49,6 @@ const submitReview = async (req, res) => {
     res.status(500).json({ message: 'Error submitting review', error: error.message });
   }
 };
-
 
 
 

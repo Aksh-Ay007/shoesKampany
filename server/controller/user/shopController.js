@@ -38,6 +38,10 @@ const getShop = async (req, res) => {
     const categoryId = req.query.category;
     const searchQuery = req.query.q;
     const sortFilter = req.query.sort;
+    if (!req.session.user) {
+      return res.redirect('/userlogin');
+    }
+
 
     const categories = await categoryDatabase.find();
     const cart = req.session.user ? await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId') : null;
@@ -92,7 +96,7 @@ const getShop = async (req, res) => {
     let selectedCategory = categoryId || "All";
     const selectedSort = sortFilter || '{"_id": 1}';
 
-// console.log("selectedProduct",selectedProduct);
+// console.log("selectedProduct",selectedProduct);     
 
     res.render('shop', { 
       selectedCategory, 
@@ -104,7 +108,7 @@ const getShop = async (req, res) => {
       searchQuery
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).send("Internal Server Error");
   }
 };

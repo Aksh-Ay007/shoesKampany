@@ -37,18 +37,27 @@ const calculateAverageRating = async (productId) => {
 
 const home = async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.redirect('/userlogin');
+    }
+
     const isUser = req.session.user;
     let cart = null;
     if (isUser) {
       cart = await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId');
+      if (cart && cart.items) {
+        cart.items = await Promise.all(cart.items.map(async (item) => {
+          item.productId = await applyOffer(item.productId);
+          return item;
+        }));
+      }
     }
-
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
 
     let allProduct = await productDatabase.find({ list: 'listed' }).skip(skip).limit(limit).populate('category');
-    allProduct = await Promise.all(allProduct.map(applyOffer));
+    allProduct = await Promise.all(allProduct.map(applyOffer)); // Apply offer to each product
 
     allProduct = await Promise.all(allProduct.map(async (product) => {
       const { averageRating, totalReviews } = await calculateAverageRating(product._id);
@@ -63,15 +72,12 @@ const home = async (req, res) => {
       };
     }));
 
-    // console.log("allProduct",allProduct);
-
     res.render('home', { isUser, allProduct, cart });
   } catch (error) {
-    console.error("Home Page Error:", error);
+
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 
 // get method login
@@ -80,10 +86,15 @@ const userLogin = async (req, res) => {
   try {
     const successMessage = req.flash("success")[0];
     const errorMessage = req.flash("error")[0];
+  
+
     if (req.session.user) {
-      res.redirect("/");
+     return res.redirect("/");
     } else {
-      res.render("login");
+
+    return  res.render("login");
+
+
     }
   } catch (error) {
     res.status(500).send("error occurred");
@@ -98,7 +109,7 @@ const googleAuth = (req, res) => {
               ['email', 'profile']
       })(req, res)
   } catch (err) {
-      console.log('Error on google authentication ${err}')
+  
   }
 }
 
@@ -110,11 +121,11 @@ const googleAuthCallback = (req, res, next) => {
   try {
       passport.authenticate('google', (err, user, info) => {
           if (err) {
-              console.log('Error on google auth callback: ${err}')
+           
               return next(err);
           }
           if (!user) {
-            console.log("ero");
+       
               return res.redirect('/userlogin');
           }
           req.logIn(user, (err) => {
@@ -127,7 +138,7 @@ const googleAuthCallback = (req, res, next) => {
           });
       })(req, res, next);
   } catch (err) {
-      console.log('Error on google callback ${err}');
+ 
 }
 }
 
@@ -311,7 +322,7 @@ const getResendOtp = async (req, res) => {
     console.log(otp, "otp");
     return res.redirect("/otp");
   } catch (error) {
-    console.log("Error in getResendOtp:", error);
+
     return res.status(500).send("Error occurred during resend OTP");
   }
 };
@@ -366,7 +377,7 @@ const postForgotPassword = async (req, res) => {
 
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.log("Error sending OTP for forgot password:", error);
+
           return res.status(500).send("Error sending OTP for forgot password");
         } else {
           console.log("OTP sent: ", otp);
@@ -397,7 +408,7 @@ const getForgotResendOtp = async (req, res) => {
     const email = req.body.email;
 
   } catch (error) {
-    console.log("Error in getResendOtp:", error);
+ 
     req.flash("error", "Error occurred during resend OTP");
     return res.status(500).send("Error occurred during forgot resend OTP");
   }
@@ -408,7 +419,7 @@ const getNewPassword = async (req, res) => {
   try {
     res.render("newPassword");
   } catch (error) {
-    console.log("Error in getResendOtp:", error);
+
     return res.status(500).send("Error occurred during get new password");
   }
 };
@@ -448,7 +459,7 @@ const postNewPassword = async (req, res) => {
       req.flash('success', 'Password updated successfully');
       return res.redirect('/userlogin');
   } catch (error) {
-      console.error('Error in postNewPassword:', error);
+  
       req.flash('error', 'An error occurred while changing the password');
       return res.redirect('/newPassword');
   }
@@ -457,8 +468,6 @@ const postNewPassword = async (req, res) => {
 
 
 
-
-//address management
 const Showprofile = async (req, res) => {
   try {
     const user = req.session.user;
@@ -482,15 +491,26 @@ const Showprofile = async (req, res) => {
         message = null;
     }
 
+    // Fetch and populate the user's cart
+    const cart = await cartDatabase.findOne({ user: userId }).populate('items.productId');
+    
+    if (cart && cart.items) {
+      // Apply offers to cart items
+      cart.items = await Promise.all(cart.items.map(async (item) => {
+        item.productId = await applyOffer(item.productId);
+        return item;
+      }));
+    }
+
+    // Add the cart to the user object
+    user.cart = cart;
+
     res.render('profile', { addresses, errors, msg: message, user });
   } catch (e) {
-    console.log(e);
+
     res.status(500).send("Internal Error");
   }
 };
-
-
-
 
 
 
@@ -515,7 +535,7 @@ const getAddress = async (req, res) => {
     }
     res.render('addaddress', { errors });
   } catch (e) {
-    console.log(e);
+
     res.status(500).send("Internal Error");
   }
 };
@@ -529,7 +549,7 @@ const addaddress = async (req, res) => {
 
   try {
     const name = req.body.name;
-    console.log(name);
+
     const mobile = req.body.mobile;
     const address = req.body.address;
     const district = req.body.district;
@@ -583,14 +603,14 @@ const addaddress = async (req, res) => {
       landmark: landmark // Optional
     });
 
-    console.log(newAddress,"new");
+
 
     await newAddress.save();
 
     // Redirect with success message
   return  res.redirect("/manageAddresses");
   } catch (err) {
-    console.error(err.message);
+
     res.status(500).send("Server error");
   }
 };
@@ -611,7 +631,7 @@ const getmanageAddress = async (req, res) => {
     // console.log(addresses,"husdf");
     res.render('manageAddresses', { addresses,user});
   } catch (e) {
-    console.log(e);
+
     res.status(500).send("Internal Error");
   }
 };
@@ -626,7 +646,7 @@ console.log("heree");
 
     return res.json({ message: 'Address deleted successfully.' });
   } catch (error) {
-    console.error('Error deleting address:', error);
+
     return res.status(500).json({ error: 'Internal server error.' });
   }
 };
@@ -646,7 +666,7 @@ const showEditAddress = async (req, res) => {
     const address = await addressDatabase.findById(id);
     res.render("editaddress", { addr: address, userId,user });
   } catch (error) {
-    console.error('Error showing edit address:', error);
+
     res.status(500).send("Internal Server Error");
   }
 };
@@ -667,7 +687,7 @@ const saveAddress = async (req, res) => {
         res.status(500).send({ message: "Error updating user information" });
       });
   } catch (error) {
-    console.error("Error saving address:", error);
+
     res.redirect("/manageAddresses?msg=erredit");
   }
 };
@@ -700,7 +720,7 @@ const editUsername = async (req, res) => {
     // Redirect with success message
     res.redirect("/profile?msg=namesuc");
   } catch (e) {
-    console.log(e);
+
     res.redirect("/profile?msg=nameerr");
   }
 };
@@ -769,7 +789,7 @@ const checkoutaddress=async(req,res)=>{
     // Redirect with success message
     res.redirect("/checkout");
   } catch (err) {
-    console.error(err.message);
+
     res.status(500).send("Server error");
   }
 }

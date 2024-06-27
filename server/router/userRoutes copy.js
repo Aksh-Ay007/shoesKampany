@@ -11,10 +11,15 @@ const isAuthenticated = require('../middleware/isAuthenticated');
 const { block } = require('../middleware/userControls');
 const nocache = require('nocache');
 const walletController = require('../controller/user/walletController');
+const ratingController=require('../controller/user/ratingController');
 
 
 // Home
 router.get('/', block, userController.home);
+
+//google auth
+router.get('/auth/google',userController.googleAuth)
+router.get('/auth/google/callback',userController.googleAuthCallback)
 
 // User Authentication
 router.get('/userlogin', userController.userLogin);
@@ -59,6 +64,17 @@ router.get('/viewsingleorder', checkoutController.singleOrder);
 router.get('/successPage', checkoutController.sucessPage);
 router.get('/cancelOrder/:id', checkoutController.getCancelOrder);
 router.post('/returnOrder/:id', checkoutController.postReturnOrder);
+router.get('/download-invoice/:orderId', checkoutController.downloadInvoice);
+router.post('/handleFailedPayment', checkoutController.handleFailedPayment);
+router.post('/submitReview',ratingController.submitReview)
+router.put('/reviews/:reviewId',ratingController.editReview)
+
+// router.post('/handleRetryPayment', checkoutController.handleRetryPayment)
+
+router.post('/getOrderDetails',checkoutController.handleRetryPayment)
+
+
+router.put('/changeToSucess',checkoutController.changeStatus)
 
 
 
@@ -70,6 +86,7 @@ router.post('/wallet/add', walletController.addToWallet);
 router.get('/wallet/history', walletController.getWalletHistory);
 
 router.get('/wallet/transactions',checkoutController .getWalletTransactions);
+router.get('/getWalletBalance',checkoutController.getWalletBalance)
 
 // User Profile
 router.get('/profile', userController.Showprofile);
@@ -82,6 +99,8 @@ router.post('/saveaddress/:id', userController.saveAddress);
 router.get('/changename', userController.showEditUsername);
 router.post('/savename', userController.editUsername);
 router.post('/checkoutaddress', userController.checkoutaddress);
+router.post('/addaddresss', checkoutController.addAddressController);
+
 
 // Catch-all route for undefined routes
 router.get('**', (req, res) => {

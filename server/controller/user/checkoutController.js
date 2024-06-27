@@ -61,11 +61,13 @@ const calculateOfferDiscount = (items) => {
 
 const getCheckout = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user._id) {
-      return res.status(401).send("Unauthorized: Please log in first.");
+    const userId = req.session.user && req.session.user._id;
+    
+    if (!userId) {
+      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
     }
 
-    const userId = req.session.user._id;
+  
     const user = await userDatabase.findById(userId);
     const addresses = await addressDatabase.find({ user: userId });
     
@@ -127,10 +129,8 @@ const getCheckout = async (req, res) => {
     // Fetch the user's wallet balance
     const wallet = await Wallet.findOne({ user: userId });
     const walletBalance = wallet ? wallet.balance : 0;
-    console.log(walletBalance,"111");
 
-    // Log the cart object to check if offerDiscount is present
-    console.log("Cart object:", cart);
+
 
     res.render("checkoutt", {
       addresses,
@@ -142,7 +142,7 @@ const getCheckout = async (req, res) => {
       appliedCoupon: req.session.appliedCoupon,
     });
   } catch (e) {
-    console.log(e);
+
     res.status(500).send("Internal Error");
   }
 };
@@ -153,14 +153,7 @@ const postOrder = async (req, res) => {
   try {
     const { addressId, cartId, paymentMethod, amountTotal, offerDiscount, discountAmount, deliveryCharge } = req.body;
 
-    // Logging each field of req.body
-    console.log("addressId:", addressId);
-    console.log("cartId:", cartId);
-    console.log("paymentMethod:", paymentMethod);
-    console.log("amountTotal:", amountTotal);
-    console.log("offerDiscount:", offerDiscount);
-    console.log("discountAmount:", discountAmount);
-    console.log("deliveryCharge:", deliveryCharge);
+ 
 
     const userId = req.session.user._id;
     const AddressId = addressId;
@@ -242,7 +235,6 @@ const postOrder = async (req, res) => {
       offerDiscount: offerDiscountValue || 0,
     });
 
-    console.log("newOrder:", newOrder);
 
     await newOrder.save();
     await cartDatabase.findOneAndDelete({ user: userId, _id: cartId });
@@ -257,7 +249,7 @@ const postOrder = async (req, res) => {
 
     res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id });
   } catch (error) {
-    console.error("Error placing order:", error);
+
     res.status(500).json({ error: "Error placing order" });
   }
 };
@@ -279,7 +271,7 @@ const applyCoupon = async (req, res) => {
 
     res.json({ discountAmount, total });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({ message: "Error applying coupon" });
   }
 };
@@ -288,7 +280,7 @@ const sucessPage = (req, res) => {
   try {
     return res.render("orderplaced");
   } catch (error) {
-    console.error(error);
+
     res.status(500).send("Error rendering order placed page");
   }
 };
@@ -313,7 +305,7 @@ const viewOrders = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).send("Internal Server Error");
   }
 };
@@ -335,7 +327,7 @@ const viewOrderDetail = async (req, res) => {
     }
     res.render("orderDetail", { order, name, user, orders: [order] });
   } catch (e) {
-    console.log(e.toString());
+
     res.status(500).send("Internal Server Error");
   }
 };
@@ -358,25 +350,32 @@ const singleOrder = async (req, res) => {
       return res.status(404).send("No order found");
     }
 
-    // Fetch the review for this order
-    const review = await ratingDatabase.findOne({ order: orderId });
+    // Fetch the reviews for the ordered items
+    const reviews = await ratingDatabase.find({ order: orderId });
 
-    res.render("orderDetail", { order, name, review, orders: [order] });
+    // Map reviews to ordered items for easier access in the template
+    const reviewsMap = reviews.reduce((acc, review) => {
+      acc[review.productId.toString()] = review;
+      return acc;
+    }, {});
+
+    res.render("orderDetail", { order, name, reviews: reviewsMap, orders: [order] });
   } catch (e) {
-    console.error('Error in singleOrder:', e);
+
     res.status(500).send("Internal Server Error");
   }
 };
 
+
+
 const postRazorpay = async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
 
     const { totalPrice } = req.body;
 
     // Convert total price to an integer representing paise
     const totalAmountInPaise = Math.round(Number(totalPrice) * 100);
-    console.log("Total Amount in Paise:", totalAmountInPaise);
+
 
     const instance = new Razorpay({
       key_id: "rzp_test_OYzzRLNBCqZfkG",
@@ -388,21 +387,20 @@ const postRazorpay = async (req, res) => {
       currency: "INR",
       receipt: "receipt#1",
     };
-    console.log("Options for Creating Order:", options);
+
 
     instance.orders.create(options, (err, order) => {
       if (err) {
-        console.error("Error creating order:", err);
+
         return res
           .status(500)
           .json({ error: "Error creating order", details: err });
       }
 
-      console.log("Order created successfully:", order);
       res.status(200).json({ orderId: order.id });
     });
   } catch (error) {
-    console.error("Error in postRazorpay:", error);
+
     res
       .status(500)
       .json({ error: "Error while creating Razorpay payment", details: error });
@@ -427,7 +425,7 @@ const razorpay = async (req, res) => {
       deliveryCharge
     } = req.body;
 
-    console.log("Payment details:", req.body);
+
     const userId = req.session.user._id;
     const payment = paymentMethod;
 
@@ -447,7 +445,7 @@ const razorpay = async (req, res) => {
       status: "Pending",
       returned: false,
     }));
-    console.log(orderedItems,"testttt");
+
 
     const totalAmount = userCartData.totalAmount;
 
@@ -489,7 +487,7 @@ const razorpay = async (req, res) => {
 
     res.status(200).json({ message: "Order placed successfully", orderId: newOrder._id, redirectUrl: `/order/${newOrder._id}/invoice` });
   } catch (error) {
-    console.error("Error placing order:", error);
+
     res.status(500).json({ error: "Error placing order" });
   }
 };
@@ -503,8 +501,7 @@ const handleFailedPayment = async (req, res) => {
       razorpay_order_id,
       razorpay_signature } = req.body;
     const userId = req.session.user._id;
-console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log("req.bbody",req.body);
+
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
@@ -593,7 +590,7 @@ console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     // Respond with success:true to indicate successful handling
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Error in handleFailedPayment function:", error);
+
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -664,7 +661,7 @@ const getCancelOrder = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Order cancelled successfully" });
   } catch (error) {
-    console.error("Error cancelling order:", error);
+
     res.status(500).json({ success: false, message: "Error cancelling order" });
   }
 };
@@ -721,7 +718,7 @@ const postReturnOrder = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Order returned successfully" });
   } catch (error) {
-    console.error("Error returning order:", error);
+
     res.status(500).json({ success: false, message: "Error returning order" });
   }
 };
@@ -745,7 +742,7 @@ const getWalletTransactions = async (req, res) => {
       transactions: wallet.transactions,
     });
   } catch (error) {
-    console.log("Error in getWalletTransactions:", error);
+
     res
       .status(500)
       .json({ success: false, message: "Error fetching wallet transactions" });
@@ -769,7 +766,7 @@ const getWalletBalance = async (req, res) => {
     // Send wallet balance in response
     res.json({ balance: wallet.balance });
   } catch (error) {
-    console.error("Error fetching wallet balance:", error);
+
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -846,86 +843,145 @@ const downloadInvoice = async (req, res) => {
     doc.moveDown();
 
     // Table configuration
-    const tableTop = doc.y;
-    const tableLeft = 50;
-    const tableWidth = 500;
-    const rowHeight = 20;
-    const columns = [
-      { name: 'Description', width: 200 },
-      { name: 'Qty', width: 50, align: 'center' },
-      { name: 'Gross Amount', width: 80, align: 'right' },
-      { name: 'Discount', width: 70, align: 'right' },
-      { name: 'Final Amount', width: 100, align: 'right' }
-    ];
+const tableTop = doc.y;
+const tableLeft = 50;
+const tableWidth = 500;
+const rowHeight = 20;
+const columns = [
+  { name: 'Description', width: 180 },
+  { name: 'Qty', width: 40, align: 'center' },
+  { name: 'Price', width: 70, align: 'right' },
+  { name: 'Offer Price', width: 70, align: 'right' },
+  { name: 'Discount', width: 70, align: 'right' },
+  { name: 'Final Price', width: 70, align: 'right' }
+];
 
-    // Draw table header
-    doc.font('Helvetica-Bold');
-    doc.fontSize(10);
-    doc.rect(tableLeft, tableTop, tableWidth, rowHeight).stroke();
-    let currentX = tableLeft;
-    columns.forEach(column => {
-      doc.text(column.name, currentX + 5, tableTop + 5, {
-        width: column.width - 10,
-        align: column.align || 'left'
-      });
-      currentX += column.width;
-    });
+// Draw table header
+doc.font('Helvetica-Bold');
+doc.fontSize(10);
+doc.rect(tableLeft, tableTop, tableWidth, rowHeight).stroke();
+let currentX = tableLeft;
+columns.forEach(column => {
+  doc.text(column.name, currentX + 5, tableTop + 5, {
+    width: column.width - 10,
+    align: column.align || 'left'
+  });
+  currentX += column.width;
+});
 
-    // Draw table rows
-    doc.font('Helvetica');
-    let currentY = tableTop + rowHeight;
-    order.orderedItems.forEach(item => {
-      doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
-      currentX = tableLeft;
-      columns.forEach(column => {
-        let value = '';
-        switch(column.name) {
-          case 'Description': value = item.productId.product_name; break;
-          case 'Qty': value = item.quantity.toString(); break;
-          case 'Gross Amount': value = `Rs:${item.price.toFixed(2)}`; break;
-          case 'Discount': value = `Rs:${(item.price * item.quantity - item.price * item.quantity).toFixed(2)}`; break;
-          case 'Final Amount': value = `Rs:${(item.price * item.quantity).toFixed(2)}`; break;
-        }
-        doc.text(value, currentX + 5, currentY + 5, {
-          width: column.width -15,
-          align: column.align || 'left'
-        });
-        currentX += column.width;
-      });
-      currentY += rowHeight;
-    });
+// Draw table rows
+doc.font('Helvetica');
+let currentY = tableTop + rowHeight;
+let subtotal = 0;
+let totalDiscount = 0;
 
-    // Add delivery charge
-    if (order.deliveryCharge > 0) {
-      doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
-      doc.text('Delivery Charge', tableLeft + 5, currentY + 5, { width: 195 });
-      doc.text('1', tableLeft + 205, currentY + 5, { width: 45, align: 'center' });
-      doc.text(`Rs:${order.deliveryCharge.toFixed(2)}`, tableLeft + 255, currentY + 5, { width: 75, align: 'right' });
-      doc.text('₹0.00', tableLeft + 330, currentY + 5, { width: 65, align: 'right' });
-      doc.text(`Rs:${order.deliveryCharge.toFixed(2)}`, tableLeft + 400, currentY + 5, { width: 95, align: 'right' });
-      currentY += rowHeight;
+order.orderedItems.forEach(item => {
+  doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
+  currentX = tableLeft;
+  
+  const originalPrice = item.price;
+  const finalPrice = item.finalPrice;
+  const quantity = item.quantity;
+  const totalOriginalPrice = originalPrice * quantity;
+  const totalFinalPrice = finalPrice * quantity;
+  const discount = totalOriginalPrice - totalFinalPrice;
+  
+  subtotal += totalFinalPrice;
+  totalDiscount += discount;
+
+  columns.forEach(column => {
+    let value = '';
+    switch(column.name) {
+      case 'Description': value = item.productname; break;
+      case 'Qty': value = quantity.toString(); break;
+      case 'Price': value = `Rs:${originalPrice.toFixed(2)}`; break;
+      case 'Offer Price': value = `Rs:${finalPrice.toFixed(2)}`; break;
+      case 'Discount': value = `Rs:${discount.toFixed(2)}`; break;
+      case 'Final Price': value = `Rs:${totalFinalPrice.toFixed(2)}`; break;
     }
+    doc.text(value, currentX + 5, currentY + 5, {
+      width: column.width - 10,
+      align: column.align || 'left'
+    });
+    currentX += column.width;
+  });
+  currentY += rowHeight;
+});
 
-    // Add total amount
-    const finalAmount = order.finalAmount || 0;
-    doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
-    doc.font('Helvetica-Bold');
-    doc.text('Total', tableLeft + 5, currentY + 5, { width: 195 });
-    doc.text(`Rs:${order.totalAmount.toFixed(2)}`, tableLeft + 255, currentY + 5, { width: 75, align: 'right' });
-    doc.text(`Rs:${(order.discountAmount || 0).toFixed(2)}`, tableLeft + 330, currentY + 5, { width: 65, align: 'right' });
-    doc.text(`Rs:${finalAmount.toFixed(2)}`, tableLeft + 400, currentY + 5, { width: 95, align: 'right' });
-    currentY += rowHeight * 2;
+// Add subtotal
+currentY += rowHeight;
+doc.font('Helvetica-Bold');
+doc.text('Subtotal:', tableLeft, currentY);
+doc.text(`Rs:${subtotal.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
 
-    // Add grand total
-    doc.fontSize(12).text('Grand Total', tableLeft + 350, currentY, { width: 100, align: 'right' });
-    doc.text(`Rs:${finalAmount.toFixed(2)}`, tableLeft + 450, currentY, { width: 95, align: 'right' });
-    doc.moveDown(2);
+// Add coupon discount if applicable
+if (order.couponDiscount > 0) {
+  currentY += rowHeight;
+  doc.font('Helvetica');
+  doc.text(`Coupon Discount:`, tableLeft, currentY);
+  doc.text(`Rs:${order.couponDiscount.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
+  totalDiscount += order.couponDiscount;
+}
 
+// Add offer discount
+if (order.offerDiscount > 0) {
+  currentY += rowHeight;
+  doc.text('Offer Discount:', tableLeft, currentY);
+  doc.text(`Rs:${order.offerDiscount.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
+  totalDiscount += order.offerDiscount;
+}
+
+// Add delivery charge
+if (order.deliveryCharge > 0) {
+  currentY += rowHeight;
+  doc.text('Delivery Charge:', tableLeft, currentY);
+  doc.text(`Rs:${order.deliveryCharge.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
+}
+
+// Add total discount
+currentY += rowHeight;
+doc.font('Helvetica-Bold');
+doc.text('Total Discount:', tableLeft, currentY);
+doc.text(`Rs:${totalDiscount.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
+
+// Add grand total
+currentY += rowHeight;
+doc.fontSize(12);
+doc.text('Grand Total:', tableLeft, currentY);
+doc.text(`Rs:${order.finalAmount.toFixed(2)}`, tableLeft + tableWidth - 70, currentY, { width: 65, align: 'right' });
     // Footer
-    doc.font('Helvetica');
-    doc.fontSize(10).text('shoesKampany Private Limited', { align: 'center' });
-    doc.moveDown(0.7);
-    doc.text('Authorized Signatory', { align: 'center' });
+    // Add a line separator
+doc.moveDown(2);
+doc.moveTo(50, doc.y)
+   .lineTo(550, doc.y)
+   .stroke();
+
+// Footer
+const bottomOfPage = doc.page.height - 50;
+
+// Add a line separator
+doc.moveTo(50, bottomOfPage - 40)
+   .lineTo(550, bottomOfPage - 40)
+   .stroke();
+
+// Company name
+doc.font('Helvetica-Bold');
+doc.fontSize(14).text('ShoesKampany Private Limited', 50, bottomOfPage - 35, { 
+  width: 500, 
+  align: 'center'
+});
+
+// Authorized Signatory
+doc.font('Helvetica');
+doc.fontSize(10).text('Authorized Signatory', 450, bottomOfPage - 15, { 
+  width: 100, 
+  align: 'center'
+});
+
+// Add a line for signature
+doc.moveTo(450, bottomOfPage - 20)
+   .lineTo(550, bottomOfPage - 20)
+   .stroke();
 
     // Finalize the PDF document
     doc.end();
@@ -934,7 +990,7 @@ const downloadInvoice = async (req, res) => {
     writeStream.on('finish', () => {
       res.download(filePath, fileName, (err) => {
         if (err) {
-          console.error('Error downloading invoice:', err);
+
           res.status(500).json({ error: 'Error downloading invoice' });
         } else {
           // Delete the PDF file after it has been downloaded
@@ -943,20 +999,19 @@ const downloadInvoice = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Error generating invoice:', error);
+
     res.status(500).json({ error: 'Error generating invoice' });
   }
 };
 
 const handleRetryPayment = async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
+
 
     const { totalPrice } = req.body;
 
     // Convert total price to an integer representing paise
     const totalAmountInPaise = Math.round(Number(totalPrice) * 100);
-    console.log("Total Amount in Paise:", totalAmountInPaise);
 
     const instance = new Razorpay({
       key_id: "rzp_test_OYzzRLNBCqZfkG",
@@ -968,21 +1023,21 @@ const handleRetryPayment = async (req, res) => {
       currency: "INR",
       receipt: "receipt#1",
     };
-    console.log("Options for Creating Order:", options);
+
 
     instance.orders.create(options, (err, order) => {
       if (err) {
-        console.error("Error creating order:", err);
+
         return res
           .status(500)
           .json({ error: "Error creating order", details: err });
       }
 
-      console.log("Order created successfully:", order);
+
       res.status(200).json({ orderId: order.id });
     });
   } catch (error) {
-    console.error("Error in postRazorpay:", error);
+  
     res
       .status(500)
       .json({ error: "Error while creating Razorpay payment", details: error });
@@ -1052,7 +1107,7 @@ const addAddressController = async (req, res) => {
 
     return res.status(200).json({ success: true, newAddress });
   } catch (err) {
-    console.error(err.message);
+  
     return res.status(500).json({ errors: ["Server error"] });
   }
 };

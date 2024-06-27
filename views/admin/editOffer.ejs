@@ -8,6 +8,10 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
+          .error-text {
+            color: red;
+            margin-bottom: 10px;
+        }
         body { font-family: 'Roboto', sans-serif; display: flex; min-height: 100vh; margin: 0; }
         #sidebar {
             width: 250px;
@@ -131,6 +135,16 @@
         <h1>Edit Offer</h1>
         <div class="form-container">
             <form id="editOfferForm" action="/admin/editoffer/<%= offer._id %>" method="post" onsubmit="return validateForm()">
+                <% if (typeof errorMessage !== 'undefined') { %>
+                    <div class="error-text"><%= errorMessage %></div>
+                <% } %>
+                
+                <div>
+                    <label for="offerName" class="form-label">Offer Name</label>
+                    <input type="text" name="offerName" id="offerName" class="form-control" value="<%= offer.offerName %>" placeholder="Enter Offer Name">
+                    <span id="offerNameError" class="error-text"></span>
+                </div>
+    
                 <div>
                     <label for="productId" class="form-label">Product</label>
                     <% if (offer.product_name && offer.product_name.product_name !== 'NA') { %>
@@ -176,93 +190,92 @@
                 </div>
             
                 <div>
-                    <button type="submit" class="toggle-button">
-                        <i class="material-icons" style="font-size: 16px; vertical-align: text-top; margin-right: 5px;">edit</i>Update Offer
+                    <button type="submit" class="btn btn-primary">
+                        <i class="material-icons" style="font-size: 16px; vertical-align: text-top; margin-right: 5px;">edit</i> Update Offer
                     </button>
                 </div>
             </form>
-    </div>
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+        <script>
+            function validateForm() {
+                var fields = [
+                    { id: 'offerName', error: 'offerNameError', message: 'Offer Name is required' },
+                    { id: 'discount', error: 'discountError', message: 'Discount Amount is required', type: 'number', min: 1, max: 100 },
+                    { id: 'expiryDate', error: 'expiryDateError', message: 'Expiry Date is required' }
+                ];
     
-    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-<script>
-   function validateForm() {
-    var fields = [
-        { id: 'discount', error: 'discountError', message: 'Discount Amount is required', type: 'number', min: 1, max: 100 },
-        { id: 'expiryDate', error: 'expiryDateError', message: 'Expiry Date is required' }
-    ];
-
-    var isValid = true;
-
-    fields.forEach(function(field) {
-        var element = document.getElementById(field.id);
-        var value = element.value.trim();
-        var errorElement = document.getElementById(field.error);
-        errorElement.textContent = "";
-
-        if (value === "") {
-            errorElement.textContent = field.message;
-            isValid = false;
-        } else if (field.type === 'number') {
-            var num = parseFloat(value);
-            if (isNaN(num) || num < field.min || num > field.max) {
-                errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
-                isValid = false;
+                var isValid = true;
+    
+                fields.forEach(function(field) {
+                    var element = document.getElementById(field.id);
+                    var value = element.value.trim();
+                    var errorElement = document.getElementById(field.error);
+                    errorElement.textContent = "";
+    
+                    if (value === "") {
+                        errorElement.textContent = field.message;
+                        isValid = false;
+                    } else if (field.type === 'number') {
+                        var num = parseFloat(value);
+                        if (isNaN(num) || num < field.min || num > field.max) {
+                            errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
+                            isValid = false;
+                        }
+                    }
+                });
+    
+                var productId = document.getElementById('productId');
+                var categoryId = document.getElementById('categoryId');
+                var productError = document.getElementById('productError');
+                var categoryError = document.getElementById('categoryError');
+    
+                if (productId && categoryId) {
+                    if (productId.value === '' && categoryId.value === '') {
+                        productError.textContent = 'Please select a product or category';
+                        categoryError.textContent = 'Please select a product or category';
+                        isValid = false;
+                    } else if (productId.value !== '' && categoryId.value !== '') {
+                        productError.textContent = 'Cannot select both product and category';
+                        categoryError.textContent = 'Cannot select both product and category';
+                        isValid = false;
+                    } else {
+                        productError.textContent = '';
+                        categoryError.textContent = '';
+                    }
+                }
+    
+                var expiryDate = new Date(document.getElementById('expiryDate').value);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (expiryDate < today) {
+                    document.getElementById('expiryDateError').textContent = "Expiry date cannot be in the past";
+                    isValid = false;
+                }
+    
+                return isValid;
             }
-        }
-    });
-
-    var productId = document.getElementById('productId');
-    var categoryId = document.getElementById('categoryId');
-    var productError = document.getElementById('productError');
-    var categoryError = document.getElementById('categoryError');
-
-    if (productId && categoryId) {
-        if (productId.value === '' && categoryId.value === '') {
-            productError.textContent = 'Please select a product or category';
-            categoryError.textContent = 'Please select a product or category';
-            isValid = false;
-        } else if (productId.value !== '' && categoryId.value !== '') {
-            productError.textContent = 'Cannot select both product and category';
-            categoryError.textContent = 'Cannot select both product and category';
-            isValid = false;
-        } else {
-            productError.textContent = '';
-            categoryError.textContent = '';
-        }
-    }
-
-    var expiryDate = new Date(document.getElementById('expiryDate').value);
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (expiryDate < today) {
-        document.getElementById('expiryDateError').textContent = "Expiry date cannot be in the past";
-        isValid = false;
-    }
-
-    return isValid;
-}
-
-</script>
-
-<script>
-    $(document).ready(function() {
-        $('#productId').on('change', function() {
-            if ($(this).val() === '') {
-                $('#categoryId').prop('disabled', false);
-            } else {
-                $('#categoryId').prop('disabled', true);
-            }
-        });
-
-        $('#categoryId').on('change', function() {
-            if ($(this).val() === '') {
-                $('#productId').prop('disabled', false);
-            } else {
-                $('#productId').prop('disabled', true);
-            }
-        });
-    });
-</script>
+    
+            $(document).ready(function() {
+                $('#productId').on('change', function() {
+                    if ($(this).val() === '') {
+                        $('#categoryId').prop('disabled', false);
+                    } else {
+                        $('#categoryId').prop('disabled', true);
+                    }
+                });
+    
+                $('#categoryId').on('change', function() {
+                    if ($(this).val() === '') {
+                        $('#productId').prop('disabled', false);
+                    } else {
+                        $('#productId').prop('disabled', true);
+                    }
+                });
+            });
+        </script>
 </body>
 </html>

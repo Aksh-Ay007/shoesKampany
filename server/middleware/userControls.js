@@ -5,11 +5,13 @@ const block = async (req, res, next) => {
         const user = req.session.user;
         const userEmail = user ? user.email : req.body.email;
         const check = await userCollection.findOne({ email: userEmail });
-
-        if (req.session.user && check && check.isBlocked) {
+        console.log(user,userEmail,check,"122");
+        if (!req.session.user || !check || check.isBlocked) {
             req.session.user = null;
             return res.redirect("/userlogin");
-        } else {
+            
+        }
+         else {
             next();
         }
     } catch (error) {

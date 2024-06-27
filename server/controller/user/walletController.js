@@ -39,7 +39,7 @@ const addToWallet = async (req, res) => {
 
     res.status(200).json({ success: true, balance: wallet.balance });
   } catch (error) {
-    console.error('Error in addToWallet:', error);
+
     res.status(500).json({ success: false, message: 'Error adding to wallet' });
   }
 };
@@ -58,7 +58,7 @@ const getWalletHistory = async (req, res) => {
 
     res.status(200).json({ success: true, transactions: wallet.transactions });
   } catch (error) {
-    console.error('Error in getWalletHistory:', error);
+
     res.status(500).json({ success: false, message: 'Error getting wallet history' });
   }
 };

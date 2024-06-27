@@ -176,16 +176,13 @@
         </div>
         <h1>Add New Offer</h1>
         <div class="form-container">
-
-
             <form id="offerForm" action="/admin/addoffer" method="POST">
-
                 <% if (typeof errorMessage !== 'undefined') { %>
                     <div class="error-text" style="color: red; margin-bottom: 10px;"><%= errorMessage %></div>
-                  <% } %>
+                <% } %>
                 <div class="form-group">
                     <div id="errorMessage" class="error-text" style="color: red; margin-bottom: 10px;"></div>
-
+            
                     <label for="offerName" class="form-label">Offer Name</label>
                     <input type="text" id="offerName" name="offerName" class="form-control" >
                     <span class="error-text" id="offerNameError"></span>
@@ -202,7 +199,7 @@
                 <div id="categoryFields" style="display: none;">
                     <div class="form-group">
                         <label for="category" class="form-label">Category</label>
-                        <select id="category" name="categoryId" class="form-control">
+                        <select id="category" name="categoryId" class="form-control" >
                             <option value="">Select Category</option>
                             <% categories.forEach(category => { %>
                                 <option value="<%= category._id %>"><%= category.categoryName %></option>
@@ -219,7 +216,7 @@
                 <div id="productFields" style="display: none;">
                     <div class="form-group">
                         <label for="product" class="form-label">Product</label>
-                        <select id="product" name="productId" class="form-control">
+                        <select id="product" name="productId" class="form-control" >
                             <option value="">Select Product</option>
                             <% products.forEach(product => { %>
                                 <option value="<%= product._id %>"><%= product.product_name %></option>
@@ -235,102 +232,111 @@
                 </div>
                 <div class="form-group">
                     <label for="expiryDate" class="form-label">Expiry Date</label>
-                    <input type="date" id="expiryDate" name="expiryDate" class="form-control" required>
+                    <input type="date" id="expiryDate" name="expiryDate" class="form-control" >
                     <span class="error-text" id="expiryDateError"></span>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn-primary">Add Offer</button>
                 </div>
             </form>
-        </div>
-    </main>
-    <script>
-        document.getElementById('offerType').addEventListener('change', function() {
-            var categoryFields = document.getElementById('categoryFields');
-            var productFields = document.getElementById('productFields');
-            if (this.value === 'category') {
-                categoryFields.style.display = 'block';
-                productFields.style.display = 'none';
-            } else if (this.value === 'product') {
-                categoryFields.style.display = 'none';
-                productFields.style.display = 'block';
-            } else {
-                categoryFields.style.display = 'none';
-                productFields.style.display = 'none';
-            }
-        });
-        
-        function validateForm() {
-            var fields = [
-                { id: 'offerName', error: 'offerNameError', message: 'Offer Name is required' },
-                { id: 'offerType', error: 'offerTypeError', message: 'Please select an offer type' },
-                { id: 'expiryDate', error: 'expiryDateError', message: 'Expiry Date is required' }
-            ];
-            var isValid = true;
-            fields.forEach(function(field) {
-                var element = document.getElementById(field.id);
-                var value = element.value.trim();
-                var errorElement = document.getElementById(field.error);
-                errorElement.textContent = "";
-                if (value === "") {
-                    errorElement.textContent = field.message;
-                    isValid = false;
+            
+            <script>
+                document.getElementById('offerType').addEventListener('change', function() {
+                    var categoryFields = document.getElementById('categoryFields');
+                    var productFields = document.getElementById('productFields');
+                    if (this.value === 'category') {
+                        categoryFields.style.display = 'block';
+                        productFields.style.display = 'none';
+                    } else if (this.value === 'product') {
+                        categoryFields.style.display = 'none';
+                        productFields.style.display = 'block';
+                    } else {
+                        categoryFields.style.display = 'none';
+                        productFields.style.display = 'none';
+                    }
+                });
+            
+                function validateForm() {
+                    var fields = [
+                        { id: 'offerName', error: 'offerNameError', message: 'Offer Name is required' },
+                        { id: 'offerType', error: 'offerTypeError', message: 'Please select an offer type' },
+                        { id: 'expiryDate', error: 'expiryDateError', message: 'Expiry Date is required' }
+                    ];
+                    var isValid = true;
+                    fields.forEach(function(field) {
+                        var element = document.getElementById(field.id);
+                        var value = element.value.trim();
+                        var errorElement = document.getElementById(field.error);
+                        errorElement.textContent = "";
+                        if (value === "") {
+                            errorElement.textContent = field.message;
+                            isValid = false;
+                        }
+                    });
+            
+                    var expiryDate = document.getElementById('expiryDate').value;
+                    var expiryDateError = document.getElementById('expiryDateError');
+                    expiryDateError.textContent = "";
+                    if (expiryDate && new Date(expiryDate) < new Date()) {
+                        expiryDateError.textContent = "Expiry Date cannot be a past date";
+                        isValid = false;
+                    }
+            
+                    var offerType = document.getElementById('offerType').value;
+                    if (offerType === 'category') {
+                        var categoryFields = [
+                            { id: 'category', error: 'categoryError', message: 'Please select a category' },
+                            { id: 'categoryDiscount', error: 'categoryDiscountError', message: 'Discount Amount is required', type: 'number', min: 0, max: 100 }
+                        ];
+                        categoryFields.forEach(function(field) {
+                            var element = document.getElementById(field.id);
+                            var value = element.value.trim();
+                            var errorElement = document.getElementById(field.error);
+                            errorElement.textContent = "";
+                            if (value === "") {
+                                errorElement.textContent = field.message;
+                                isValid = false;
+                            } else if (field.type === 'number') {
+                                var num = parseFloat(value);
+                                if (isNaN(num) || num < field.min || num > field.max) {
+                                    errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
+                                    isValid = false;
+                                }
+                            }
+                        });
+                    } else if (offerType === 'product') {
+                        var productFields = [
+                            { id: 'product', error: 'productError', message: 'Please select a product' },
+                            { id: 'productDiscount', error: 'productDiscountError', message: 'Discount Amount is required', type: 'number', min: 0, max: 100 }
+                        ];
+                        productFields.forEach(function(field) {
+                            var element = document.getElementById(field.id);
+                            var value = element.value.trim();
+                            var errorElement = document.getElementById(field.error);
+                            errorElement.textContent = "";
+                            if (value === "") {
+                                errorElement.textContent = field.message;
+                                isValid = false;
+                            } else if (field.type === 'number') {
+                                var num = parseFloat(value);
+                                if (isNaN(num) || num < field.min || num > field.max) {
+                                    errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
+                                    isValid = false;
+                                }
+                            }
+                        });
+                    }
+                    return isValid;
                 }
-            });
-            var offerType = document.getElementById('offerType').value;
-            if (offerType === 'category') {
-                var categoryFields = [
-                    { id: 'category', error: 'categoryError', message: 'Please select a category' },
-                    { id: 'categoryDiscount', error: 'categoryDiscountError', message: 'Discount Amount is required', type: 'number', min: 0, max: 100 }
-                ];
-                categoryFields.forEach(function(field) {
-                    var element = document.getElementById(field.id);
-                    var value = element.value.trim();
-                    var errorElement = document.getElementById(field.error);
-                    errorElement.textContent = "";
-                    if (value === "") {
-                        errorElement.textContent = field.message;
-                        isValid = false;
-                    } else if (field.type === 'number') {
-                        var num = parseFloat(value);
-                        if (isNaN(num) || num < field.min || num > field.max) {
-                            errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
-                            isValid = false;
-                        }
+            
+                document.getElementById('offerForm').addEventListener('submit', function(event) {
+                    if (!validateForm()) {
+                        event.preventDefault();
                     }
                 });
-            } else if (offerType === 'product') {
-                var productFields = [
-                    { id: 'product', error: 'productError', message: 'Please select a product' },
-                    { id: 'productDiscount', error: 'productDiscountError', message: 'Discount Amount is required', type: 'number', min: 0, max: 100 }
-                ];
-                productFields.forEach(function(field) {
-                    var element = document.getElementById(field.id);
-                    var value = element.value.trim();
-                    var errorElement = document.getElementById(field.error);
-                    errorElement.textContent = "";
-                    if (value === "") {
-                        errorElement.textContent = field.message;
-                        isValid = false;
-                    } else if (field.type === 'number') {
-                        var num = parseFloat(value);
-                        if (isNaN(num) || num < field.min || num > field.max) {
-                            errorElement.textContent = `Must be a valid number between ${field.min} and ${field.max}`;
-                            isValid = false;
-                        }
-                    }
-                });
-            }
-            return isValid;
-        }
-        
-        document.getElementById('offerForm').addEventListener('submit', function(event) {
-            if (!validateForm()) {
-                event.preventDefault();
-            }
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+            
 
     
 

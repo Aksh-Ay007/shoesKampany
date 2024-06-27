@@ -108,7 +108,7 @@ const getProduct = async (req, res) => {
       message: 'Product details fetched successfully'
     });
   } catch (error) {
-    console.error('Error fetching product details:', error);
+  
     res.status(500).json({ message: 'Error fetching product details' });
   }
 };
@@ -141,7 +141,7 @@ const catFilter = async (req, res) => {
     }
 
     // Apply sorting if present
-    console.log("sortFilter",sortFilter);
+
     if (sortFilter) {
       const sortCriteria = JSON.parse(sortFilter);
       selectedProduct.sort((a, b) => {
@@ -185,7 +185,7 @@ const catFilter = async (req, res) => {
       searchQuery: searchQuery || ''  // Add this line
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).send('Internal Server Error');
   }
 };
