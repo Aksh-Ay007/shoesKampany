@@ -145,14 +145,9 @@ const deleteCartItem = async (req, res) => {
 
 const quantity = async (req, res) => {
   try {
-
     const productId = req.params.id;
     const action = req.query.action;
-    const userId = req.session.user && req.session.user._id;
-    
-    if (!userId) {
-      return res.redirect("/userlogin"); // Redirect to login if session user is not defined
-    }rs
+    const userId = req.session.user._id;
 
     const cart = await cartDatabase.findOne({ user: userId });
     const product = await productDatabase.findById(productId);
@@ -184,7 +179,7 @@ const quantity = async (req, res) => {
 
     res.status(200).json({ message: 'Quantity updated successfully' });
   } catch (error) {
-
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
