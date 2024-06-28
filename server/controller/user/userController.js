@@ -334,7 +334,7 @@ const getResendOtp = async (req, res) => {
 const getForgotPassword = async (req, res) => {
   console.log("getForgotPassword");
   try {
-    res.render("forgotPassword", { expireTime: req.session.expireTime });
+    res.render("forgotpassword", { expireTime: req.session.expireTime });
   } catch (error) {
     return res
       .status(500)
