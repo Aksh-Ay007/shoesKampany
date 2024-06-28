@@ -1488,6 +1488,10 @@ function removeCoupon() {
           check = false;
           errorMessageElement.textContent = 'Please enter a valid number without spaces.';
         }
+        else if (!/^\d{10}$/.test(value)) {
+    check = false;
+    errorMessageElement.textContent = 'Please enter a 10-digit valid mobile number.';
+  }
       }
 
       function validatePincode(inputFieldId, errorMessageId) {
