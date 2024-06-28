@@ -108,6 +108,9 @@ a:hover {
                     <h6>Didn't receive OTP? <a href="/resendOtp">Resend</a></h6>
                     <a href="/userlogin">Back To Login</a>
                 </form>
+                
+     
+                
             </div>
         </div>
     
@@ -124,7 +127,7 @@ a:hover {
 
         <script>
             // Initialize timeleft with the total number of seconds for the timer
-            var timeleft = 1 / 2 * 60; // For 30 minutes
+            var timeleft = 1 / 2 * 120; // For 30 minutes
         
             var downloadTimer = setInterval(function () {
                 var minutes = Math.floor(timeleft / 60);
@@ -149,14 +152,16 @@ a:hover {
                 }
             }, 1000);
         </script>
-        <script>
-            function moveToNext(currentInput, nextInputId) {
-    if (currentInput.value.length === currentInput.maxLength) {
-        document.getElementById(nextInputId).focus();
-    }
-}
-
-        </script>
+              <script>
+                function moveToNext(currentInput, nextInputName) {
+                    if (currentInput.value.length >= currentInput.maxLength) {
+                        var nextInput = document.getElementsByName(nextInputName)[0];
+                        if (nextInput) {
+                            nextInput.focus();
+                        }
+                    }
+                }
+            </script>
 
 
         
