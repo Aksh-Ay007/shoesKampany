@@ -36,6 +36,7 @@ const mongoose = require('mongoose');
 
 const getProduct = async (req, res) => {
   try {
+    
     const productId = req.query.id;
 
     // Validate ObjectId

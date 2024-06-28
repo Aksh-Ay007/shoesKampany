@@ -18,7 +18,7 @@ const ratingController=require('../controller/user/ratingController');
 router.use(nocache()); // Using nocache middleware globally
 
 // Home
-router.get('/', block, userController.home);
+router.get('/',  userController.home);
 
 // Google Auth
 router.get('/auth/google', userController.googleAuth);

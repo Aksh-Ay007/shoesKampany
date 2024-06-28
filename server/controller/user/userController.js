@@ -37,12 +37,9 @@ const calculateAverageRating = async (productId) => {
 
 const home = async (req, res) => {
   try {
-    if (!req.session.user) {
-      return res.redirect('/userlogin');
-    }
-
     const isUser = req.session.user;
     let cart = null;
+
     if (isUser) {
       cart = await cartDatabase.findOne({ user: req.session.user._id }).populate('items.productId');
       if (cart && cart.items) {
@@ -52,6 +49,7 @@ const home = async (req, res) => {
         }));
       }
     }
+
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let skip = (page - 1) * limit;
@@ -74,11 +72,10 @@ const home = async (req, res) => {
 
     res.render('home', { isUser, allProduct, cart });
   } catch (error) {
-
+    console.error("Home Page Error:", error);
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 // get method login
 
